@@ -1,0 +1,219 @@
+import { useState, useEffect, useRef } from "react";
+import { usePage, router } from "@inertiajs/react";
+import AppLayout from "@/Layouts/AppLayout";
+
+export default function Index() {
+    const { jadwal, hari, tanggal: tgl, rekap, auth } = usePage().props;
+    const isAdmin = auth.user.role === "admin";
+    const [tanggal, setTanggal] = useState(
+        tgl || new Date().toISOString().split("T")[0],
+    );
+    const dateRef = useRef(null);
+
+    useEffect(() => {
+        if (dateRef.current) {
+            dateRef.current.value = "";
+            setTimeout(() => {
+                const today = new Date().toISOString().split("T")[0];
+                dateRef.current.value = today;
+                setTanggal(today);
+            }, 50);
+        }
+    }, []);
+
+    const handleSimpan = (niu, status, honorDefault) => {
+        router.post("/presensi", {
+            niu,
+            tanggal,
+            status,
+            honor: status === "hadir" ? honorDefault : 0,
+        });
+    };
+
+    const handleBatal = (id) => {
+        if (confirm("Hapus?")) router.delete(`/presensi/${id}`);
+    };
+
+    const totalHonor = rekap.reduce(
+        (s, r) => s + parseInt(r.total_honor || 0),
+        0,
+    );
+
+    return (
+        <AppLayout>
+            <div>
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-bold text-slate-800">
+                        Presensi Ustadz
+                    </h2>
+                    <input
+                        type="date"
+                        ref={dateRef}
+                        value={tanggal}
+                        onChange={(e) => {
+                            setTanggal(e.target.value);
+                            router.get(
+                                "/presensi",
+                                { tanggal: e.target.value },
+                                { preserveState: true },
+                            );
+                        }}
+                        className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none"
+                    />
+                </div>
+
+                <p className="text-sm text-slate-500 mb-4">
+                    {hari},{" "}
+                    {new Date(tanggal + "T12:00:00").toLocaleDateString(
+                        "id-ID",
+                        { day: "numeric", month: "long", year: "numeric" },
+                    )}
+                </p>
+
+                <div className="space-y-3 mb-6">
+                    {jadwal.length === 0 && (
+                        <p className="text-center text-slate-400 py-10">
+                            Tidak ada jadwal
+                        </p>
+                    )}
+                    {jadwal.map((item) => (
+                        <div
+                            key={item.niu}
+                            className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-semibold text-sm">
+                                        {item.nama}
+                                    </p>
+                                    <p className="text-xs text-slate-400 mt-0.5 space-y-0.5">
+                                        {item.kitab && (
+                                            <span className="block">
+                                                Kitab:{" "}
+                                                <span className="font-medium text-slate-600">
+                                                    {item.kitab}
+                                                </span>
+                                            </span>
+                                        )}
+                                        <span className="block">
+                                            Bisyaroh:{" "}
+                                            <span className="font-mono tracking-tight font-medium text-slate-600">
+                                                Rp{" "}
+                                                {item.honor_default?.toLocaleString()}
+                                            </span>
+                                        </span>
+                                        {item.sesi && (
+                                            <span className="block text-slate-400">
+                                                Sesi: {item.sesi}
+                                            </span>
+                                        )}
+                                    </p>
+                                </div>
+                                {isAdmin &&
+                                    (item.sudah_absen ? (
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className={`text-xs px-3 py-1.5 rounded-full font-medium ${item.status === "hadir" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                            >
+                                                {item.status === "hadir"
+                                                    ? "Hadir"
+                                                    : "Tidak Hadir"}
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    handleBatal(
+                                                        item.presensi_id,
+                                                    )
+                                                }
+                                                className="text-xs text-slate-400 hover:text-red-500 font-medium"
+                                            >
+                                                Batal
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() =>
+                                                    handleSimpan(
+                                                        item.niu,
+                                                        "hadir",
+                                                        item.honor_default,
+                                                    )
+                                                }
+                                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg hover:scale-[1.02] transition"
+                                            >
+                                                Hadir
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    handleSimpan(
+                                                        item.niu,
+                                                        "tidak_hadir",
+                                                        item.honor_default,
+                                                    )
+                                                }
+                                                className="bg-red-100 text-red-600 px-4 py-2 rounded-2xl text-xs font-semibold hover:bg-red-200 transition"
+                                            >
+                                                Tidak
+                                            </button>
+                                        </div>
+                                    ))}
+                                {!isAdmin && item.sudah_absen && (
+                                    <span
+                                        className={`text-xs px-3 py-1.5 rounded-full font-medium ${item.status === "hadir" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                    >
+                                        {item.status === "hadir"
+                                            ? "Hadir"
+                                            : "Tidak Hadir"}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="pt-4">
+                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
+                        Rekap Honor Bulan Ini
+                    </h3>
+                    {rekap.length === 0 ? (
+                        <p className="text-xs text-slate-400">Belum ada data</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {rekap.map((r) => (
+                                <div
+                                    key={r.niu}
+                                    className="rounded-2xl border border-sky-100 bg-white p-4 flex items-center justify-between text-sm"
+                                >
+                                    <div>
+                                        <p className="font-medium">
+                                            {r.ustad?.nama_lengkap || r.niu}
+                                        </p>
+                                        <p className="text-xs text-slate-400">
+                                            Hadir: {r.total_hadir} • Tidak:{" "}
+                                            {r.total_tidak_hadir}
+                                        </p>
+                                    </div>
+                                    <p className="font-bold text-[#3D7ABA] font-mono tracking-tight">
+                                        Rp{" "}
+                                        {parseInt(
+                                            r.total_honor || 0,
+                                        ).toLocaleString()}
+                                    </p>
+                                </div>
+                            ))}
+                            <div className="rounded-2xl bg-gradient-to-r from-[#3D7ABA]/10 to-[#20B5E8]/10 p-4 flex items-center justify-between text-sm font-bold">
+                                <span className="text-[#3D7ABA]">
+                                    Total Honor
+                                </span>
+                                <span className="text-[#3D7ABA] font-mono tracking-tight">
+                                    Rp {totalHonor.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </AppLayout>
+    );
+}

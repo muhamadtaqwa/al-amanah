@@ -20,10 +20,17 @@ class UstadzController extends Controller
     {
         $request->validate([
             'niu' => 'required|unique:ustadzs,niu',
+            'nip_nuptk' => 'nullable',
+            'nik' => 'nullable',
             'nama_lengkap' => 'required',
+            'tempat_lahir' => 'nullable',
+            'tanggal_lahir' => 'nullable|date',
             'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
             'pendidikan_terakhir' => 'nullable',
+            'alamat' => 'nullable',
             'status' => 'nullable|in:aktif,tidak aktif',
+            'status_kepegawaian' => 'nullable|in:PNS,PPPK,Honorer',
+            'tanggal_mulai_tugas' => 'nullable|date',
             'nomor_hp' => 'nullable',
             'password' => 'required|min:6',
         ]);
@@ -38,10 +45,17 @@ class UstadzController extends Controller
         Ustadz::create([
             'user_id' => $user->id,
             'niu' => $request->niu,
+            'nip_nuptk' => $request->nip_nuptk,
+            'nik' => $request->nik,
             'nama_lengkap' => $request->nama_lengkap,
+            'tempat_lahir' => $request->tempat_lahir,
+            'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
             'pendidikan_terakhir' => $request->pendidikan_terakhir,
+            'alamat' => $request->alamat,
             'status' => $request->status ?? 'aktif',
+            'status_kepegawaian' => $request->status_kepegawaian,
+            'tanggal_mulai_tugas' => $request->tanggal_mulai_tugas,
             'nomor_hp' => $request->nomor_hp,
         ]);
 
@@ -53,18 +67,32 @@ class UstadzController extends Controller
         $ustadz = Ustadz::findOrFail($id);
 
         $request->validate([
+            'nip_nuptk' => 'nullable',
+            'nik' => 'nullable',
             'nama_lengkap' => 'required',
+            'tempat_lahir' => 'nullable',
+            'tanggal_lahir' => 'nullable|date',
             'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
             'pendidikan_terakhir' => 'nullable',
+            'alamat' => 'nullable',
             'status' => 'nullable|in:aktif,tidak aktif',
+            'status_kepegawaian' => 'nullable|in:PNS,PPPK,Honorer',
+            'tanggal_mulai_tugas' => 'nullable|date',
             'nomor_hp' => 'nullable',
         ]);
 
         $ustadz->update($request->only([
+            'nip_nuptk',
+            'nik',
             'nama_lengkap',
+            'tempat_lahir',
+            'tanggal_lahir',
             'jenis_kelamin',
             'pendidikan_terakhir',
+            'alamat',
             'status',
+            'status_kepegawaian',
+            'tanggal_mulai_tugas',
             'nomor_hp',
         ]));
 

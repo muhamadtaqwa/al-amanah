@@ -132,17 +132,11 @@ class PembayaranController extends Controller
 
         if ($user->role === 'santri') {
             $nis = $user->santri->nis;
-        } elseif ($user->role === 'walisantri') {
-            $nis = Santri::where('walisantri_id', $user->walisantri->id)->pluck('nis')->toArray();
         }
 
         $tagihan = Pembayaran::with('santri')
             ->when($nis, function ($q) use ($nis) {
-                if (is_array($nis)) {
-                    $q->whereIn('nis', $nis);
-                } else {
-                    $q->where('nis', $nis);
-                }
+                $q->where('nis', $nis);
             })
             ->orderBy('created_at', 'desc')
             ->get();

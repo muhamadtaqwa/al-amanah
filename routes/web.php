@@ -4,15 +4,14 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SantriController;
 use App\Http\Controllers\UstadzController;
-use App\Http\Controllers\WalisantriController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PinjamGedungController;
 use App\Http\Controllers\TimelineController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InventarisController;
+use Illuminate\Support\Facades\Route;
 
 // Auth
 Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -35,12 +34,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/ustadz', [UstadzController::class, 'store']);
     Route::put('/ustadz/{id}', [UstadzController::class, 'update']);
     Route::delete('/ustadz/{id}', [UstadzController::class, 'destroy']);
-
-    // Walisantri
-    Route::get('/walisantri', [WalisantriController::class, 'index']);
-    Route::post('/walisantri', [WalisantriController::class, 'store']);
-    Route::put('/walisantri/{id}', [WalisantriController::class, 'update']);
-    Route::delete('/walisantri/{id}', [WalisantriController::class, 'destroy']);
 
     // Pembayaran
     Route::get('/pembayaran', [PembayaranController::class, 'index']);
@@ -91,6 +84,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/timeline', [TimelineController::class, 'store']);
     Route::put('/timeline/{id}', [TimelineController::class, 'update']);
     Route::delete('/timeline/{id}', [TimelineController::class, 'destroy']);
+
+    // Inventaris
     Route::get('/inventaris', [InventarisController::class, 'index']);
     Route::post('/inventaris', [InventarisController::class, 'store']);
     Route::put('/inventaris/{id}', [InventarisController::class, 'update']);

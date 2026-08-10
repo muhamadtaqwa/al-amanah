@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Santri;
 use App\Models\User;
-use App\Models\Walisantri;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -13,11 +12,9 @@ class SantriController extends Controller
 {
     public function index()
     {
-        $santris = Santri::with(['user', 'walisantri'])->get();
-        $walisantris = Walisantri::all();
+        $santris = Santri::with('user')->get();
         return Inertia::render('Santri/Index', [
             'santris' => $santris,
-            'walisantris' => $walisantris,
         ]);
     }
 
@@ -25,18 +22,31 @@ class SantriController extends Controller
     {
         $request->validate([
             'nis' => 'required|unique:santris,nis',
+            'nisn' => 'nullable',
             'nik' => 'nullable',
             'nama_lengkap' => 'required',
             'tempat_lahir' => 'nullable',
             'tanggal_lahir' => 'nullable|date',
             'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
+            'alamat' => 'nullable',
+            'desa' => 'nullable',
+            'kecamatan' => 'nullable',
+            'kabupaten' => 'nullable',
+            'provinsi' => 'nullable',
             'program_studi' => 'nullable',
             'angkatan' => 'nullable',
+            'tahun_masuk' => 'nullable',
             'kamar' => 'nullable',
             'nomor_hp' => 'nullable',
             'status' => 'nullable|in:aktif,lulus,keluar',
+            'nama_ayah' => 'nullable',
+            'nik_ayah' => 'nullable',
+            'pekerjaan_ayah' => 'nullable',
+            'nama_ibu' => 'nullable',
+            'nik_ibu' => 'nullable',
+            'pekerjaan_ibu' => 'nullable',
+            'no_hp_orang_tua' => 'nullable',
             'password' => 'required|min:6',
-            'walisantri_id' => 'required|exists:walisantris,id',
         ]);
 
         $user = User::create([
@@ -48,18 +58,31 @@ class SantriController extends Controller
 
         Santri::create([
             'user_id' => $user->id,
-            'walisantri_id' => $request->walisantri_id,
             'nis' => $request->nis,
+            'nisn' => $request->nisn,
             'nik' => $request->nik,
             'nama_lengkap' => $request->nama_lengkap,
             'tempat_lahir' => $request->tempat_lahir,
             'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
+            'alamat' => $request->alamat,
+            'desa' => $request->desa,
+            'kecamatan' => $request->kecamatan,
+            'kabupaten' => $request->kabupaten,
+            'provinsi' => $request->provinsi,
             'program_studi' => $request->program_studi,
             'angkatan' => $request->angkatan,
+            'tahun_masuk' => $request->tahun_masuk,
             'kamar' => $request->kamar,
             'nomor_hp' => $request->nomor_hp,
             'status' => $request->status ?? 'aktif',
+            'nama_ayah' => $request->nama_ayah,
+            'nik_ayah' => $request->nik_ayah,
+            'pekerjaan_ayah' => $request->pekerjaan_ayah,
+            'nama_ibu' => $request->nama_ibu,
+            'nik_ibu' => $request->nik_ibu,
+            'pekerjaan_ibu' => $request->pekerjaan_ibu,
+            'no_hp_orang_tua' => $request->no_hp_orang_tua,
             'poin_kedisiplinan' => 100,
         ]);
 
@@ -71,31 +94,57 @@ class SantriController extends Controller
         $santri = Santri::findOrFail($id);
 
         $request->validate([
+            'nisn' => 'nullable',
             'nik' => 'nullable',
             'nama_lengkap' => 'required',
             'tempat_lahir' => 'nullable',
             'tanggal_lahir' => 'nullable|date',
             'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
+            'alamat' => 'nullable',
+            'desa' => 'nullable',
+            'kecamatan' => 'nullable',
+            'kabupaten' => 'nullable',
+            'provinsi' => 'nullable',
             'program_studi' => 'nullable',
             'angkatan' => 'nullable',
+            'tahun_masuk' => 'nullable',
             'kamar' => 'nullable',
             'nomor_hp' => 'nullable',
             'status' => 'nullable|in:aktif,lulus,keluar',
-            'walisantri_id' => 'required|exists:walisantris,id',
+            'nama_ayah' => 'nullable',
+            'nik_ayah' => 'nullable',
+            'pekerjaan_ayah' => 'nullable',
+            'nama_ibu' => 'nullable',
+            'nik_ibu' => 'nullable',
+            'pekerjaan_ibu' => 'nullable',
+            'no_hp_orang_tua' => 'nullable',
         ]);
 
         $santri->update($request->only([
+            'nisn',
             'nik',
             'nama_lengkap',
             'tempat_lahir',
             'tanggal_lahir',
             'jenis_kelamin',
+            'alamat',
+            'desa',
+            'kecamatan',
+            'kabupaten',
+            'provinsi',
             'program_studi',
             'angkatan',
+            'tahun_masuk',
             'kamar',
             'nomor_hp',
             'status',
-            'walisantri_id',
+            'nama_ayah',
+            'nik_ayah',
+            'pekerjaan_ayah',
+            'nama_ibu',
+            'nik_ibu',
+            'pekerjaan_ibu',
+            'no_hp_orang_tua',
             'poin_kedisiplinan',
         ]));
 

@@ -53,6 +53,15 @@ export default function Index() {
             p.keperluan?.toLowerCase().includes(search.toLowerCase()),
     );
 
+    const formatTgl = (tgl) => {
+        if (!tgl) return null;
+        return new Date(tgl).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    };
+
     return (
         <AppLayout>
             <div>
@@ -80,47 +89,55 @@ export default function Index() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filtered.length === 0 && (
-                        <p className="text-center text-slate-400 py-10">
+                        <p className="text-center text-slate-400 py-10 sm:col-span-2">
                             Tidak ada data
                         </p>
                     )}
                     {filtered.map((p) => (
                         <div
                             key={p.id}
-                            className="rounded-[30px] border border-sky-100 bg-white p-6 shadow-2xl hover:shadow-xl transition-shadow"
+                            className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl hover:shadow-xl transition-shadow"
                         >
-                            <div className="flex justify-between">
-                                <div>
-                                    <span
-                                        className={`text-xs px-3 py-1 rounded-full font-medium ${p.status === "aktif" ? "bg-emerald-50 text-emerald-600" : p.status === "selesai" ? "bg-[#3D7ABA]/10 text-[#3D7ABA]" : "bg-red-50 text-red-500"}`}
-                                    >
-                                        {p.status.charAt(0).toUpperCase() +
-                                            p.status.slice(1)}
-                                    </span>
-                                    <h3 className="font-semibold text-sm mt-2">
-                                        {p.nama_peminjam} - {p.gedung}
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                                        <span
+                                            className={`text-xs px-2.5 py-1 rounded-full font-medium ${p.status === "aktif" ? "bg-emerald-50 text-emerald-600" : p.status === "selesai" ? "bg-[#3D7ABA]/10 text-[#3D7ABA]" : "bg-red-50 text-red-500"}`}
+                                        >
+                                            {p.status.charAt(0).toUpperCase() +
+                                                p.status.slice(1)}
+                                        </span>
+                                    </div>
+                                    <h3 className="font-semibold text-sm truncate">
+                                        {p.nama_peminjam}
                                     </h3>
-                                    <p className="text-xs text-slate-400 mt-1">
-                                        {p.tanggal_mulai}{" "}
-                                        {p.tanggal_selesai &&
-                                            `→ ${p.tanggal_selesai}`}{" "}
-                                        • {p.jam_mulai}-{p.jam_selesai}
+                                    <p className="text-xs text-slate-400 mt-0.5">
+                                        {p.gedung}
                                     </p>
-                                    <p className="text-xs text-slate-400">
-                                        {p.keperluan}
-                                    </p>
+                                    <div className="mt-2 text-[11px] text-slate-500 space-y-0.5">
+                                        <p>
+                                            {formatTgl(p.tanggal_mulai)}
+                                            {p.tanggal_selesai &&
+                                                ` - ${formatTgl(p.tanggal_selesai)}`}
+                                        </p>
+                                        <p>
+                                            {p.jam_mulai?.slice(0, 5)} -{" "}
+                                            {p.jam_selesai?.slice(0, 5)}
+                                        </p>
+                                        {p.keperluan && <p>{p.keperluan}</p>}
+                                    </div>
                                 </div>
                                 {isAdmin && (
-                                    <div className="flex gap-1">
+                                    <div className="flex flex-col gap-1 ml-2 shrink-0">
                                         <button
                                             onClick={() => openEdit(p)}
-                                            className="bg-slate-100 p-2 rounded-xl text-xs hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
+                                            className="bg-slate-100 px-3 py-1.5 rounded-xl text-[11px] hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => handleDelete(p.id)}
-                                            className="bg-red-50 text-red-500 p-2 rounded-xl text-xs hover:bg-red-100 transition"
+                                            className="bg-red-50 text-red-500 px-3 py-1.5 rounded-xl text-[11px] hover:bg-red-100 transition"
                                         >
                                             Hapus
                                         </button>
@@ -137,7 +154,7 @@ export default function Index() {
                             className="absolute inset-0 bg-black/50"
                             onClick={closeModal}
                         ></div>
-                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-8 border border-sky-100">
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-6 border border-sky-100">
                             <h3 className="font-semibold text-lg mb-4">
                                 {editData ? "Edit" : "Catat"} Peminjaman
                             </h3>
@@ -149,7 +166,7 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("nama_peminjam", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <input
@@ -159,9 +176,12 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("gedung", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
+                                <p className="text-[11px] font-semibold text-slate-500">
+                                    Tanggal
+                                </p>
                                 <div className="grid grid-cols-2 gap-2">
                                     <input
                                         type="date"
@@ -172,7 +192,7 @@ export default function Index() {
                                                 e.target.value,
                                             )
                                         }
-                                        className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                         required
                                     />
                                     <input
@@ -184,9 +204,12 @@ export default function Index() {
                                                 e.target.value,
                                             )
                                         }
-                                        className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                     />
                                 </div>
+                                <p className="text-[11px] font-semibold text-slate-500">
+                                    Waktu
+                                </p>
                                 <div className="grid grid-cols-2 gap-2">
                                     <input
                                         type="time"
@@ -194,7 +217,7 @@ export default function Index() {
                                         onChange={(e) =>
                                             setData("jam_mulai", e.target.value)
                                         }
-                                        className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                         required
                                     />
                                     <input
@@ -206,7 +229,7 @@ export default function Index() {
                                                 e.target.value,
                                             )
                                         }
-                                        className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                         required
                                     />
                                 </div>
@@ -217,7 +240,7 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("keperluan", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <select
@@ -225,7 +248,7 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("status", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm bg-white"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm bg-white"
                                 >
                                     <option value="aktif">Aktif</option>
                                     <option value="selesai">Selesai</option>
@@ -235,14 +258,14 @@ export default function Index() {
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className="flex-1 border py-3 rounded-2xl text-sm"
+                                        className="flex-1 border py-2.5 rounded-2xl text-sm"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-3 rounded-2xl text-sm font-semibold"
+                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold"
                                     >
                                         {editData ? "Update" : "Simpan"}
                                     </button>

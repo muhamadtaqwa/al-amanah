@@ -11,7 +11,7 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        $user = auth()->user()->load('ustadz', 'santri', 'walisantri');
+        $user = auth()->user()->load('ustadz', 'santri');
         return Inertia::render('Profil/Index', ['user' => $user]);
     }
 
@@ -19,18 +19,74 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
 
-        $request->validate([
-            'nama_lengkap' => 'required',
-            'password' => 'nullable|min:6',
-        ]);
-
-        // Update nama di tabel profil sesuai role
         if ($user->role === 'ustadz') {
-            $user->ustadz->update(['nama_lengkap' => $request->nama_lengkap]);
+            $request->validate([
+                'nama_lengkap' => 'required',
+                'tempat_lahir' => 'nullable',
+                'tanggal_lahir' => 'nullable|date',
+                'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
+                'pendidikan_terakhir' => 'nullable',
+                'alamat' => 'nullable',
+                'nomor_hp' => 'nullable',
+                'password' => 'nullable|min:6',
+            ]);
+
+            $user->ustadz->update($request->only([
+                'nama_lengkap',
+                'tempat_lahir',
+                'tanggal_lahir',
+                'jenis_kelamin',
+                'pendidikan_terakhir',
+                'alamat',
+                'nomor_hp',
+            ]));
         } elseif ($user->role === 'santri') {
-            $user->santri->update(['nama_lengkap' => $request->nama_lengkap]);
-        } elseif ($user->role === 'walisantri') {
-            $user->walisantri->update(['nama_lengkap' => $request->nama_lengkap]);
+            $request->validate([
+                'nama_lengkap' => 'required',
+                'tempat_lahir' => 'nullable',
+                'tanggal_lahir' => 'nullable|date',
+                'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
+                'alamat' => 'nullable',
+                'desa' => 'nullable',
+                'kecamatan' => 'nullable',
+                'kabupaten' => 'nullable',
+                'provinsi' => 'nullable',
+                'program_studi' => 'nullable',
+                'angkatan' => 'nullable',
+                'kamar' => 'nullable',
+                'nomor_hp' => 'nullable',
+                'nama_ayah' => 'nullable',
+                'nik_ayah' => 'nullable',
+                'pekerjaan_ayah' => 'nullable',
+                'nama_ibu' => 'nullable',
+                'nik_ibu' => 'nullable',
+                'pekerjaan_ibu' => 'nullable',
+                'no_hp_orang_tua' => 'nullable',
+                'password' => 'nullable|min:6',
+            ]);
+
+            $user->santri->update($request->only([
+                'nama_lengkap',
+                'tempat_lahir',
+                'tanggal_lahir',
+                'jenis_kelamin',
+                'alamat',
+                'desa',
+                'kecamatan',
+                'kabupaten',
+                'provinsi',
+                'program_studi',
+                'angkatan',
+                'kamar',
+                'nomor_hp',
+                'nama_ayah',
+                'nik_ayah',
+                'pekerjaan_ayah',
+                'nama_ibu',
+                'nik_ibu',
+                'pekerjaan_ibu',
+                'no_hp_orang_tua',
+            ]));
         }
 
         if ($request->password) {
@@ -40,7 +96,6 @@ class ProfileController extends Controller
         return back()->with('success', 'Profil berhasil diupdate.');
     }
 
-    // Admin ganti password user lain
     public function gantiPassword(Request $request)
     {
         $request->validate([

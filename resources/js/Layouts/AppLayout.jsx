@@ -4,7 +4,7 @@ import { usePage, Link, router } from "@inertiajs/react";
 export default function AppLayout({ children }) {
     const { auth } = usePage().props;
     const user = auth.user;
-    const profil = user.ustadz || user.santri || user.walisantri;
+    const profil = user.ustadz || user.santri;
     const initial = profil?.nama_lengkap?.charAt(0) || "A";
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,19 +23,19 @@ export default function AppLayout({ children }) {
             label: "Dashboard",
             path: "/",
             icon: "fa-home",
-            roles: ["admin", "ustadz", "santri", "walisantri"],
+            roles: ["admin", "ustadz", "santri"],
         },
         {
             label: "QR Code",
             path: "/qr",
             icon: "fa-qrcode",
-            roles: ["admin", "ustadz", "santri", "walisantri"],
+            roles: ["admin", "ustadz", "santri"],
         },
         {
             label: "Timeline",
             path: "/timeline",
             icon: "fa-timeline",
-            roles: ["admin", "ustadz", "santri", "walisantri"],
+            roles: ["admin", "ustadz", "santri"],
         },
     ];
 
@@ -50,12 +50,6 @@ export default function AppLayout({ children }) {
             label: "Ustadz",
             path: "/ustadz",
             icon: "fa-chalkboard-user",
-            roles: ["admin"],
-        },
-        {
-            label: "Walisantri",
-            path: "/walisantri",
-            icon: "fa-people-roof",
             roles: ["admin"],
         },
     ];
@@ -77,7 +71,7 @@ export default function AppLayout({ children }) {
             label: "Tagihan",
             path: "/tagihan",
             icon: "fa-file-invoice",
-            roles: ["walisantri", "santri"],
+            roles: ["santri"],
         },
     ];
 
@@ -119,11 +113,6 @@ export default function AppLayout({ children }) {
             { label: "Presensi", path: "/presensi", icon: "fa-clipboard-list" },
         ],
         santri: [
-            { label: "Beranda", path: "/", icon: "fa-home" },
-            { label: "QR", path: "/qr", icon: "fa-qrcode", isCenter: true },
-            { label: "Tagihan", path: "/tagihan", icon: "fa-file-invoice" },
-        ],
-        walisantri: [
             { label: "Beranda", path: "/", icon: "fa-home" },
             { label: "QR", path: "/qr", icon: "fa-qrcode", isCenter: true },
             { label: "Tagihan", path: "/tagihan", icon: "fa-file-invoice" },

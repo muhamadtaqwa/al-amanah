@@ -21,9 +21,4 @@ class User extends Authenticatable
     {
         return $this->hasOne(Santri::class);
     }
-
-    public function walisantri()
-    {
-        return $this->hasOne(Walisantri::class);
-    }
 }

@@ -11,10 +11,17 @@ class Ustadz extends Model
     protected $fillable = [
         'user_id',
         'niu',
+        'nip_nuptk',
+        'nik',
         'nama_lengkap',
+        'tempat_lahir',
+        'tanggal_lahir',
         'jenis_kelamin',
         'pendidikan_terakhir',
+        'alamat',
         'status',
+        'status_kepegawaian',
+        'tanggal_mulai_tugas',
         'nomor_hp',
     ];
 

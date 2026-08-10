@@ -10,7 +10,6 @@ export default function Index() {
     const [search, setSearch] = useState("");
 
     const { data, setData, post, put, reset, processing } = useForm({
-        kode: "",
         nama_barang: "",
         kategori: "",
         jumlah: 1,
@@ -26,7 +25,14 @@ export default function Index() {
     };
     const openEdit = (item) => {
         setEditData(item);
-        setData(item);
+        setData({
+            nama_barang: item.nama_barang,
+            kategori: item.kategori || "",
+            jumlah: item.jumlah,
+            kondisi: item.kondisi,
+            lokasi: item.lokasi || "",
+            keterangan: item.keterangan || "",
+        });
         setShowModal(true);
     };
     const closeModal = () => {
@@ -151,17 +157,11 @@ export default function Index() {
                                 {editData ? "Edit" : "Tambah"} Barang
                             </h3>
                             <form onSubmit={submit} className="space-y-3">
-                                <input
-                                    type="text"
-                                    placeholder="Kode Barang"
-                                    value={data.kode}
-                                    onChange={(e) =>
-                                        setData("kode", e.target.value)
-                                    }
-                                    disabled={!!editData}
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
-                                    required
-                                />
+                                {editData && (
+                                    <p className="text-xs text-slate-400 bg-slate-50 px-4 py-2 rounded-2xl">
+                                        Kode: {editData.kode}
+                                    </p>
+                                )}
                                 <input
                                     type="text"
                                     placeholder="Nama Barang"

@@ -49,27 +49,24 @@ class DashboardController extends Controller
     {
         $data = collect();
 
-        // Pembayaran terbaru
-        $pembayaran = Pembayaran::with('santri')->latest()->take(5)->get();
+        $pembayaran = Pembayaran::with('santri')->latest()->take(10)->get();
         foreach ($pembayaran as $p) {
             $nama = $p->santri->nama_lengkap ?? 'Seseorang';
             $data->push([
                 'teks' => $nama . ' membayar ' . $p->jenis,
-                'waktu' => $p->created_at->diffForHumans(),
+                'waktu' => $p->created_at,
             ]);
         }
 
-        // PSB terbaru
-        $psb = Psb::latest()->take(3)->get();
+        $psb = Psb::latest()->take(10)->get();
         foreach ($psb as $p) {
             $data->push([
                 'teks' => $p->nama_lengkap . ' mendaftar PSB',
-                'waktu' => $p->created_at->diffForHumans(),
+                'waktu' => $p->created_at,
             ]);
         }
 
-        // Login terbaru
-        $logins = Login::with('user.ustadz', 'user.santri')->latest()->take(3)->get();
+        $logins = Login::with('user.ustadz', 'user.santri')->latest()->take(10)->get();
         foreach ($logins as $l) {
             $nama = 'Seseorang';
             if ($l->user) {
@@ -77,11 +74,15 @@ class DashboardController extends Controller
             }
             $data->push([
                 'teks' => $nama . ' login',
-                'waktu' => $l->created_at->diffForHumans(),
+                'waktu' => $l->created_at,
             ]);
         }
 
-        // Urutkan & ambil 5
-        return $data->sortByDesc('waktu')->take(5)->values();
+        return $data->sortByDesc('waktu')->take(15)->values()->map(function ($item) {
+            return [
+                'teks' => $item['teks'],
+                'waktu' => $item['waktu']->diffForHumans(),
+            ];
+        });
     }
 }

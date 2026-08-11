@@ -10,7 +10,7 @@ class InventarisController extends Controller
 {
     public function index()
     {
-        $data = Inventaris::orderBy('nama_barang')->get();
+        $data = Inventaris::orderBy('kode')->get();
         return Inertia::render('Inventaris/Index', ['inventaris' => $data]);
     }
 
@@ -25,7 +25,6 @@ class InventarisController extends Controller
             'keterangan' => 'nullable',
         ]);
 
-        // Generate kode otomatis
         $last = Inventaris::orderBy('id', 'desc')->first();
         $nextId = $last ? $last->id + 1 : 1;
         $kode = 'INV-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);

@@ -12,7 +12,7 @@ class UstadzController extends Controller
 {
     public function index()
     {
-        $ustadzs = Ustadz::with('user')->get();
+        $ustadzs = Ustadz::with('user')->orderBy('niu')->get();
         return Inertia::render('Ustadz/Index', ['ustadzs' => $ustadzs]);
     }
 
@@ -34,7 +34,6 @@ class UstadzController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        // Generate NIU
         $last = Ustadz::orderBy('niu', 'desc')->first();
         if ($last) {
             $num = (int) substr($last->niu, 1) + 1;

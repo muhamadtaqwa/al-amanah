@@ -12,7 +12,7 @@ class SantriController extends Controller
 {
     public function index()
     {
-        $santris = Santri::with('user')->get();
+        $santris = Santri::with('user')->orderBy('nis')->get();
         return Inertia::render('Santri/Index', [
             'santris' => $santris,
         ]);
@@ -48,7 +48,6 @@ class SantriController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        // Generate NIS
         $prefix = $request->jenis_kelamin === 'laki-laki' ? 'PA' : 'PI';
         $last = Santri::where('nis', 'like', $prefix . '%')->orderBy('nis', 'desc')->first();
         if ($last) {

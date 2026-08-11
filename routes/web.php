@@ -12,6 +12,7 @@ use App\Http\Controllers\PinjamGedungController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\InventarisController;
 use App\Http\Controllers\PsbController;
+use App\Http\Controllers\ExportController;
 use Illuminate\Support\Facades\Route;
 
 // Auth
@@ -34,6 +35,9 @@ Route::middleware('auth')->group(function () {
     // PSB Verifikasi (admin)
     Route::get('/psb/verifikasi', [PsbController::class, 'index']);
     Route::put('/psb/{id}/verifikasi', [PsbController::class, 'verifikasi']);
+
+    // Export
+    Route::get('/export/santri', [ExportController::class, 'santri']);
 
     // Santri
     Route::get('/santri', [SantriController::class, 'index']);

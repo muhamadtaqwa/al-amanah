@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -58,11 +59,28 @@ export default function Index() {
     const submit = (e) => {
         e.preventDefault();
         editData
-            ? put(`/ustadz/${editData.id}`, { onSuccess: () => closeModal() })
-            : post("/ustadz", { onSuccess: () => closeModal() });
+            ? put(`/ustadz/${editData.id}`, {
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Ustadz berhasil diupdate!");
+                  },
+                  onError: () => toast.error("Gagal mengupdate ustadz."),
+              })
+            : post("/ustadz", {
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Ustadz berhasil ditambah!");
+                  },
+                  onError: () => toast.error("Gagal menambah ustadz."),
+              });
     };
     const handleDelete = (id, nama) => {
-        if (confirm(`Hapus ustadz "${nama}"?`)) router.delete(`/ustadz/${id}`);
+        if (confirm(`Hapus ustadz "${nama}"?`)) {
+            router.delete(`/ustadz/${id}`, {
+                onSuccess: () => toast.success("Ustadz berhasil dihapus!"),
+                onError: () => toast.error("Gagal menghapus ustadz."),
+            });
+        }
     };
 
     const filtered = ustadzs.filter(

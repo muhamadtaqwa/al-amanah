@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -179,11 +180,28 @@ export default function Index() {
     const submit = (e) => {
         e.preventDefault();
         editData
-            ? put(`/santri/${editData.id}`, { onSuccess: () => closeModal() })
-            : post("/santri", { onSuccess: () => closeModal() });
+            ? put(`/santri/${editData.id}`, {
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Santri berhasil diupdate!");
+                  },
+                  onError: () => toast.error("Gagal mengupdate santri."),
+              })
+            : post("/santri", {
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Santri berhasil ditambah!");
+                  },
+                  onError: () => toast.error("Gagal menambah santri."),
+              });
     };
     const handleDelete = (id, nama) => {
-        if (confirm(`Hapus santri "${nama}"?`)) router.delete(`/santri/${id}`);
+        if (confirm(`Hapus santri "${nama}"?`)) {
+            router.delete(`/santri/${id}`, {
+                onSuccess: () => toast.success("Santri berhasil dihapus!"),
+                onError: () => toast.error("Gagal menghapus santri."),
+            });
+        }
     };
 
     const filtered = santris.filter(

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -38,12 +39,27 @@ export default function Index() {
         e.preventDefault();
         editData
             ? put(`/pinjam-gedung/${editData.id}`, {
-                  onSuccess: () => closeModal(),
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Peminjaman berhasil diupdate!");
+                  },
+                  onError: () => toast.error("Gagal mengupdate."),
               })
-            : post("/pinjam-gedung", { onSuccess: () => closeModal() });
+            : post("/pinjam-gedung", {
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Peminjaman berhasil dicatat!");
+                  },
+                  onError: () => toast.error("Gagal mencatat."),
+              });
     };
     const handleDelete = (id) => {
-        if (confirm("Hapus?")) router.delete(`/pinjam-gedung/${id}`);
+        if (confirm("Hapus?")) {
+            router.delete(`/pinjam-gedung/${id}`, {
+                onSuccess: () => toast.success("Peminjaman berhasil dihapus!"),
+                onError: () => toast.error("Gagal menghapus."),
+            });
+        }
     };
 
     const filtered = pinjam.filter(

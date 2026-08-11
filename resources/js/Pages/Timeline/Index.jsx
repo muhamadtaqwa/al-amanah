@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -37,17 +38,26 @@ export default function Index() {
                   onSuccess: () => {
                       reset();
                       setShowForm(false);
+                      toast.success("Acara diupdate!");
                   },
+                  onError: () => toast.error("Gagal mengupdate."),
               })
             : post("/timeline", {
                   onSuccess: () => {
                       reset();
                       setShowForm(false);
+                      toast.success("Acara ditambah!");
                   },
+                  onError: () => toast.error("Gagal menambah."),
               });
     };
     const handleDelete = (id) => {
-        if (confirm("Hapus acara?")) router.delete(`/timeline/${id}`);
+        if (confirm("Hapus acara?")) {
+            router.delete(`/timeline/${id}`, {
+                onSuccess: () => toast.success("Acara dihapus!"),
+                onError: () => toast.error("Gagal menghapus."),
+            });
+        }
     };
 
     return (
@@ -67,7 +77,6 @@ export default function Index() {
                     )}
                 </div>
 
-                {/* Modal Popup */}
                 {showForm && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <div
@@ -121,7 +130,7 @@ export default function Index() {
                                     <button
                                         type="button"
                                         onClick={() => setShowForm(false)}
-                                        className="flex-1 border border-slate-200 py-3 rounded-2xl text-sm hover:bg-slate-50"
+                                        className="flex-1 border border-slate-200 py-3 rounded-2xl text-sm"
                                     >
                                         Batal
                                     </button>
@@ -138,7 +147,6 @@ export default function Index() {
                     </div>
                 )}
 
-                {/* Timeline */}
                 <div className="relative pl-6 ml-[7px] space-y-3 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-[#3D7ABA]/20">
                     {timeline.length === 0 && (
                         <p className="text-slate-400 text-sm">

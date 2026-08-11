@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { usePage, useForm, router, Link } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -16,16 +17,13 @@ export default function Index() {
     const [editData, setEditData] = useState(null);
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
-
     const [verifyingId, setVerifyingId] = useState(null);
     const [cicilanSubmitting, setCicilanSubmitting] = useState(false);
     const [lunasiSubmitting, setLunasiSubmitting] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
     const [deletingKategoriId, setDeletingKategoriId] = useState(null);
-
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [deleteKategoriTarget, setDeleteKategoriTarget] = useState(null);
-
     const firstFieldRef = useRef(null);
 
     const { data, setData, post, put, reset, processing, errors, clearErrors } =
@@ -81,9 +79,19 @@ export default function Index() {
         e.preventDefault();
         editData
             ? put(`/pembayaran/${editData.id}`, {
-                  onSuccess: () => closeModal(),
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Pembayaran diupdate!");
+                  },
+                  onError: () => toast.error("Gagal mengupdate."),
               })
-            : post("/pembayaran", { onSuccess: () => closeModal() });
+            : post("/pembayaran", {
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Pembayaran ditambah!");
+                  },
+                  onError: () => toast.error("Gagal menambah."),
+              });
     };
 
     const confirmDeletePembayaran = (id, nama) => setDeleteTarget({ id, nama });
@@ -91,6 +99,8 @@ export default function Index() {
         if (!deleteTarget) return;
         setDeletingId(deleteTarget.id);
         router.delete(`/pembayaran/${deleteTarget.id}`, {
+            onSuccess: () => toast.success("Pembayaran dihapus!"),
+            onError: () => toast.error("Gagal menghapus."),
             onFinish: () => {
                 setDeletingId(null);
                 setDeleteTarget(null);
@@ -110,9 +120,7 @@ export default function Index() {
             return;
         }
         if (typeof p.sisa === "number" && value > p.sisa) {
-            setCicilanError(
-                `Nominal melebihi sisa tagihan (Rp ${p.sisa.toLocaleString()}).`,
-            );
+            setCicilanError(`Nominal melebihi sisa tagihan.`);
             return;
         }
         setCicilanError("");
@@ -124,11 +132,11 @@ export default function Index() {
                 onSuccess: () => {
                     setShowCicilan(null);
                     setNominalCicilan("");
+                    toast.success("Cicilan berhasil!");
                 },
                 onError: (errs) => {
-                    setCicilanError(
-                        Object.values(errs)[0] || "Gagal menyimpan cicilan.",
-                    );
+                    setCicilanError(Object.values(errs)[0] || "Gagal.");
+                    toast.error("Gagal menyimpan cicilan.");
                 },
                 onFinish: () => setCicilanSubmitting(false),
             },
@@ -144,6 +152,8 @@ export default function Index() {
             `/pembayaran/${p.id}/cicilan`,
             { nominal: sisa },
             {
+                onSuccess: () => toast.success("Tagihan dilunasi!"),
+                onError: () => toast.error("Gagal melunasi."),
                 onFinish: () => setLunasiSubmitting(false),
             },
         );
@@ -152,15 +162,29 @@ export default function Index() {
     const handleGenerate = (e) => {
         e.preventDefault();
         generateForm.post("/pembayaran/generate", {
-            onSuccess: () => setShowGenerate(false),
+            onSuccess: () => {
+                setShowGenerate(false);
+                toast.success("Tagihan digenerate!");
+            },
+            onError: () => toast.error("Gagal generate."),
         });
     };
+
     const handleVerifikasi = (id, status) => {
         setVerifyingId(id);
         router.post(
             `/pembayaran/${id}/verifikasi`,
             { status_verifikasi: status },
-            { onFinish: () => setVerifyingId(null) },
+            {
+                onSuccess: () =>
+                    toast.success(
+                        status === "lunas"
+                            ? "Pembayaran diterima!"
+                            : "Pembayaran ditolak!",
+                    ),
+                onError: () => toast.error("Gagal verifikasi."),
+                onFinish: () => setVerifyingId(null),
+            },
         );
     };
 
@@ -170,6 +194,8 @@ export default function Index() {
         if (!deleteKategoriTarget) return;
         setDeletingKategoriId(deleteKategoriTarget.id);
         router.delete(`/jenis-pembayaran/${deleteKategoriTarget.id}`, {
+            onSuccess: () => toast.success("Kategori dihapus!"),
+            onError: () => toast.error("Gagal menghapus kategori."),
             onFinish: () => {
                 setDeletingKategoriId(null);
                 setDeleteKategoriTarget(null);
@@ -218,19 +244,19 @@ export default function Index() {
                     <div className="grid grid-cols-3 gap-2 mb-4">
                         <button
                             onClick={() => setShowKategori(true)}
-                            className="bg-white border border-slate-200 text-slate-600 py-2.5 rounded-2xl text-xs font-medium hover:bg-slate-50 transition text-center"
+                            className="bg-white border border-slate-200 text-slate-600 py-2.5 rounded-2xl text-xs font-medium hover:bg-slate-50 transition"
                         >
                             Kategori
                         </button>
                         <button
                             onClick={() => setShowGenerate(true)}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg hover:scale-[1.02] transition text-center"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg"
                         >
                             Generate
                         </button>
                         <button
                             onClick={openCreate}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg hover:scale-[1.02] transition text-center"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg"
                         >
                             + Tambah
                         </button>
@@ -307,7 +333,18 @@ export default function Index() {
                                     router.post(
                                         "/jenis-pembayaran",
                                         { nama: input.value },
-                                        { onSuccess: () => (input.value = "") },
+                                        {
+                                            onSuccess: () => {
+                                                input.value = "";
+                                                toast.success(
+                                                    "Kategori ditambah!",
+                                                );
+                                            },
+                                            onError: () =>
+                                                toast.error(
+                                                    "Gagal menambah kategori.",
+                                                ),
+                                        },
                                     );
                                 }}
                                 className="flex gap-2"
@@ -321,7 +358,7 @@ export default function Index() {
                                 />
                                 <button
                                     type="submit"
-                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg hover:scale-[1.02] transition"
+                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-5 py-3 rounded-2xl text-sm font-semibold"
                                 >
                                     Tambah
                                 </button>
@@ -443,7 +480,7 @@ export default function Index() {
                 {/* Card List */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filtered.length === 0 && (
-                        <p className="text-center text-slate-400 py-10">
+                        <p className="text-center text-slate-400 py-10 sm:col-span-2">
                             Tidak ada data
                         </p>
                     )}
@@ -517,7 +554,7 @@ export default function Index() {
                                                     onClick={() =>
                                                         openCicilan(p.id)
                                                     }
-                                                    className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition"
+                                                    className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg"
                                                 >
                                                     Cicilan
                                                 </button>
@@ -526,7 +563,7 @@ export default function Index() {
                                                         handleLunasi(p)
                                                     }
                                                     disabled={lunasiSubmitting}
-                                                    className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg hover:bg-emerald-200 transition"
+                                                    className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg"
                                                 >
                                                     {lunasiSubmitting
                                                         ? "..."

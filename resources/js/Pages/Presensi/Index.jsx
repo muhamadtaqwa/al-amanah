@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { usePage, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -22,16 +23,28 @@ export default function Index() {
     }, []);
 
     const handleSimpan = (niu, status, honorDefault) => {
-        router.post("/presensi", {
-            niu,
-            tanggal,
-            status,
-            honor: status === "hadir" ? honorDefault : 0,
-        });
+        router.post(
+            "/presensi",
+            {
+                niu,
+                tanggal,
+                status,
+                honor: status === "hadir" ? honorDefault : 0,
+            },
+            {
+                onSuccess: () => toast.success("Presensi tersimpan!"),
+                onError: () => toast.error("Gagal menyimpan presensi."),
+            },
+        );
     };
 
     const handleBatal = (id) => {
-        if (confirm("Hapus?")) router.delete(`/presensi/${id}`);
+        if (confirm("Hapus?")) {
+            router.delete(`/presensi/${id}`, {
+                onSuccess: () => toast.success("Presensi dibatalkan!"),
+                onError: () => toast.error("Gagal membatalkan."),
+            });
+        }
     };
 
     const totalHonor = rekap.reduce(
@@ -97,7 +110,7 @@ export default function Index() {
                                         )}
                                         <span className="block">
                                             Bisyaroh:{" "}
-                                            <span className="font-mono tracking-tight font-medium text-slate-600">
+                                            <span className="font-mono font-medium text-slate-600">
                                                 Rp{" "}
                                                 {item.honor_default?.toLocaleString()}
                                             </span>
@@ -140,7 +153,7 @@ export default function Index() {
                                                         item.honor_default,
                                                     )
                                                 }
-                                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg hover:scale-[1.02] transition"
+                                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg"
                                             >
                                                 Hadir
                                             </button>
@@ -152,7 +165,7 @@ export default function Index() {
                                                         item.honor_default,
                                                     )
                                                 }
-                                                className="bg-red-100 text-red-600 px-4 py-2 rounded-2xl text-xs font-semibold hover:bg-red-200 transition"
+                                                className="bg-red-100 text-red-600 px-4 py-2 rounded-2xl text-xs font-semibold"
                                             >
                                                 Tidak
                                             </button>
@@ -194,7 +207,7 @@ export default function Index() {
                                             {r.total_tidak_hadir}
                                         </p>
                                     </div>
-                                    <p className="font-bold text-[#3D7ABA] font-mono tracking-tight">
+                                    <p className="font-bold text-[#3D7ABA] font-mono">
                                         Rp{" "}
                                         {parseInt(
                                             r.total_honor || 0,
@@ -206,7 +219,7 @@ export default function Index() {
                                 <span className="text-[#3D7ABA]">
                                     Total Honor
                                 </span>
-                                <span className="text-[#3D7ABA] font-mono tracking-tight">
+                                <span className="text-[#3D7ABA] font-mono">
                                     Rp {totalHonor.toLocaleString()}
                                 </span>
                             </div>

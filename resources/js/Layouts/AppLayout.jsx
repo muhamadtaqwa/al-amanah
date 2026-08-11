@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
+import { Toaster } from "react-hot-toast";
 
 export default function AppLayout({ children }) {
     const { auth } = usePage().props;
@@ -59,7 +60,7 @@ export default function AppLayout({ children }) {
             roles: ["admin"],
         },
         {
-            label: "Export",
+            label: "Export EMIS",
             path: "/export",
             icon: "fa-file-export",
             roles: ["admin"],
@@ -155,6 +156,8 @@ export default function AppLayout({ children }) {
 
     return (
         <div className="min-h-screen bg-[#EEF8FD]">
+            <Toaster position="top-right" />
+
             {/* Header Mobile */}
             <header className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] sticky top-0 z-30 shadow-lg md:hidden">
                 <div className="flex flex-col items-center py-2 relative">

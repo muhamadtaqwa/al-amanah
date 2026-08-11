@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { usePage, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -12,7 +13,7 @@ export default function Index() {
 
     const handleUpload = (id) => {
         const file = fileRef.current?.files[0];
-        if (!file) return alert("Pilih file dulu");
+        if (!file) return toast.error("Pilih file dulu");
 
         setUploadingId(id);
         const formData = new FormData();
@@ -23,9 +24,10 @@ export default function Index() {
                 setShowUpload(null);
                 setFileName("");
                 setUploadingId(null);
+                toast.success("Bukti berhasil diupload!");
             },
             onError: () => {
-                alert("Gagal upload. Coba lagi.");
+                toast.error("Gagal upload. Coba lagi.");
                 setUploadingId(null);
             },
             forceFormData: true,
@@ -147,11 +149,11 @@ export default function Index() {
                             {t.total_dibayar > 0 && (
                                 <div className="mt-3">
                                     <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-emerald-500 font-mono tracking-tight">
+                                        <span className="text-emerald-500 font-mono">
                                             Dibayar: Rp{" "}
                                             {t.total_dibayar?.toLocaleString()}
                                         </span>
-                                        <span className="text-red-400 font-mono tracking-tight">
+                                        <span className="text-red-400 font-mono">
                                             Sisa: Rp {t.sisa?.toLocaleString()}
                                         </span>
                                     </div>

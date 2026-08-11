@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -43,12 +44,27 @@ export default function Index() {
         e.preventDefault();
         editData
             ? put(`/inventaris/${editData.id}`, {
-                  onSuccess: () => closeModal(),
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Barang berhasil diupdate!");
+                  },
+                  onError: () => toast.error("Gagal mengupdate barang."),
               })
-            : post("/inventaris", { onSuccess: () => closeModal() });
+            : post("/inventaris", {
+                  onSuccess: () => {
+                      closeModal();
+                      toast.success("Barang berhasil ditambah!");
+                  },
+                  onError: () => toast.error("Gagal menambah barang."),
+              });
     };
     const handleDelete = (id) => {
-        if (confirm("Hapus?")) router.delete(`/inventaris/${id}`);
+        if (confirm("Hapus?")) {
+            router.delete(`/inventaris/${id}`, {
+                onSuccess: () => toast.success("Barang berhasil dihapus!"),
+                onError: () => toast.error("Gagal menghapus barang."),
+            });
+        }
     };
 
     const filtered = inventaris.filter(
@@ -100,13 +116,7 @@ export default function Index() {
                                             {item.kode}
                                         </span>
                                         <span
-                                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                                item.kondisi === "baik"
-                                                    ? "bg-emerald-50 text-emerald-600"
-                                                    : item.kondisi === "rusak"
-                                                      ? "bg-amber-50 text-amber-600"
-                                                      : "bg-red-50 text-red-500"
-                                            }`}
+                                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.kondisi === "baik" ? "bg-emerald-50 text-emerald-600" : item.kondisi === "rusak" ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-500"}`}
                                         >
                                             {item.kondisi
                                                 .charAt(0)

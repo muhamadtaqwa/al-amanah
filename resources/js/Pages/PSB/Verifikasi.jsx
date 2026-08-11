@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { usePage, useForm, router } from "@inertiajs/react";
+import { usePage, useForm } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Verifikasi() {
@@ -33,7 +34,13 @@ export default function Verifikasi() {
             onSuccess: () => {
                 setShowTolak(null);
                 setDetail(null);
+                toast.success(
+                    status === "diterima"
+                        ? "Pendaftar diterima!"
+                        : "Pendaftar ditolak!",
+                );
             },
+            onError: () => toast.error("Gagal memverifikasi."),
         });
     };
 
@@ -55,7 +62,6 @@ export default function Verifikasi() {
                     </h2>
                 </div>
 
-                {/* Filter */}
                 <div className="grid grid-cols-4 gap-2 mb-4">
                     {["semua", "menunggu", "diterima", "ditolak"].map((f) => (
                         <button
@@ -68,7 +74,6 @@ export default function Verifikasi() {
                     ))}
                 </div>
 
-                {/* List */}
                 <div className="space-y-3">
                     {filtered.length === 0 && (
                         <p className="text-center text-slate-400 py-10">
@@ -108,7 +113,6 @@ export default function Verifikasi() {
                                 ></i>
                             </div>
 
-                            {/* Detail expand */}
                             {detail?.id === p.id && (
                                 <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
                                     <Row label="NIK" value={p.nik} />
@@ -169,7 +173,6 @@ export default function Verifikasi() {
                                         />
                                     )}
 
-                                    {/* Tombol aksi (hanya status menunggu) */}
                                     {p.status === "menunggu" && (
                                         <div className="flex gap-2 pt-3">
                                             <button
@@ -197,7 +200,6 @@ export default function Verifikasi() {
                                         </div>
                                     )}
 
-                                    {/* Form tolak */}
                                     {showTolak === p.id && (
                                         <div
                                             className="pt-2 space-y-2"

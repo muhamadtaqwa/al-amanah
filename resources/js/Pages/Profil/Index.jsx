@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -167,19 +168,28 @@ export default function Index() {
 
     const submit = (e) => {
         e.preventDefault();
-        put("/profil", { onSuccess: () => setShowModal(false) });
+        put("/profil", {
+            onSuccess: () => {
+                setShowModal(false);
+                toast.success("Profil berhasil diupdate!");
+            },
+            onError: () => toast.error("Gagal mengupdate profil."),
+        });
     };
     const handleGantiPassword = (e) => {
         e.preventDefault();
         passwordForm.post("/profil/ganti-password", {
-            onSuccess: () => passwordForm.reset(),
+            onSuccess: () => {
+                passwordForm.reset();
+                toast.success("Password berhasil diubah!");
+            },
+            onError: () => toast.error("Gagal mengubah password."),
         });
     };
 
     return (
         <AppLayout>
             <div className="max-w-2xl mx-auto space-y-4">
-                {/* Card Profil */}
                 <div className="rounded-[30px] bg-gradient-to-br from-[#3D7ABA] to-[#20B5E8] p-6 shadow-2xl text-white text-center">
                     <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-4xl font-bold mb-4 border-2 border-white/30 mx-auto">
                         {profil?.nama_lengkap?.charAt(0) || "A"}
@@ -195,7 +205,6 @@ export default function Index() {
                     </p>
                 </div>
 
-                {/* Info Profil + Tombol Edit (Santri & Ustadz) */}
                 {(user.role === "ustadz" || user.role === "santri") && (
                     <div className="rounded-[30px] border border-sky-100 bg-white p-6 shadow-2xl">
                         <div className="flex items-center justify-between mb-4">
@@ -209,7 +218,6 @@ export default function Index() {
                                 Edit Profil
                             </button>
                         </div>
-
                         <div className="text-xs text-slate-500 space-y-1.5">
                             {user.role === "ustadz" && (
                                 <>
@@ -339,7 +347,6 @@ export default function Index() {
                     </div>
                 )}
 
-                {/* Admin: Ganti Password User */}
                 {user.role === "admin" && (
                     <div className="rounded-[30px] border border-sky-100 bg-white p-6 shadow-2xl">
                         <h3 className="font-semibold text-sm text-slate-700 mb-4">
@@ -386,7 +393,6 @@ export default function Index() {
                     </div>
                 )}
 
-                {/* Tombol Logout */}
                 <button
                     onClick={handleLogout}
                     className="w-full bg-red-500 text-white py-3 rounded-2xl text-sm font-semibold shadow-lg hover:bg-red-600 transition"
@@ -394,7 +400,6 @@ export default function Index() {
                     Logout
                 </button>
 
-                {/* Modal Edit Profil */}
                 {showModal && (
                     <div className="fixed inset-0 z-50 overflow-y-auto">
                         <div className="flex min-h-full items-center justify-center p-4">
@@ -423,7 +428,6 @@ export default function Index() {
                                         className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         required
                                     />
-
                                     {user.role === "ustadz" && (
                                         <>
                                             <input
@@ -544,7 +548,6 @@ export default function Index() {
                                             />
                                         </>
                                     )}
-
                                     {user.role === "santri" && (
                                         <>
                                             <input
@@ -827,7 +830,6 @@ export default function Index() {
                                             />
                                         </>
                                     )}
-
                                     <input
                                         type="password"
                                         placeholder="Password Baru (opsional)"
@@ -837,7 +839,6 @@ export default function Index() {
                                         }
                                         className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                     />
-
                                     <div className="flex gap-2 pt-2">
                                         <button
                                             type="button"

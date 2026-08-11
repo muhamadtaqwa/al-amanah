@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { useForm, usePage } from "@inertiajs/react";
+import { useForm } from "@inertiajs/react";
+import toast from "react-hot-toast";
 
 export default function Form() {
-    const { flash } = usePage().props;
-    const psbId = flash?.psb_id || null;
-
     const prodiList = [
         "S1 Kedokteran",
         "S1 Bimbingan dan Penyuluhan Islam",
@@ -133,14 +131,15 @@ export default function Form() {
     const submit = (e) => {
         e.preventDefault();
         post("/psb", {
-            onSuccess: () => {
-                const id =
-                    psbId ||
-                    new URLSearchParams(window.location.search).get("psb_id");
+            onSuccess: (response) => {
+                const id = response?.props?.flash?.psb_id || null;
                 setSuksesId(id);
                 reset();
                 setSukses(true);
+                toast.success("Pendaftaran berhasil!");
             },
+            onError: () =>
+                toast.error("Gagal mendaftar. Periksa kembali data Anda."),
         });
     };
 

@@ -58,6 +58,12 @@ export default function AppLayout({ children }) {
             icon: "fa-file-signature",
             roles: ["admin"],
         },
+        {
+            label: "Export",
+            path: "/export",
+            icon: "fa-file-export",
+            roles: ["admin"],
+        },
     ];
 
     const menuKeuangan = [
@@ -141,7 +147,7 @@ export default function AppLayout({ children }) {
     const CategoryTitle = ({ children, collapsed }) => {
         if (collapsed) return null;
         return (
-            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-3 mb-1">
+            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
                 {children}
             </p>
         );
@@ -200,7 +206,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -218,7 +224,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -236,7 +242,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -254,7 +260,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -267,7 +273,7 @@ export default function AppLayout({ children }) {
                         <Link
                             href="/profil"
                             onClick={() => setSidebarOpen(false)}
-                            className={`flex items-center gap-3 px-6 py-3 text-sm ${isActive("/profil") ? activeClass : inactiveClass}`}
+                            className={`flex items-center gap-3 px-6 py-2.5 text-sm ${isActive("/profil") ? activeClass : inactiveClass}`}
                         >
                             <div className="w-5 h-5 rounded-full bg-[#3D7ABA] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                                 {initial}
@@ -276,7 +282,7 @@ export default function AppLayout({ children }) {
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-6 py-3 text-sm text-red-500 font-medium hover:bg-red-50"
+                            className="w-full flex items-center gap-3 px-6 py-2.5 text-sm text-red-500 font-medium hover:bg-red-50"
                         >
                             <i className="fa-solid fa-right-from-bracket w-5 text-center"></i>
                             Logout
@@ -287,9 +293,9 @@ export default function AppLayout({ children }) {
 
             {/* Sidebar Desktop */}
             <aside
-                className={`hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-full md:bg-white md:shadow-xl z-20 transition-all duration-300 rounded-r-3xl ${sidebarCollapsed ? "w-20" : "w-64"}`}
+                className={`hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-full md:bg-white md:shadow-xl z-20 transition-all duration-300 rounded-r-3xl ${sidebarCollapsed ? "w-20" : "w-60"}`}
             >
-                <div className="p-5 flex items-center justify-center">
+                <div className="p-4 flex items-center justify-center">
                     <img
                         src={
                             sidebarCollapsed
@@ -298,19 +304,19 @@ export default function AppLayout({ children }) {
                         }
                         alt="Logo"
                         className={
-                            sidebarCollapsed ? "h-8 w-auto" : "h-12 w-auto"
+                            sidebarCollapsed ? "h-7 w-auto" : "h-10 w-auto"
                         }
                     />
                 </div>
                 <button
                     onClick={toggleSidebar}
-                    className="absolute -right-3 top-24 w-6 h-6 bg-white shadow-md rounded-full flex items-center justify-center text-xs text-slate-400 hover:text-[#3D7ABA]"
+                    className="absolute -right-3 top-20 w-6 h-6 bg-white shadow-md rounded-full flex items-center justify-center text-xs text-slate-400 hover:text-[#3D7ABA]"
                 >
                     <i
                         className={`fa-solid ${sidebarCollapsed ? "fa-chevron-right" : "fa-chevron-left"}`}
                     ></i>
                 </button>
-                <nav className="px-2 flex-1 space-y-0.5 overflow-y-auto">
+                <nav className="px-2 flex-1 space-y-0 overflow-y-auto">
                     <CategoryTitle collapsed={sidebarCollapsed}>
                         Utama
                     </CategoryTitle>
@@ -318,11 +324,11 @@ export default function AppLayout({ children }) {
                         <Link
                             key={m.path}
                             href={m.path}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
+                            className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
                             <i
-                                className={`fa-solid ${m.icon} w-5 text-center text-lg`}
+                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
                             ></i>
                             {!sidebarCollapsed && m.label}
                         </Link>
@@ -336,11 +342,11 @@ export default function AppLayout({ children }) {
                         <Link
                             key={m.path}
                             href={m.path}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
+                            className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
                             <i
-                                className={`fa-solid ${m.icon} w-5 text-center text-lg`}
+                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
                             ></i>
                             {!sidebarCollapsed && m.label}
                         </Link>
@@ -354,11 +360,11 @@ export default function AppLayout({ children }) {
                         <Link
                             key={m.path}
                             href={m.path}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
+                            className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
                             <i
-                                className={`fa-solid ${m.icon} w-5 text-center text-lg`}
+                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
                             ></i>
                             {!sidebarCollapsed && m.label}
                         </Link>
@@ -372,20 +378,20 @@ export default function AppLayout({ children }) {
                         <Link
                             key={m.path}
                             href={m.path}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
+                            className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
                             <i
-                                className={`fa-solid ${m.icon} w-5 text-center text-lg`}
+                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
                             ></i>
                             {!sidebarCollapsed && m.label}
                         </Link>
                     ))}
                 </nav>
-                <div className="p-4 space-y-1 bg-slate-50/50">
+                <div className="p-3 space-y-0.5 bg-slate-50/50">
                     <Link
                         href="/profil"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive("/profil") ? activeClass : inactiveClass}`}
+                        className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive("/profil") ? activeClass : inactiveClass}`}
                         title={sidebarCollapsed ? "Profil" : ""}
                     >
                         <div className="w-5 h-5 rounded-full bg-[#3D7ABA] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
@@ -395,9 +401,9 @@ export default function AppLayout({ children }) {
                     </Link>
                     <button
                         onClick={handleLogout}
-                        className={`text-red-500 text-xs font-medium hover:bg-red-50 rounded-xl px-3 py-2 ${sidebarCollapsed ? "w-full justify-center flex" : "w-full text-left flex items-center gap-3"}`}
+                        className={`text-red-500 text-xs font-medium hover:bg-red-50 rounded-xl px-3 py-1.5 ${sidebarCollapsed ? "w-full justify-center flex" : "w-full text-left flex items-center gap-3"}`}
                     >
-                        <i className="fa-solid fa-right-from-bracket text-base"></i>
+                        <i className="fa-solid fa-right-from-bracket text-sm"></i>
                         {!sidebarCollapsed && <span>Logout</span>}
                     </button>
                 </div>
@@ -405,7 +411,7 @@ export default function AppLayout({ children }) {
 
             {/* Main Content */}
             <main
-                className={`pb-28 md:pb-6 transition-all duration-300 ${sidebarCollapsed ? "md:ml-20" : "md:ml-64"}`}
+                className={`pb-28 md:pb-6 transition-all duration-300 ${sidebarCollapsed ? "md:ml-20" : "md:ml-60"}`}
             >
                 <div className="p-4 md:p-6">{children}</div>
             </main>

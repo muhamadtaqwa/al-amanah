@@ -85,4 +85,54 @@ class ExportController extends Controller
 
         return response()->download($filePath)->deleteFileAfterSend();
     }
+    public function ustadz()
+    {
+        $ustadzs = \App\Models\Ustadz::select(
+            'niu',
+            'nip_nuptk',
+            'nik',
+            'nama_lengkap',
+            'tempat_lahir',
+            'tanggal_lahir',
+            'jenis_kelamin',
+            'alamat',
+            'pendidikan_terakhir',
+            'status',
+            'status_kepegawaian',
+            'tanggal_mulai_tugas',
+            'nomor_hp'
+        )->get();
+
+        $fileName = 'data-ustadz.xlsx';
+        $filePath = storage_path('app/' . $fileName);
+
+        $writer = new Writer();
+        $writer->openToFile($filePath);
+
+        $headerRow = Row::fromValues([
+            'NIU',
+            'NIP/NUPTK',
+            'NIK',
+            'Nama Lengkap',
+            'Tempat Lahir',
+            'Tanggal Lahir',
+            'Jenis Kelamin',
+            'Alamat',
+            'Pendidikan Terakhir',
+            'Status',
+            'Status Kepegawaian',
+            'Tanggal Mulai Tugas',
+            'Nomor HP',
+        ]);
+        $writer->addRow($headerRow);
+
+        foreach ($ustadzs as $u) {
+            $row = Row::fromValues($u->toArray());
+            $writer->addRow($row);
+        }
+
+        $writer->close();
+
+        return response()->download($filePath)->deleteFileAfterSend();
+    }
 }

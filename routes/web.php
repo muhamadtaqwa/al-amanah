@@ -37,7 +37,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/psb/{id}/verifikasi', [PsbController::class, 'verifikasi']);
 
     // Export
+    Route::get('/export', fn() => inertia('Export/Emis'));
     Route::get('/export/santri', [ExportController::class, 'santri']);
+    Route::get('/export/ustadz', [ExportController::class, 'ustadz']);
 
     // Santri
     Route::get('/santri', [SantriController::class, 'index']);

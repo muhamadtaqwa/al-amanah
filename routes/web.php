@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PinjamGedungController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\InventarisController;
+use App\Http\Controllers\PsbController;
 use Illuminate\Support\Facades\Route;
 
 // Auth
@@ -18,10 +19,21 @@ Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'store']);
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth');
 
+// PSB (publik)
+Route::get('/psb', [PsbController::class, 'form']);
+Route::post('/psb', [PsbController::class, 'store']);
+Route::get('/psb/cetak/{id}', [PsbController::class, 'cetak']);
+Route::get('/psb/cek', [PsbController::class, 'cek']);
+Route::post('/psb/cek', [PsbController::class, 'cekStatus']);
+
 // Authenticated
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index']);
+
+    // PSB Verifikasi (admin)
+    Route::get('/psb/verifikasi', [PsbController::class, 'index']);
+    Route::put('/psb/{id}/verifikasi', [PsbController::class, 'verifikasi']);
 
     // Santri
     Route::get('/santri', [SantriController::class, 'index']);

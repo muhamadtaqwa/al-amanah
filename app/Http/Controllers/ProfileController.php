@@ -22,6 +22,8 @@ class ProfileController extends Controller
         if ($user->role === 'ustadz') {
             $request->validate([
                 'nama_lengkap' => 'required',
+                'nip_nuptk' => 'nullable',
+                'nik' => 'nullable',
                 'tempat_lahir' => 'nullable',
                 'tanggal_lahir' => 'nullable|date',
                 'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
@@ -33,6 +35,8 @@ class ProfileController extends Controller
 
             $user->ustadz->update($request->only([
                 'nama_lengkap',
+                'nip_nuptk',
+                'nik',
                 'tempat_lahir',
                 'tanggal_lahir',
                 'jenis_kelamin',
@@ -43,6 +47,7 @@ class ProfileController extends Controller
         } elseif ($user->role === 'santri') {
             $request->validate([
                 'nama_lengkap' => 'required',
+                'nik' => 'nullable',
                 'tempat_lahir' => 'nullable',
                 'tanggal_lahir' => 'nullable|date',
                 'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
@@ -67,6 +72,7 @@ class ProfileController extends Controller
 
             $user->santri->update($request->only([
                 'nama_lengkap',
+                'nik',
                 'tempat_lahir',
                 'tanggal_lahir',
                 'jenis_kelamin',

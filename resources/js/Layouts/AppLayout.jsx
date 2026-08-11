@@ -52,6 +52,12 @@ export default function AppLayout({ children }) {
             icon: "fa-chalkboard-user",
             roles: ["admin"],
         },
+        {
+            label: "PSB",
+            path: "/psb/verifikasi",
+            icon: "fa-file-signature",
+            roles: ["admin"],
+        },
     ];
 
     const menuKeuangan = [
@@ -109,13 +115,17 @@ export default function AppLayout({ children }) {
         ],
         ustadz: [
             { label: "Beranda", path: "/", icon: "fa-home" },
+            { label: "Timeline", path: "/timeline", icon: "fa-timeline" },
             { label: "QR", path: "/qr", icon: "fa-qrcode", isCenter: true },
             { label: "Presensi", path: "/presensi", icon: "fa-clipboard-list" },
+            { label: "Profil", path: "/profil", icon: "fa-user" },
         ],
         santri: [
             { label: "Beranda", path: "/", icon: "fa-home" },
+            { label: "Timeline", path: "/timeline", icon: "fa-timeline" },
             { label: "QR", path: "/qr", icon: "fa-qrcode", isCenter: true },
             { label: "Tagihan", path: "/tagihan", icon: "fa-file-invoice" },
+            { label: "Profil", path: "/profil", icon: "fa-user" },
         ],
     };
 

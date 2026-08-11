@@ -87,9 +87,15 @@ class PsbController extends Controller
         $psb->update(['status' => $request->status, 'catatan' => $request->catatan]);
 
         if ($request->status === 'diterima') {
-            $last = Santri::orderBy('id', 'desc')->first();
-            $nextId = $last ? $last->id + 1 : 1;
-            $nis = 'S' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            // Generate NIS
+            $prefix = $psb->jenis_kelamin === 'laki-laki' ? 'PA' : 'PI';
+            $last = Santri::where('nis', 'like', $prefix . '%')->orderBy('nis', 'desc')->first();
+            if ($last) {
+                $num = (int) substr($last->nis, 2) + 1;
+            } else {
+                $num = 1;
+            }
+            $nis = $prefix . str_pad($num, 2, '0', STR_PAD_LEFT);
 
             $user = User::create([
                 'username' => $nis,

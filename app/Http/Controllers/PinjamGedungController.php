@@ -10,7 +10,9 @@ class PinjamGedungController extends Controller
 {
     public function index()
     {
-        $data = PinjamGedung::orderBy('tanggal_mulai', 'desc')->get();
+        $data = PinjamGedung::orderByRaw("CASE WHEN status = 'aktif' AND tanggal_selesai >= CURDATE() THEN 0 ELSE 1 END")
+            ->orderBy('tanggal_mulai', 'desc')
+            ->get();
         return Inertia::render('PinjamGedung/Index', ['pinjam' => $data]);
     }
 

@@ -139,7 +139,6 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Aktivitas Terbaru */}
                         <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
                             <h2 className="text-sm font-bold text-slate-700 mb-2">
                                 Aktivitas Terbaru
@@ -187,7 +186,10 @@ export default function Dashboard() {
                                     Status
                                 </p>
                                 <p className="mt-1 text-sm font-bold text-emerald-500">
-                                    Aktif
+                                    {user.ustadz?.status
+                                        ?.charAt(0)
+                                        .toUpperCase() +
+                                        user.ustadz?.status?.slice(1)}
                                 </p>
                             </div>
                         </div>
@@ -233,10 +235,13 @@ export default function Dashboard() {
                             </div>
                             <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
                                 <p className="text-[11px] text-slate-400">
-                                    Poin
+                                    Status
                                 </p>
-                                <p className="mt-1 text-lg font-bold text-amber-500">
-                                    {user.santri?.poin_kedisiplinan || 0}
+                                <p className="mt-1 text-sm font-bold text-emerald-500">
+                                    {user.santri?.status
+                                        ?.charAt(0)
+                                        .toUpperCase() +
+                                        user.santri?.status?.slice(1)}
                                 </p>
                             </div>
                         </div>
@@ -250,6 +255,12 @@ export default function Dashboard() {
                                     className="rounded-xl bg-red-50 p-3 text-center text-xs font-medium text-red-500"
                                 >
                                     Tagihan
+                                </a>
+                                <a
+                                    href="/timeline"
+                                    className="rounded-xl bg-blue-50 p-3 text-center text-xs font-medium text-blue-500"
+                                >
+                                    Timeline
                                 </a>
                                 <a
                                     href="/qr"

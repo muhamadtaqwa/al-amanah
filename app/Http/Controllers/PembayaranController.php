@@ -92,9 +92,18 @@ class PembayaranController extends Controller
             'nominal' => 'required|integer',
             'bulan' => 'nullable',
             'tahun' => 'nullable',
+            'kecualikan' => 'nullable',
         ]);
 
-        $santris = Santri::all();
+        $kecualikan = $request->kecualikan
+            ? array_map('trim', explode(',', $request->kecualikan))
+            : [];
+
+        $santris = Santri::when(!empty($kecualikan), function ($q) use ($kecualikan) {
+            $q->whereNotIn('nis', $kecualikan);
+        })->get();
+
+        $count = 0;
         foreach ($santris as $s) {
             Pembayaran::create([
                 'nis' => $s->nis,
@@ -103,9 +112,10 @@ class PembayaranController extends Controller
                 'nominal' => $request->nominal,
                 'tgl_jatuh_tempo' => $request->tgl_jatuh_tempo,
             ]);
+            $count++;
         }
 
-        return back()->with('success', 'Tagihan berhasil digenerate.');
+        return back()->with('success', $count . ' tagihan berhasil digenerate.');
     }
 
     public function uploadBukti(Request $request, $id)

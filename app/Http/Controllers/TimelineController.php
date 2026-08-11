@@ -10,7 +10,10 @@ class TimelineController extends Controller
 {
     public function index()
     {
-        $data = Timeline::orderBy('tanggal', 'asc')->orderBy('waktu', 'asc')->get();
+        $data = Timeline::orderByRaw("CASE WHEN tanggal >= CURDATE() THEN 0 ELSE 1 END")
+            ->orderBy('tanggal', 'asc')
+            ->orderBy('waktu', 'asc')
+            ->get();
         return Inertia::render('Timeline/Index', ['timeline' => $data]);
     }
 

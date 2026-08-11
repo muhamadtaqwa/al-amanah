@@ -19,7 +19,6 @@ class UstadzController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'niu' => 'required|unique:ustadzs,niu',
             'nip_nuptk' => 'nullable',
             'nik' => 'nullable',
             'nama_lengkap' => 'required',
@@ -35,8 +34,17 @@ class UstadzController extends Controller
             'password' => 'required|min:6',
         ]);
 
+        // Generate NIU
+        $last = Ustadz::orderBy('niu', 'desc')->first();
+        if ($last) {
+            $num = (int) substr($last->niu, 1) + 1;
+        } else {
+            $num = 1;
+        }
+        $niu = 'U' . str_pad($num, 2, '0', STR_PAD_LEFT);
+
         $user = User::create([
-            'username' => $request->niu,
+            'username' => $niu,
             'password' => Hash::make($request->password),
             'role' => 'ustadz',
         ]);
@@ -44,7 +52,7 @@ class UstadzController extends Controller
 
         Ustadz::create([
             'user_id' => $user->id,
-            'niu' => $request->niu,
+            'niu' => $niu,
             'nip_nuptk' => $request->nip_nuptk,
             'nik' => $request->nik,
             'nama_lengkap' => $request->nama_lengkap,

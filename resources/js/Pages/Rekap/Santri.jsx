@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usePage } from "@inertiajs/react";
+import { usePage, Link } from "@inertiajs/react";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Santri() {
@@ -9,6 +9,33 @@ export default function Santri() {
     const [detail, setDetail] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const menu = [
+        {
+            label: "Santri",
+            path: "/rekap/santri",
+            bg: "bg-[#3D7ABA]/10",
+            text: "text-[#3D7ABA]",
+        },
+        {
+            label: "SPP",
+            path: "/rekap/spp",
+            bg: "bg-[#20B5E8]/10",
+            text: "text-[#20B5E8]",
+        },
+        {
+            label: "Kitab",
+            path: "/rekap/kitab",
+            bg: "bg-orange-50",
+            text: "text-orange-600",
+        },
+        {
+            label: "Kas",
+            path: "/rekap/kas",
+            bg: "bg-pink-50",
+            text: "text-pink-600",
+        },
+    ];
 
     const sortedSantris = [...santris].sort((a, b) =>
         a.nis.localeCompare(b.nis),
@@ -42,6 +69,22 @@ export default function Santri() {
                 <h2 className="text-lg font-bold text-slate-800 mb-4">
                     Rekap Per Santri
                 </h2>
+
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                    {menu.map((m) => (
+                        <Link
+                            key={m.path}
+                            href={m.path}
+                            className={`${m.bg} rounded-2xl p-3 text-center active:scale-[0.98] transition-all hover:shadow-md`}
+                        >
+                            <span
+                                className={`font-semibold text-[11px] ${m.text}`}
+                            >
+                                {m.label}
+                            </span>
+                        </Link>
+                    ))}
+                </div>
 
                 <input
                     type="text"
@@ -78,7 +121,6 @@ export default function Santri() {
                     ))}
                 </div>
 
-                {/* Popup */}
                 {showPopup && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <div
@@ -135,40 +177,19 @@ export default function Santri() {
                                                             : `${d.total_belum} belum`}
                                                     </span>
                                                 </div>
-                                                <div className="space-y-0.5 text-xs">
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-400">
-                                                            Total
-                                                        </span>
-                                                        <span className="font-semibold font-mono">
-                                                            Rp{" "}
-                                                            {parseInt(
-                                                                d.total_nominal,
-                                                            ).toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-emerald-500">
-                                                            Lunas
-                                                        </span>
-                                                        <span className="font-semibold text-emerald-600 font-mono">
-                                                            Rp{" "}
-                                                            {parseInt(
-                                                                d.nominal_lunas,
-                                                            ).toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-red-400">
-                                                            Belum
-                                                        </span>
-                                                        <span className="font-semibold text-red-500 font-mono">
-                                                            Rp{" "}
-                                                            {parseInt(
-                                                                d.nominal_belum,
-                                                            ).toLocaleString()}
-                                                        </span>
-                                                    </div>
+                                                <div className="text-[11px] text-slate-500 space-y-0.5">
+                                                    <Row
+                                                        label="Total"
+                                                        value={`Rp ${parseInt(d.total_nominal).toLocaleString()}`}
+                                                    />
+                                                    <Row
+                                                        label="Lunas"
+                                                        value={`Rp ${parseInt(d.nominal_lunas).toLocaleString()}`}
+                                                    />
+                                                    <Row
+                                                        label="Belum"
+                                                        value={`Rp ${parseInt(d.nominal_belum).toLocaleString()}`}
+                                                    />
                                                 </div>
                                             </div>
                                         ))}
@@ -182,3 +203,12 @@ export default function Santri() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

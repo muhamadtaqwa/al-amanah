@@ -11,7 +11,6 @@ export default function Index() {
     const [search, setSearch] = useState("");
 
     const { data, setData, post, put, reset, processing } = useForm({
-        niu: "",
         nip_nuptk: "",
         nik: "",
         nama_lengkap: "",
@@ -35,7 +34,6 @@ export default function Index() {
     const openEdit = (u) => {
         setEditData(u);
         setData({
-            niu: u.niu,
             nip_nuptk: u.nip_nuptk || "",
             nik: u.nik || "",
             nama_lengkap: u.nama_lengkap,
@@ -134,60 +132,25 @@ export default function Index() {
                     {filtered.map((u) => (
                         <div
                             key={u.id}
-                            className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl hover:shadow-xl transition-shadow"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl hover:shadow-xl transition-shadow"
                         >
-                            <div className="flex justify-between items-start">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                        <span className="text-xs bg-[#20B5E8]/10 text-[#20B5E8] px-2.5 py-1 rounded-full font-medium">
-                                            {u.niu}
-                                        </span>
-                                        <span
-                                            className={`text-xs px-2.5 py-1 rounded-full font-medium ${u.status === "aktif" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
-                                        >
-                                            {u.status?.charAt(0).toUpperCase() +
-                                                u.status?.slice(1)}
-                                        </span>
-                                    </div>
-                                    <h3 className="font-semibold text-sm truncate">
-                                        {u.nama_lengkap}
-                                    </h3>
-                                    <div className="mt-2 text-[11px] text-slate-500 space-y-0.5">
-                                        {u.nip_nuptk && (
-                                            <p>NIP/NUPTK: {u.nip_nuptk}</p>
-                                        )}
-                                        {u.nik && <p>NIK: {u.nik}</p>}
-                                        {(u.tempat_lahir ||
-                                            u.tanggal_lahir) && (
-                                            <p>
-                                                {u.tempat_lahir}
-                                                {u.tempat_lahir &&
-                                                    u.tanggal_lahir &&
-                                                    ", "}
-                                                {formatTgl(u.tanggal_lahir)}
-                                            </p>
-                                        )}
-                                        {u.jenis_kelamin && (
-                                            <p>
-                                                {u.jenis_kelamin === "laki-laki"
-                                                    ? "Laki-laki"
-                                                    : "Perempuan"}
-                                            </p>
-                                        )}
-                                        {u.pendidikan_terakhir && (
-                                            <p>{u.pendidikan_terakhir}</p>
-                                        )}
-                                        {u.status_kepegawaian && (
-                                            <p>{u.status_kepegawaian}</p>
-                                        )}
-                                        {u.nomor_hp && <p>{u.nomor_hp}</p>}
-                                    </div>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs bg-[#20B5E8]/10 text-[#20B5E8] px-2.5 py-1 rounded-full font-medium">
+                                        {u.niu}
+                                    </span>
+                                    <span
+                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${u.status === "aktif" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                    >
+                                        {u.status?.charAt(0).toUpperCase() +
+                                            u.status?.slice(1)}
+                                    </span>
                                 </div>
                                 {isAdmin && (
-                                    <div className="flex flex-col gap-1 ml-2 shrink-0">
+                                    <div className="flex gap-1">
                                         <button
                                             onClick={() => openEdit(u)}
-                                            className="bg-slate-100 px-3 py-1.5 rounded-xl text-[11px] hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
+                                            className="bg-slate-100 px-2.5 py-1 rounded-lg text-xs hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
                                         >
                                             Edit
                                         </button>
@@ -198,11 +161,54 @@ export default function Index() {
                                                     u.nama_lengkap,
                                                 )
                                             }
-                                            className="bg-red-50 text-red-500 px-3 py-1.5 rounded-xl text-[11px] hover:bg-red-100 transition"
+                                            className="bg-red-50 text-red-500 px-2.5 py-1 rounded-lg text-xs hover:bg-red-100 transition"
                                         >
                                             Hapus
                                         </button>
                                     </div>
+                                )}
+                            </div>
+                            <h3 className="font-semibold text-sm truncate mb-2">
+                                {u.nama_lengkap}
+                            </h3>
+                            <div className="text-[11px] text-slate-500 space-y-0.5">
+                                {u.nip_nuptk && (
+                                    <Row
+                                        label="NIP/NUPTK"
+                                        value={u.nip_nuptk}
+                                    />
+                                )}
+                                {u.nik && <Row label="NIK" value={u.nik} />}
+                                {(u.tempat_lahir || u.tanggal_lahir) && (
+                                    <Row
+                                        label="TTL"
+                                        value={`${u.tempat_lahir || "-"}, ${formatTgl(u.tanggal_lahir) || "-"}`}
+                                    />
+                                )}
+                                {u.jenis_kelamin && (
+                                    <Row
+                                        label="JK"
+                                        value={
+                                            u.jenis_kelamin === "laki-laki"
+                                                ? "Laki-laki"
+                                                : "Perempuan"
+                                        }
+                                    />
+                                )}
+                                {u.pendidikan_terakhir && (
+                                    <Row
+                                        label="Pendidikan"
+                                        value={u.pendidikan_terakhir}
+                                    />
+                                )}
+                                {u.status_kepegawaian && (
+                                    <Row
+                                        label="Kepegawaian"
+                                        value={u.status_kepegawaian}
+                                    />
+                                )}
+                                {u.nomor_hp && (
+                                    <Row label="HP" value={u.nomor_hp} />
                                 )}
                             </div>
                         </div>
@@ -224,17 +230,14 @@ export default function Index() {
                                     onSubmit={submit}
                                     className="space-y-2.5 max-h-[70vh] overflow-y-auto pr-1"
                                 >
-                                    <input
-                                        type="text"
-                                        placeholder="NIU"
-                                        value={data.niu}
-                                        onChange={(e) =>
-                                            setData("niu", e.target.value)
-                                        }
-                                        disabled={!!editData}
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50 outline-none"
-                                        required
-                                    />
+                                    {editData && (
+                                        <input
+                                            type="text"
+                                            value={editData.niu}
+                                            disabled
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50 outline-none"
+                                        />
+                                    )}
                                     <input
                                         type="text"
                                         placeholder="NIP/NIPPPK/NUPTK"
@@ -432,3 +435,12 @@ export default function Index() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

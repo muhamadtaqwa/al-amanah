@@ -10,7 +10,6 @@ import {
     PieChart,
     Pie,
     Cell,
-    Legend,
 } from "recharts";
 
 export default function Index() {
@@ -58,8 +57,8 @@ export default function Index() {
                     Rekap Pembayaran
                 </h2>
 
-                {/* Ringkasan - 3 baris */}
-                <div className="space-y-2 mb-6">
+                {/* Ringkasan */}
+                <div className="space-y-2 mb-4">
                     <div className="rounded-2xl bg-white p-4 shadow-sm flex justify-between items-center">
                         <span className="text-sm text-slate-500">
                             Total Semua
@@ -84,9 +83,28 @@ export default function Index() {
                     </div>
                 </div>
 
+                {/* Menu Pilih Jenis Rekap */}
+                <p className="text-sm font-bold text-slate-400 uppercase mb-3">
+                    Pilih jenis rekap
+                </p>
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                    {menu.map((m) => (
+                        <Link
+                            key={m.path}
+                            href={m.path}
+                            className={`${m.bg} rounded-2xl p-3 text-center active:scale-[0.98] transition-all hover:shadow-md`}
+                        >
+                            <span
+                                className={`font-semibold text-[11px] ${m.text}`}
+                            >
+                                {m.label}
+                            </span>
+                        </Link>
+                    ))}
+                </div>
+
                 {/* Grafik */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    {/* Bar Chart */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl">
                         <h3 className="text-sm font-bold text-slate-700 mb-2">
                             Total per Jenis
@@ -117,7 +135,6 @@ export default function Index() {
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
-                        {/* Legend */}
                         <div className="flex justify-center gap-4 mt-2">
                             {rekap.map((item, index) => (
                                 <div
@@ -136,7 +153,6 @@ export default function Index() {
                         </div>
                     </div>
 
-                    {/* Donut Chart */}
                     <div className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl">
                         <h3 className="text-sm font-bold text-slate-700 mb-2">
                             Lunas vs Belum
@@ -164,7 +180,6 @@ export default function Index() {
                                 />
                             </PieChart>
                         </ResponsiveContainer>
-                        {/* Legend */}
                         <div className="flex justify-center gap-4 mt-2">
                             <div className="flex items-center gap-1.5">
                                 <div
@@ -186,26 +201,6 @@ export default function Index() {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Menu 4 Kolom */}
-                <p className="text-sm font-bold text-slate-400 uppercase mb-3">
-                    Pilih jenis rekap
-                </p>
-                <div className="grid grid-cols-4 gap-2">
-                    {menu.map((m) => (
-                        <Link
-                            key={m.path}
-                            href={m.path}
-                            className={`${m.bg} rounded-2xl p-3 text-center active:scale-[0.98] transition-all hover:shadow-md`}
-                        >
-                            <span
-                                className={`font-semibold text-[11px] ${m.text}`}
-                            >
-                                {m.label}
-                            </span>
-                        </Link>
-                    ))}
                 </div>
             </div>
         </AppLayout>

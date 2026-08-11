@@ -14,11 +14,9 @@ export default function Index() {
     const handleUpload = (id) => {
         const file = fileRef.current?.files[0];
         if (!file) return toast.error("Pilih file dulu");
-
         setUploadingId(id);
         const formData = new FormData();
         formData.append("bukti", file);
-
         router.post(`/pembayaran/${id}/upload-bukti`, formData, {
             onSuccess: () => {
                 setShowUpload(null);
@@ -52,7 +50,7 @@ export default function Index() {
                     Tagihan
                 </h2>
 
-                <div className="space-y-2 mb-6">
+                <div className="space-y-2 mb-4">
                     <div className="rounded-2xl bg-white p-4 shadow-sm flex justify-between items-center">
                         <span className="text-sm text-slate-500">
                             Total Semua
@@ -84,14 +82,16 @@ export default function Index() {
                 </div>
 
                 {rekening && (
-                    <div className="rounded-[30px] border border-sky-100 bg-white p-6 shadow-2xl mb-4">
-                        <h4 className="text-sm font-semibold mb-2">
+                    <div className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl mb-4">
+                        <h4 className="text-xs font-semibold text-slate-500 mb-2">
                             Rekening Yayasan
                         </h4>
-                        <p className="text-sm text-slate-600">
-                            {rekening.bank} - {rekening.nomor_rekening} a.n{" "}
-                            {rekening.atas_nama}
-                        </p>
+                        <Row label="Bank" value={rekening.bank} />
+                        <Row
+                            label="No. Rekening"
+                            value={rekening.nomor_rekening}
+                        />
+                        <Row label="Atas Nama" value={rekening.atas_nama} />
                     </div>
                 )}
 
@@ -100,7 +100,7 @@ export default function Index() {
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`py-2 rounded-full text-xs font-medium transition ${filter === f ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500 hover:border-[#20B5E8]"}`}
+                            className={`py-2 rounded-full text-xs font-medium transition ${filter === f ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500"}`}
                         >
                             {f === "semua"
                                 ? "Semua"
@@ -120,56 +120,61 @@ export default function Index() {
                     {filtered.map((t) => (
                         <div
                             key={t.id}
-                            className="rounded-[30px] border border-sky-100 bg-white p-6 shadow-2xl"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl"
                         >
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs bg-slate-100 px-3 py-1 rounded-full">
-                                    {t.jenis}
-                                </span>
-                                <span
-                                    className={`text-xs px-3 py-1 rounded-full font-medium ${t.status === "lunas" ? "bg-emerald-50 text-emerald-600" : t.status === "ditolak" ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-600"}`}
-                                >
-                                    {t.status === "lunas"
-                                        ? "Lunas"
-                                        : t.status === "ditolak"
-                                          ? "Ditolak"
-                                          : "Menunggu"}
-                                </span>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs bg-slate-100 px-2.5 py-1 rounded-full">
+                                        {t.jenis}
+                                    </span>
+                                    <span
+                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${t.status === "lunas" ? "bg-emerald-50 text-emerald-600" : t.status === "ditolak" ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-600"}`}
+                                    >
+                                        {t.status === "lunas"
+                                            ? "Lunas"
+                                            : t.status === "ditolak"
+                                              ? "Ditolak"
+                                              : "Menunggu"}
+                                    </span>
+                                </div>
+                                <p className="text-base font-bold font-mono tracking-tight">
+                                    Rp {parseInt(t.nominal).toLocaleString()}
+                                </p>
                             </div>
-                            <h3 className="font-semibold text-sm">
+                            <h3 className="font-semibold text-sm truncate mb-2">
                                 {t.nama_pembayaran}
                             </h3>
-                            <p className="text-xs text-slate-400 mt-1">
-                                {t.santri?.nama_lengkap} ({t.nis})
-                            </p>
-                            <p className="text-lg font-bold mt-2 font-mono tracking-tight">
-                                Rp {parseInt(t.nominal).toLocaleString()}
-                            </p>
-
+                            <div className="text-[11px] text-slate-500 space-y-0.5">
+                                <Row label="NIS" value={t.nis} />
+                                <Row
+                                    label="Santri"
+                                    value={t.santri?.nama_lengkap}
+                                />
+                                {t.total_dibayar > 0 && (
+                                    <>
+                                        <Row
+                                            label="Dibayar"
+                                            value={`Rp ${t.total_dibayar?.toLocaleString()}`}
+                                        />
+                                        <Row
+                                            label="Sisa"
+                                            value={`Rp ${t.sisa?.toLocaleString()}`}
+                                        />
+                                    </>
+                                )}
+                            </div>
                             {t.total_dibayar > 0 && (
-                                <div className="mt-3">
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-emerald-500 font-mono">
-                                            Dibayar: Rp{" "}
-                                            {t.total_dibayar?.toLocaleString()}
-                                        </span>
-                                        <span className="text-red-400 font-mono">
-                                            Sisa: Rp {t.sisa?.toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <div className="w-full bg-slate-200 rounded-full h-2">
-                                        <div
-                                            className="bg-emerald-500 h-2 rounded-full"
-                                            style={{
-                                                width: `${(t.total_dibayar / t.nominal) * 100}%`,
-                                            }}
-                                        ></div>
-                                    </div>
+                                <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2 mb-3">
+                                    <div
+                                        className="bg-emerald-500 h-1.5 rounded-full"
+                                        style={{
+                                            width: `${(t.total_dibayar / t.nominal) * 100}%`,
+                                        }}
+                                    ></div>
                                 </div>
                             )}
-
                             {t.status !== "lunas" && (
-                                <div className="mt-3 pt-3 border-t">
+                                <div className="pt-3 border-t">
                                     {t.bukti ? (
                                         <p className="text-xs text-[#3D7ABA] bg-[#3D7ABA]/5 px-3 py-2 rounded-2xl">
                                             ✅ Bukti diupload - Menunggu
@@ -179,7 +184,7 @@ export default function Index() {
                                         <>
                                             {showUpload === t.id ? (
                                                 <div>
-                                                    <label className="flex items-center justify-center gap-2 bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-4 cursor-pointer hover:border-[#20B5E8] transition mb-2">
+                                                    <label className="flex items-center justify-center gap-2 bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 cursor-pointer hover:border-[#20B5E8] transition mb-2">
                                                         {fileName ? (
                                                             <span className="text-xs text-emerald-600 font-medium">
                                                                 📄 {fileName}
@@ -245,7 +250,7 @@ export default function Index() {
                                                     onClick={() =>
                                                         setShowUpload(t.id)
                                                     }
-                                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg hover:scale-[1.02] transition"
+                                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg"
                                                 >
                                                     Upload Bukti TF
                                                 </button>
@@ -261,3 +266,12 @@ export default function Index() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between text-[11px]">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

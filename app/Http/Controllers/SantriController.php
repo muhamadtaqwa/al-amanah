@@ -21,13 +21,12 @@ class SantriController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nis' => 'required|unique:santris,nis',
+            'jenis_kelamin' => 'required|in:laki-laki,perempuan',
             'nisn' => 'nullable',
             'nik' => 'nullable',
             'nama_lengkap' => 'required',
             'tempat_lahir' => 'nullable',
             'tanggal_lahir' => 'nullable|date',
-            'jenis_kelamin' => 'nullable|in:laki-laki,perempuan',
             'alamat' => 'nullable',
             'desa' => 'nullable',
             'kecamatan' => 'nullable',
@@ -49,8 +48,18 @@ class SantriController extends Controller
             'password' => 'required|min:6',
         ]);
 
+        // Generate NIS
+        $prefix = $request->jenis_kelamin === 'laki-laki' ? 'PA' : 'PI';
+        $last = Santri::where('nis', 'like', $prefix . '%')->orderBy('nis', 'desc')->first();
+        if ($last) {
+            $num = (int) substr($last->nis, 2) + 1;
+        } else {
+            $num = 1;
+        }
+        $nis = $prefix . str_pad($num, 2, '0', STR_PAD_LEFT);
+
         $user = User::create([
-            'username' => $request->nis,
+            'username' => $nis,
             'password' => Hash::make($request->password),
             'role' => 'santri',
         ]);
@@ -58,7 +67,7 @@ class SantriController extends Controller
 
         Santri::create([
             'user_id' => $user->id,
-            'nis' => $request->nis,
+            'nis' => $nis,
             'nisn' => $request->nisn,
             'nik' => $request->nik,
             'nama_lengkap' => $request->nama_lengkap,

@@ -1,8 +1,35 @@
-import { usePage } from "@inertiajs/react";
+import { usePage, Link } from "@inertiajs/react";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function SPP() {
     const { rekap, totalSemua, totalLunas, totalBelum } = usePage().props;
+
+    const menu = [
+        {
+            label: "Santri",
+            path: "/rekap/santri",
+            bg: "bg-[#3D7ABA]/10",
+            text: "text-[#3D7ABA]",
+        },
+        {
+            label: "SPP",
+            path: "/rekap/spp",
+            bg: "bg-[#20B5E8]/10",
+            text: "text-[#20B5E8]",
+        },
+        {
+            label: "Kitab",
+            path: "/rekap/kitab",
+            bg: "bg-orange-50",
+            text: "text-orange-600",
+        },
+        {
+            label: "Kas",
+            path: "/rekap/kas",
+            bg: "bg-pink-50",
+            text: "text-pink-600",
+        },
+    ];
 
     const sorted = [...rekap].sort((a, b) => a.nis.localeCompare(b.nis));
 
@@ -13,8 +40,7 @@ export default function SPP() {
                     Rekap SPP
                 </h2>
 
-                {/* Ringkasan - 3 baris */}
-                <div className="space-y-2 mb-6">
+                <div className="space-y-2 mb-4">
                     <div className="rounded-2xl bg-white p-4 shadow-sm flex justify-between items-center">
                         <span className="text-sm text-slate-500">
                             Total Semua
@@ -39,8 +65,26 @@ export default function SPP() {
                     </div>
                 </div>
 
-                {/* List Santri */}
-                <div className="space-y-2">
+                <p className="text-sm font-bold text-slate-400 uppercase mb-3">
+                    Pilih jenis rekap
+                </p>
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                    {menu.map((m) => (
+                        <Link
+                            key={m.path}
+                            href={m.path}
+                            className={`${m.bg} rounded-2xl p-3 text-center active:scale-[0.98] transition-all hover:shadow-md`}
+                        >
+                            <span
+                                className={`font-semibold text-[11px] ${m.text}`}
+                            >
+                                {m.label}
+                            </span>
+                        </Link>
+                    ))}
+                </div>
+
+                <div className="space-y-3">
                     {sorted.length === 0 && (
                         <p className="text-center text-slate-400 py-10">
                             Tidak ada data SPP
@@ -49,7 +93,7 @@ export default function SPP() {
                     {sorted.map((s) => (
                         <div
                             key={s.nis}
-                            className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl"
                         >
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
@@ -73,39 +117,19 @@ export default function SPP() {
                                         : `${s.total_belum} belum`}
                                 </span>
                             </div>
-                            {/* 3 baris */}
-                            <div className="space-y-1 text-xs">
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">
-                                        Total
-                                    </span>
-                                    <span className="font-semibold font-mono">
-                                        Rp{" "}
-                                        {parseInt(
-                                            s.total_nominal,
-                                        ).toLocaleString()}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-emerald-500">
-                                        Lunas
-                                    </span>
-                                    <span className="font-semibold text-emerald-600 font-mono">
-                                        Rp{" "}
-                                        {parseInt(
-                                            s.nominal_lunas,
-                                        ).toLocaleString()}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-red-400">Belum</span>
-                                    <span className="font-semibold text-red-500 font-mono">
-                                        Rp{" "}
-                                        {parseInt(
-                                            s.nominal_belum,
-                                        ).toLocaleString()}
-                                    </span>
-                                </div>
+                            <div className="text-[11px] text-slate-500 space-y-0.5">
+                                <Row
+                                    label="Total"
+                                    value={`Rp ${parseInt(s.total_nominal).toLocaleString()}`}
+                                />
+                                <Row
+                                    label="Lunas"
+                                    value={`Rp ${parseInt(s.nominal_lunas).toLocaleString()}`}
+                                />
+                                <Row
+                                    label="Belum"
+                                    value={`Rp ${parseInt(s.nominal_belum).toLocaleString()}`}
+                                />
                             </div>
                         </div>
                     ))}
@@ -114,3 +138,12 @@ export default function SPP() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

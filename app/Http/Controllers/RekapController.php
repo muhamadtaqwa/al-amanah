@@ -13,6 +13,7 @@ class RekapController extends Controller
     {
         $rekap = Pembayaran::all()->groupBy('jenis')->map(function ($items) {
             $total = $items->sum('nominal');
+            $dibayar = $items->sum('total_dibayar');
             $lunas = $items->filter(fn($i) => $i->status === 'lunas');
             return [
                 'jenis' => $items->first()->jenis,
@@ -20,8 +21,8 @@ class RekapController extends Controller
                 'total_lunas' => $lunas->count(),
                 'total_belum' => $items->count() - $lunas->count(),
                 'total_nominal' => $total,
-                'nominal_lunas' => $lunas->sum('nominal'),
-                'nominal_belum' => $total - $lunas->sum('nominal'),
+                'nominal_lunas' => $dibayar,
+                'nominal_belum' => $total - $dibayar,
             ];
         })->values();
 
@@ -44,12 +45,13 @@ class RekapController extends Controller
         $santri = Santri::where('nis', $nis)->first();
         $rekap = Pembayaran::where('nis', $nis)->get()->groupBy('jenis')->map(function ($items) {
             $total = $items->sum('nominal');
+            $dibayar = $items->sum('total_dibayar');
             $lunas = $items->filter(fn($i) => $i->status === 'lunas');
             return [
                 'jenis' => $items->first()->jenis,
                 'total_nominal' => $total,
-                'nominal_lunas' => $lunas->sum('nominal'),
-                'nominal_belum' => $total - $lunas->sum('nominal'),
+                'nominal_lunas' => $dibayar,
+                'nominal_belum' => $total - $dibayar,
                 'total_belum' => $items->count() - $lunas->count(),
             ];
         })->values();
@@ -64,6 +66,7 @@ class RekapController extends Controller
             ->map(function ($items) {
                 $santri = Santri::where('nis', $items->first()->nis)->first();
                 $total = $items->sum('nominal');
+                $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
                 return [
                     'nis' => $items->first()->nis,
@@ -72,8 +75,8 @@ class RekapController extends Controller
                     'total_lunas' => $lunas->count(),
                     'total_belum' => $items->count() - $lunas->count(),
                     'total_nominal' => $total,
-                    'nominal_lunas' => $lunas->sum('nominal'),
-                    'nominal_belum' => $total - $lunas->sum('nominal'),
+                    'nominal_lunas' => $dibayar,
+                    'nominal_belum' => $total - $dibayar,
                 ];
             })->sortBy('nis')->values();
 
@@ -92,6 +95,7 @@ class RekapController extends Controller
             ->map(function ($items) {
                 $santri = Santri::where('nis', $items->first()->nis)->first();
                 $total = $items->sum('nominal');
+                $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
                 return [
                     'nis' => $items->first()->nis,
@@ -100,8 +104,8 @@ class RekapController extends Controller
                     'total_lunas' => $lunas->count(),
                     'total_belum' => $items->count() - $lunas->count(),
                     'total_nominal' => $total,
-                    'nominal_lunas' => $lunas->sum('nominal'),
-                    'nominal_belum' => $total - $lunas->sum('nominal'),
+                    'nominal_lunas' => $dibayar,
+                    'nominal_belum' => $total - $dibayar,
                 ];
             })->sortBy('nis')->values();
 
@@ -120,9 +124,9 @@ class RekapController extends Controller
             ->map(function ($items) {
                 $santri = Santri::where('nis', $items->first()->nis)->first();
                 $total = $items->sum('nominal');
+                $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
 
-                // Detail per bulan
                 $perBulan = $items->map(function ($item) {
                     return [
                         'id' => $item->id,
@@ -140,8 +144,8 @@ class RekapController extends Controller
                     'total_lunas' => $lunas->count(),
                     'total_belum' => $items->count() - $lunas->count(),
                     'total_nominal' => $total,
-                    'nominal_lunas' => $lunas->sum('nominal'),
-                    'nominal_belum' => $total - $lunas->sum('nominal'),
+                    'nominal_lunas' => $dibayar,
+                    'nominal_belum' => $total - $dibayar,
                     'per_bulan' => $perBulan,
                 ];
             })->sortBy('nis')->values();

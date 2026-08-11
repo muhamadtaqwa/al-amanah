@@ -24,6 +24,7 @@ export default function Index() {
     const [deletingKategoriId, setDeletingKategoriId] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [deleteKategoriTarget, setDeleteKategoriTarget] = useState(null);
+    const [statusFilter, setStatusFilter] = useState(filters.status || "semua");
     const firstFieldRef = useRef(null);
 
     const { data, setData, post, put, reset, processing, errors, clearErrors } =
@@ -41,6 +42,7 @@ export default function Index() {
         nominal: "",
         bulan: "",
         tahun: "",
+        kecualikan: "",
     });
 
     useEffect(() => {
@@ -120,7 +122,7 @@ export default function Index() {
             return;
         }
         if (typeof p.sisa === "number" && value > p.sisa) {
-            setCicilanError(`Nominal melebihi sisa tagihan.`);
+            setCicilanError("Nominal melebihi sisa tagihan.");
             return;
         }
         setCicilanError("");
@@ -220,16 +222,18 @@ export default function Index() {
                 ? "Dicicil"
                 : "Menunggu";
 
-    const filtered = pembayaran.filter(
-        (p) =>
-            p.nama_pembayaran
-                ?.toLowerCase()
-                .includes(debouncedSearch.toLowerCase()) ||
-            p.nis?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-            p.santri?.nama_lengkap
-                ?.toLowerCase()
-                .includes(debouncedSearch.toLowerCase()),
-    );
+    const filtered = pembayaran
+        .filter((p) => statusFilter === "semua" || p.status === statusFilter)
+        .filter(
+            (p) =>
+                p.nama_pembayaran
+                    ?.toLowerCase()
+                    .includes(debouncedSearch.toLowerCase()) ||
+                p.nis?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                p.santri?.nama_lengkap
+                    ?.toLowerCase()
+                    .includes(debouncedSearch.toLowerCase()),
+        );
 
     return (
         <AppLayout>
@@ -273,16 +277,34 @@ export default function Index() {
                     />
                 </div>
 
-                <div className="flex gap-2 mb-4 overflow-x-auto">
+                {/* Filter Jenis */}
+                <div className="flex gap-2 mb-2">
                     {[{ nama: "semua" }, ...jenisPembayaran].map((j) => (
                         <Link
                             key={j.nama}
                             href={`/pembayaran?jenis=${j.nama === "semua" ? "" : j.nama}`}
                             preserveScroll
-                            className={`px-4 py-1.5 rounded-full text-xs whitespace-nowrap ${filters.jenis === j.nama || (!filters.jenis && j.nama === "semua") ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white" : "bg-white border text-slate-500"}`}
+                            className={`flex-1 py-1.5 rounded-full text-xs text-center ${filters.jenis === j.nama || (!filters.jenis && j.nama === "semua") ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white" : "bg-white border text-slate-500"}`}
                         >
                             {j.nama === "semua" ? "Semua" : j.nama}
                         </Link>
+                    ))}
+                </div>
+
+                {/* Filter Status */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                    {["semua", "menunggu", "lunas"].map((f) => (
+                        <button
+                            key={f}
+                            onClick={() => setStatusFilter(f)}
+                            className={`py-1.5 rounded-full text-xs font-medium transition ${statusFilter === f ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border text-slate-500"}`}
+                        >
+                            {f === "semua"
+                                ? "Semua"
+                                : f === "menunggu"
+                                  ? "Belum"
+                                  : "Lunas"}
+                        </button>
                     ))}
                 </div>
 
@@ -293,7 +315,7 @@ export default function Index() {
                             className="absolute inset-0 bg-black/50"
                             onClick={() => setShowKategori(false)}
                         ></div>
-                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-8 border border-sky-100">
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-6 border border-sky-100">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-lg">
                                     Kategori Tagihan
@@ -353,12 +375,12 @@ export default function Index() {
                                     type="text"
                                     name="nama"
                                     placeholder="Nama kategori baru..."
-                                    className="flex-1 border border-slate-200 rounded-2xl px-5 py-3 text-sm"
+                                    className="flex-1 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <button
                                     type="submit"
-                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-5 py-3 rounded-2xl text-sm font-semibold"
+                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-5 py-2.5 rounded-2xl text-sm font-semibold"
                                 >
                                     Tambah
                                 </button>
@@ -374,7 +396,7 @@ export default function Index() {
                             className="absolute inset-0 bg-black/50"
                             onClick={() => setShowGenerate(false)}
                         ></div>
-                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-8 border border-sky-100">
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-6 border border-sky-100">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-lg">
                                     Generate Tagihan
@@ -398,7 +420,7 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm bg-white"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
                                 >
                                     {jenisPembayaran?.map((j) => (
                                         <option key={j.id} value={j.nama}>
@@ -416,7 +438,7 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <input
@@ -429,7 +451,7 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <input
@@ -442,7 +464,7 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                 />
                                 <input
                                     type="text"
@@ -454,20 +476,32 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Kecualikan NIS (pisah koma)"
+                                    value={generateForm.data.kecualikan}
+                                    onChange={(e) =>
+                                        generateForm.setData(
+                                            "kecualikan",
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                 />
                                 <div className="flex gap-2 pt-2">
                                     <button
                                         type="button"
                                         onClick={() => setShowGenerate(false)}
-                                        className="flex-1 border py-3 rounded-2xl text-sm"
+                                        className="flex-1 border py-2.5 rounded-2xl text-sm"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={generateForm.processing}
-                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-3 rounded-2xl text-sm font-semibold"
+                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold"
                                     >
                                         Generate
                                     </button>
@@ -478,9 +512,9 @@ export default function Index() {
                 )}
 
                 {/* Card List */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-3">
                     {filtered.length === 0 && (
-                        <p className="text-center text-slate-400 py-10 sm:col-span-2">
+                        <p className="text-center text-slate-400 py-10">
                             Tidak ada data
                         </p>
                     )}
@@ -497,64 +531,89 @@ export default function Index() {
                         return (
                             <div
                                 key={p.id}
-                                className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl"
+                                className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl"
                             >
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">
-                                        {p.jenis}
-                                    </span>
-                                    <span
-                                        className={`text-xs px-2 py-0.5 rounded-full ${statusColor(p.status)}`}
-                                    >
-                                        {statusLabel(p.status)}
-                                    </span>
-                                    {p.bukti && (
-                                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
-                                            Ada Bukti
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs bg-slate-100 px-2.5 py-1 rounded-full font-medium">
+                                            {p.jenis}
                                         </span>
+                                        <span
+                                            className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusColor(p.status)}`}
+                                        >
+                                            {statusLabel(p.status)}
+                                        </span>
+                                        {p.bukti && (
+                                            <span className="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full">
+                                                Bukti
+                                            </span>
+                                        )}
+                                    </div>
+                                    {isAdmin && (
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => openEdit(p)}
+                                                className="bg-slate-100 px-2.5 py-1 rounded-lg text-xs hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    confirmDeletePembayaran(
+                                                        p.id,
+                                                        p.nama_pembayaran,
+                                                    )
+                                                }
+                                                className="bg-red-50 text-red-500 px-2.5 py-1 rounded-lg text-xs hover:bg-red-100 transition"
+                                            >
+                                                Hapus
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
-                                <h3 className="font-semibold text-sm">
+                                <h3 className="font-semibold text-sm truncate mb-2">
                                     {p.nama_pembayaran}
                                 </h3>
-                                <p className="text-xs text-slate-400">
-                                    NIS: {p.nis} • {p.santri?.nama_lengkap}
-                                </p>
-                                <p className="text-lg font-bold mt-1 font-mono tracking-tight">
-                                    Rp {nominal.toLocaleString()}
-                                </p>
+                                <div className="text-[11px] text-slate-500 space-y-0.5 mb-2">
+                                    <Row label="NIS" value={p.nis} />
+                                    <Row
+                                        label="Santri"
+                                        value={p.santri?.nama_lengkap}
+                                    />
+                                    <Row
+                                        label="Nominal"
+                                        value={`Rp ${nominal.toLocaleString()}`}
+                                    />
+                                    {dibayar > 0 && (
+                                        <>
+                                            <Row
+                                                label="Dibayar"
+                                                value={`Rp ${dibayar.toLocaleString()}`}
+                                            />
+                                            <Row
+                                                label="Sisa"
+                                                value={`Rp ${Math.max(0, nominal - dibayar).toLocaleString()}`}
+                                            />
+                                        </>
+                                    )}
+                                </div>
                                 {dibayar > 0 && (
-                                    <div className="mt-2">
-                                        <div className="flex justify-between text-xs mb-1">
-                                            <span className="text-emerald-500 font-mono">
-                                                Dibayar: Rp{" "}
-                                                {dibayar.toLocaleString()}
-                                            </span>
-                                            <span className="text-red-400 font-mono">
-                                                Sisa: Rp{" "}
-                                                {Math.max(
-                                                    0,
-                                                    nominal - dibayar,
-                                                ).toLocaleString()}
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-slate-200 rounded-full h-2">
-                                            <div
-                                                className="bg-emerald-500 h-2 rounded-full"
-                                                style={{ width: `${percent}%` }}
-                                            ></div>
-                                        </div>
+                                    <div className="w-full bg-slate-200 rounded-full h-1.5 mb-3">
+                                        <div
+                                            className="bg-emerald-500 h-1.5 rounded-full"
+                                            style={{ width: `${percent}%` }}
+                                        ></div>
                                     </div>
                                 )}
                                 {isAdmin && (
-                                    <div className="flex items-center gap-2 mt-3 pt-3 border-t flex-wrap">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
                                         {p.status !== "lunas" && (
                                             <>
                                                 <button
                                                     onClick={() =>
                                                         openCicilan(p.id)
                                                     }
-                                                    className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg"
+                                                    className="text-[10px] bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg"
                                                 >
                                                     Cicilan
                                                 </button>
@@ -563,7 +622,7 @@ export default function Index() {
                                                         handleLunasi(p)
                                                     }
                                                     disabled={lunasiSubmitting}
-                                                    className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg"
+                                                    className="text-[10px] bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg"
                                                 >
                                                     {lunasiSubmitting
                                                         ? "..."
@@ -581,7 +640,7 @@ export default function Index() {
                                                                 "lunas",
                                                             )
                                                         }
-                                                        className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg"
+                                                        className="text-[10px] bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg"
                                                     >
                                                         Terima
                                                     </button>
@@ -592,29 +651,12 @@ export default function Index() {
                                                                 "ditolak",
                                                             )
                                                         }
-                                                        className="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg"
+                                                        className="text-[10px] bg-red-100 text-red-700 px-2.5 py-1 rounded-lg"
                                                     >
                                                         Tolak
                                                     </button>
                                                 </>
                                             )}
-                                        <button
-                                            onClick={() => openEdit(p)}
-                                            className="text-xs bg-slate-100 px-3 py-1.5 rounded-lg"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                confirmDeletePembayaran(
-                                                    p.id,
-                                                    p.nama_pembayaran,
-                                                )
-                                            }
-                                            className="text-xs bg-red-50 text-red-500 px-3 py-1.5 rounded-lg"
-                                        >
-                                            Hapus
-                                        </button>
                                     </div>
                                 )}
                                 {showCicilan === p.id && isAdmin && (
@@ -629,7 +671,7 @@ export default function Index() {
                                                 );
                                                 setCicilanError("");
                                             }}
-                                            className="flex-1 border rounded-2xl px-5 py-3 text-sm"
+                                            className="flex-1 border rounded-2xl px-4 py-2 text-sm"
                                         />
                                         <button
                                             onClick={() => handleCicilan(p)}
@@ -658,7 +700,7 @@ export default function Index() {
                             className="absolute inset-0 bg-black/50"
                             onClick={closeModal}
                         ></div>
-                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-8 border border-sky-100">
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-6 border border-sky-100">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-lg">
                                     {editData ? "Edit" : "Tambah"} Pembayaran
@@ -679,7 +721,7 @@ export default function Index() {
                                         setData("nis", e.target.value)
                                     }
                                     disabled={!!editData}
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <select
@@ -687,7 +729,7 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("jenis", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm bg-white"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm bg-white"
                                 >
                                     {jenisPembayaran?.map((j) => (
                                         <option key={j.id} value={j.nama}>
@@ -705,7 +747,7 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <input
@@ -715,7 +757,7 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("nominal", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <input
@@ -727,20 +769,20 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border rounded-2xl px-5 py-3 text-sm"
+                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
                                 />
                                 <div className="flex gap-2 pt-2">
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className="flex-1 border py-3 rounded-2xl text-sm"
+                                        className="flex-1 border py-2.5 rounded-2xl text-sm"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-3 rounded-2xl text-sm font-semibold"
+                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold"
                                     >
                                         {editData ? "Update" : "Simpan"}
                                     </button>
@@ -757,7 +799,7 @@ export default function Index() {
                             className="absolute inset-0 bg-black/50"
                             onClick={() => setDeleteTarget(null)}
                         ></div>
-                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-8 border border-sky-100 text-center">
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-6 border border-sky-100 text-center">
                             <h3 className="font-semibold text-lg">
                                 Hapus Pembayaran?
                             </h3>
@@ -786,3 +828,12 @@ export default function Index() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

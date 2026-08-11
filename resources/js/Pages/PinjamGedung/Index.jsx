@@ -112,52 +112,52 @@ export default function Index() {
                     {filtered.map((p) => (
                         <div
                             key={p.id}
-                            className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl hover:shadow-xl transition-shadow"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl hover:shadow-xl transition-shadow"
                         >
-                            <div className="flex justify-between items-start">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                        <span
-                                            className={`text-xs px-2.5 py-1 rounded-full font-medium ${p.status === "aktif" ? "bg-emerald-50 text-emerald-600" : p.status === "selesai" ? "bg-[#3D7ABA]/10 text-[#3D7ABA]" : "bg-red-50 text-red-500"}`}
-                                        >
-                                            {p.status.charAt(0).toUpperCase() +
-                                                p.status.slice(1)}
-                                        </span>
-                                    </div>
-                                    <h3 className="font-semibold text-sm truncate">
-                                        {p.nama_peminjam}
-                                    </h3>
-                                    <p className="text-xs text-slate-400 mt-0.5">
-                                        {p.gedung}
-                                    </p>
-                                    <div className="mt-2 text-[11px] text-slate-500 space-y-0.5">
-                                        <p>
-                                            {formatTgl(p.tanggal_mulai)}
-                                            {p.tanggal_selesai &&
-                                                ` - ${formatTgl(p.tanggal_selesai)}`}
-                                        </p>
-                                        <p>
-                                            {p.jam_mulai?.slice(0, 5)} -{" "}
-                                            {p.jam_selesai?.slice(0, 5)}
-                                        </p>
-                                        {p.keperluan && <p>{p.keperluan}</p>}
-                                    </div>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${p.status === "aktif" ? "bg-emerald-50 text-emerald-600" : p.status === "selesai" ? "bg-[#3D7ABA]/10 text-[#3D7ABA]" : "bg-red-50 text-red-500"}`}
+                                    >
+                                        {p.status.charAt(0).toUpperCase() +
+                                            p.status.slice(1)}
+                                    </span>
                                 </div>
                                 {isAdmin && (
-                                    <div className="flex flex-col gap-1 ml-2 shrink-0">
+                                    <div className="flex gap-1">
                                         <button
                                             onClick={() => openEdit(p)}
-                                            className="bg-slate-100 px-3 py-1.5 rounded-xl text-[11px] hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
+                                            className="bg-slate-100 px-2.5 py-1 rounded-lg text-xs hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => handleDelete(p.id)}
-                                            className="bg-red-50 text-red-500 px-3 py-1.5 rounded-xl text-[11px] hover:bg-red-100 transition"
+                                            className="bg-red-50 text-red-500 px-2.5 py-1 rounded-lg text-xs hover:bg-red-100 transition"
                                         >
                                             Hapus
                                         </button>
                                     </div>
+                                )}
+                            </div>
+                            <h3 className="font-semibold text-sm truncate mb-2">
+                                {p.nama_peminjam}
+                            </h3>
+                            <div className="text-[11px] text-slate-500 space-y-0.5">
+                                <Row label="Gedung" value={p.gedung} />
+                                <Row
+                                    label="Tanggal"
+                                    value={`${formatTgl(p.tanggal_mulai)}${p.tanggal_selesai ? ` - ${formatTgl(p.tanggal_selesai)}` : ""}`}
+                                />
+                                <Row
+                                    label="Waktu"
+                                    value={`${p.jam_mulai?.slice(0, 5)} - ${p.jam_selesai?.slice(0, 5)}`}
+                                />
+                                {p.keperluan && (
+                                    <Row
+                                        label="Keperluan"
+                                        value={p.keperluan}
+                                    />
                                 )}
                             </div>
                         </div>
@@ -294,3 +294,12 @@ export default function Index() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

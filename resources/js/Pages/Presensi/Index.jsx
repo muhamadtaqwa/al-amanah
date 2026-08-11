@@ -92,41 +92,17 @@ export default function Index() {
                     {jadwal.map((item) => (
                         <div
                             key={item.niu}
-                            className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl"
                         >
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="font-semibold text-sm">
-                                        {item.nama}
-                                    </p>
-                                    <p className="text-xs text-slate-400 mt-0.5 space-y-0.5">
-                                        {item.kitab && (
-                                            <span className="block">
-                                                Kitab:{" "}
-                                                <span className="font-medium text-slate-600">
-                                                    {item.kitab}
-                                                </span>
-                                            </span>
-                                        )}
-                                        <span className="block">
-                                            Bisyaroh:{" "}
-                                            <span className="font-mono font-medium text-slate-600">
-                                                Rp{" "}
-                                                {item.honor_default?.toLocaleString()}
-                                            </span>
-                                        </span>
-                                        {item.sesi && (
-                                            <span className="block text-slate-400">
-                                                Sesi: {item.sesi}
-                                            </span>
-                                        )}
-                                    </p>
-                                </div>
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="font-semibold text-sm">
+                                    {item.nama}
+                                </h3>
                                 {isAdmin &&
                                     (item.sudah_absen ? (
                                         <div className="flex items-center gap-2">
                                             <span
-                                                className={`text-xs px-3 py-1.5 rounded-full font-medium ${item.status === "hadir" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                                className={`text-xs px-2.5 py-1 rounded-full font-medium ${item.status === "hadir" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
                                             >
                                                 {item.status === "hadir"
                                                     ? "Hadir"
@@ -144,7 +120,7 @@ export default function Index() {
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-1">
                                             <button
                                                 onClick={() =>
                                                     handleSimpan(
@@ -153,7 +129,7 @@ export default function Index() {
                                                         item.honor_default,
                                                     )
                                                 }
-                                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg"
+                                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg"
                                             >
                                                 Hadir
                                             </button>
@@ -165,7 +141,7 @@ export default function Index() {
                                                         item.honor_default,
                                                     )
                                                 }
-                                                className="bg-red-100 text-red-600 px-4 py-2 rounded-2xl text-xs font-semibold"
+                                                className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs font-semibold"
                                             >
                                                 Tidak
                                             </button>
@@ -173,12 +149,24 @@ export default function Index() {
                                     ))}
                                 {!isAdmin && item.sudah_absen && (
                                     <span
-                                        className={`text-xs px-3 py-1.5 rounded-full font-medium ${item.status === "hadir" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${item.status === "hadir" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
                                     >
                                         {item.status === "hadir"
                                             ? "Hadir"
                                             : "Tidak Hadir"}
                                     </span>
+                                )}
+                            </div>
+                            <div className="text-[11px] text-slate-500 space-y-0.5">
+                                {item.kitab && (
+                                    <Row label="Kitab" value={item.kitab} />
+                                )}
+                                <Row
+                                    label="Bisyaroh"
+                                    value={`Rp ${item.honor_default?.toLocaleString()}`}
+                                />
+                                {item.sesi && (
+                                    <Row label="Sesi" value={item.sesi} />
                                 )}
                             </div>
                         </div>
@@ -196,23 +184,38 @@ export default function Index() {
                             {rekap.map((r) => (
                                 <div
                                     key={r.niu}
-                                    className="rounded-2xl border border-sky-100 bg-white p-4 flex items-center justify-between text-sm"
+                                    className="rounded-2xl border border-sky-100 bg-white p-4 text-sm"
                                 >
-                                    <div>
-                                        <p className="font-medium">
-                                            {r.ustad?.nama_lengkap || r.niu}
-                                        </p>
-                                        <p className="text-xs text-slate-400">
-                                            Hadir: {r.total_hadir} • Tidak:{" "}
-                                            {r.total_tidak_hadir}
-                                        </p>
+                                    <h4 className="font-semibold text-slate-700 mb-2">
+                                        {r.ustad?.nama_lengkap || r.niu}
+                                    </h4>
+                                    <div className="flex justify-between mb-1">
+                                        <span className="text-slate-500">
+                                            Hadir
+                                        </span>
+                                        <span className="font-medium text-slate-700">
+                                            {r.total_hadir}
+                                        </span>
                                     </div>
-                                    <p className="font-bold text-[#3D7ABA] font-mono">
-                                        Rp{" "}
-                                        {parseInt(
-                                            r.total_honor || 0,
-                                        ).toLocaleString()}
-                                    </p>
+                                    <div className="flex justify-between mb-1">
+                                        <span className="text-slate-500">
+                                            Tidak
+                                        </span>
+                                        <span className="font-medium text-slate-700">
+                                            {r.total_tidak_hadir}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">
+                                            Honor
+                                        </span>
+                                        <span className="font-bold text-[#3D7ABA] font-mono">
+                                            Rp{" "}
+                                            {parseInt(
+                                                r.total_honor || 0,
+                                            ).toLocaleString()}
+                                        </span>
+                                    </div>
                                 </div>
                             ))}
                             <div className="rounded-2xl bg-gradient-to-r from-[#3D7ABA]/10 to-[#20B5E8]/10 p-4 flex items-center justify-between text-sm font-bold">
@@ -230,3 +233,12 @@ export default function Index() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

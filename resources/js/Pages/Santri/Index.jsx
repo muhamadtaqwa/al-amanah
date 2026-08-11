@@ -108,13 +108,12 @@ export default function Index() {
     ];
 
     const { data, setData, post, put, reset, processing } = useForm({
-        nis: "",
+        jenis_kelamin: "",
         nisn: "",
         nik: "",
         nama_lengkap: "",
         tempat_lahir: "",
         tanggal_lahir: "",
-        jenis_kelamin: "",
         alamat: "",
         desa: "",
         kecamatan: "",
@@ -144,13 +143,12 @@ export default function Index() {
     const openEdit = (santri) => {
         setEditData(santri);
         setData({
-            nis: santri.nis,
+            jenis_kelamin: santri.jenis_kelamin || "",
             nisn: santri.nisn || "",
             nik: santri.nik || "",
             nama_lengkap: santri.nama_lengkap,
             tempat_lahir: santri.tempat_lahir || "",
             tanggal_lahir: santri.tanggal_lahir || "",
-            jenis_kelamin: santri.jenis_kelamin || "",
             alamat: santri.alamat || "",
             desa: santri.desa || "",
             kecamatan: santri.kecamatan || "",
@@ -255,77 +253,27 @@ export default function Index() {
                     {filtered.map((santri) => (
                         <div
                             key={santri.id}
-                            className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl hover:shadow-xl transition-shadow"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl hover:shadow-xl transition-shadow"
                         >
-                            <div className="flex justify-between items-start">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                        <span className="text-xs bg-[#3D7ABA]/10 text-[#3D7ABA] px-2.5 py-1 rounded-full font-medium">
-                                            {santri.nis}
-                                        </span>
-                                        <span
-                                            className={`text-xs px-2.5 py-1 rounded-full font-medium ${santri.status === "aktif" ? "bg-emerald-50 text-emerald-600" : santri.status === "lulus" ? "bg-[#20B5E8]/10 text-[#20B5E8]" : "bg-red-50 text-red-500"}`}
-                                        >
-                                            {santri.status
-                                                ?.charAt(0)
-                                                .toUpperCase() +
-                                                santri.status?.slice(1)}
-                                        </span>
-                                    </div>
-                                    <h3 className="font-semibold text-sm truncate">
-                                        {santri.nama_lengkap}
-                                    </h3>
-                                    <div className="mt-2 text-[11px] text-slate-500 space-y-0.5">
-                                        {santri.nisn && (
-                                            <p>NISN: {santri.nisn}</p>
-                                        )}
-                                        {santri.nik && <p>NIK: {santri.nik}</p>}
-                                        {(santri.tempat_lahir ||
-                                            santri.tanggal_lahir) && (
-                                            <p>
-                                                {santri.tempat_lahir}
-                                                {santri.tempat_lahir &&
-                                                    santri.tanggal_lahir &&
-                                                    ", "}
-                                                {formatTgl(
-                                                    santri.tanggal_lahir,
-                                                )}
-                                            </p>
-                                        )}
-                                        {santri.jenis_kelamin && (
-                                            <p>
-                                                {santri.jenis_kelamin ===
-                                                "laki-laki"
-                                                    ? "Laki-laki"
-                                                    : "Perempuan"}
-                                            </p>
-                                        )}
-                                        {santri.program_studi && (
-                                            <p>
-                                                {santri.program_studi}
-                                                {santri.angkatan &&
-                                                    ` • Angkatan ${santri.angkatan}`}
-                                            </p>
-                                        )}
-                                        {santri.tahun_masuk && (
-                                            <p>
-                                                Tahun Masuk:{" "}
-                                                {santri.tahun_masuk}
-                                            </p>
-                                        )}
-                                        {santri.kamar && (
-                                            <p>Kamar: {santri.kamar}</p>
-                                        )}
-                                        {santri.nomor_hp && (
-                                            <p>{santri.nomor_hp}</p>
-                                        )}
-                                    </div>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs bg-[#3D7ABA]/10 text-[#3D7ABA] px-2.5 py-1 rounded-full font-medium">
+                                        {santri.nis}
+                                    </span>
+                                    <span
+                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${santri.status === "aktif" ? "bg-emerald-50 text-emerald-600" : santri.status === "lulus" ? "bg-[#20B5E8]/10 text-[#20B5E8]" : "bg-red-50 text-red-500"}`}
+                                    >
+                                        {santri.status
+                                            ?.charAt(0)
+                                            .toUpperCase() +
+                                            santri.status?.slice(1)}
+                                    </span>
                                 </div>
                                 {isAdmin && (
-                                    <div className="flex flex-col gap-1 ml-2 shrink-0">
+                                    <div className="flex gap-1">
                                         <button
                                             onClick={() => openEdit(santri)}
-                                            className="bg-slate-100 px-3 py-1.5 rounded-xl text-[11px] hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
+                                            className="bg-slate-100 px-2.5 py-1 rounded-lg text-xs hover:bg-[#3D7ABA]/10 hover:text-[#3D7ABA] transition"
                                         >
                                             Edit
                                         </button>
@@ -336,11 +284,63 @@ export default function Index() {
                                                     santri.nama_lengkap,
                                                 )
                                             }
-                                            className="bg-red-50 text-red-500 px-3 py-1.5 rounded-xl text-[11px] hover:bg-red-100 transition"
+                                            className="bg-red-50 text-red-500 px-2.5 py-1 rounded-lg text-xs hover:bg-red-100 transition"
                                         >
                                             Hapus
                                         </button>
                                     </div>
+                                )}
+                            </div>
+                            <h3 className="font-semibold text-sm truncate mb-2">
+                                {santri.nama_lengkap}
+                            </h3>
+                            <div className="text-[11px] text-slate-500 space-y-0.5">
+                                {santri.nisn && (
+                                    <Row label="NISN" value={santri.nisn} />
+                                )}
+                                {santri.nik && (
+                                    <Row label="NIK" value={santri.nik} />
+                                )}
+                                {(santri.tempat_lahir ||
+                                    santri.tanggal_lahir) && (
+                                    <Row
+                                        label="TTL"
+                                        value={`${santri.tempat_lahir || "-"}, ${formatTgl(santri.tanggal_lahir) || "-"}`}
+                                    />
+                                )}
+                                {santri.jenis_kelamin && (
+                                    <Row
+                                        label="JK"
+                                        value={
+                                            santri.jenis_kelamin === "laki-laki"
+                                                ? "Laki-laki"
+                                                : "Perempuan"
+                                        }
+                                    />
+                                )}
+                                {santri.program_studi && (
+                                    <Row
+                                        label="Prodi"
+                                        value={santri.program_studi}
+                                    />
+                                )}
+                                {santri.angkatan && (
+                                    <Row
+                                        label="Angkatan"
+                                        value={santri.angkatan}
+                                    />
+                                )}
+                                {santri.tahun_masuk && (
+                                    <Row
+                                        label="Tahun Masuk"
+                                        value={santri.tahun_masuk}
+                                    />
+                                )}
+                                {santri.kamar && (
+                                    <Row label="Kamar" value={santri.kamar} />
+                                )}
+                                {santri.nomor_hp && (
+                                    <Row label="HP" value={santri.nomor_hp} />
                                 )}
                             </div>
                         </div>
@@ -362,17 +362,37 @@ export default function Index() {
                                     onSubmit={submit}
                                     className="space-y-2.5 max-h-[70vh] overflow-y-auto pr-1"
                                 >
-                                    <input
-                                        type="text"
-                                        placeholder="NIS"
-                                        value={data.nis}
-                                        onChange={(e) =>
-                                            setData("nis", e.target.value)
-                                        }
-                                        disabled={!!editData}
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50 outline-none"
-                                        required
-                                    />
+                                    {!editData && (
+                                        <select
+                                            value={data.jenis_kelamin}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "jenis_kelamin",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                            required
+                                        >
+                                            <option value="">
+                                                Pilih Putra/Putri *
+                                            </option>
+                                            <option value="laki-laki">
+                                                Putra (PA)
+                                            </option>
+                                            <option value="perempuan">
+                                                Putri (PI)
+                                            </option>
+                                        </select>
+                                    )}
+                                    {editData && (
+                                        <input
+                                            type="text"
+                                            value={editData.nis}
+                                            disabled
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50 outline-none"
+                                        />
+                                    )}
                                     <input
                                         type="text"
                                         placeholder="NISN"
@@ -429,26 +449,28 @@ export default function Index() {
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         />
                                     </div>
-                                    <select
-                                        value={data.jenis_kelamin}
-                                        onChange={(e) =>
-                                            setData(
-                                                "jenis_kelamin",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
-                                    >
-                                        <option value="">
-                                            Pilih Jenis Kelamin
-                                        </option>
-                                        <option value="laki-laki">
-                                            Laki-laki
-                                        </option>
-                                        <option value="perempuan">
-                                            Perempuan
-                                        </option>
-                                    </select>
+                                    {editData && (
+                                        <select
+                                            value={data.jenis_kelamin}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "jenis_kelamin",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                        >
+                                            <option value="">
+                                                Pilih Jenis Kelamin
+                                            </option>
+                                            <option value="laki-laki">
+                                                Laki-laki
+                                            </option>
+                                            <option value="perempuan">
+                                                Perempuan
+                                            </option>
+                                        </select>
+                                    )}
                                     <input
                                         type="text"
                                         placeholder="Alamat"
@@ -707,3 +729,12 @@ export default function Index() {
         </AppLayout>
     );
 }
+
+const Row = ({ label, value }) => (
+    <div className="flex justify-between">
+        <span className="text-slate-400">{label}</span>
+        <span className="font-medium text-slate-600 text-right ml-4">
+            {value || "-"}
+        </span>
+    </div>
+);

@@ -50,4 +50,33 @@ class PresensiSantriController extends Controller
 
         return back()->with('success', 'Presensi santri berhasil.');
     }
+    public function rekap(Request $request)
+    {
+        $bulan = $request->bulan ?? now()->month;
+        $tahun = $request->tahun ?? now()->year;
+
+        $rekap = PresensiSantri::with('santri')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->get()
+            ->groupBy('nis')
+            ->map(function ($items) {
+                $santri = $items->first()->santri;
+                return [
+                    'nis' => $items->first()->nis,
+                    'nama' => $santri->nama_lengkap ?? '-',
+                    'total_hadir' => $items->count(),
+                    'total_hari' => $items->count(),
+                    'terakhir_hadir' => $items->max('tanggal'),
+                ];
+            })
+            ->sortBy('nama')
+            ->values();
+
+        return Inertia::render('Presensi/SantriRekap', [
+            'rekap' => $rekap,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+        ]);
+    }
 }

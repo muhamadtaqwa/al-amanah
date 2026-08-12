@@ -59,6 +59,10 @@ export default function Index() {
                     setScanResult(null);
                     setManualInput("");
                     setSending(false);
+                    // Auto-restart setelah 1,5 detik
+                    setTimeout(() => {
+                        if (mode === "camera") startScan();
+                    }, 1500);
                 },
                 onError: (errors) => {
                     toast.error(
@@ -68,6 +72,7 @@ export default function Index() {
                     setTimeout(() => {
                         setScanResult(null);
                         setManualInput("");
+                        if (mode === "camera") startScan();
                     }, 2000);
                     setSending(false);
                 },

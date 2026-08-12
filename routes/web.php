@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
     // Presensi Santri
     Route::get('/presensi-santri', [PresensiSantriController::class, 'index']);
     Route::post('/presensi-santri', [PresensiSantriController::class, 'store']);
+    Route::get('/presensi-santri/rekap', [PresensiSantriController::class, 'rekap']);
 
     // Rekap
     Route::get('/rekap', [RekapController::class, 'index']);

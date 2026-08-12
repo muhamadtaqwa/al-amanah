@@ -6,8 +6,8 @@ import AppLayout from "@/Layouts/AppLayout";
 export default function Santri() {
     const { presensi, tanggal } = usePage().props;
     const [selectedDate, setSelectedDate] = useState(tanggal);
-    const [scanning, setScanning] = useState(false);
     const [nis, setNis] = useState("");
+    const [sending, setSending] = useState(false);
 
     const playBeep = () => {
         try {
@@ -24,31 +24,33 @@ export default function Santri() {
             setTimeout(() => {
                 osc.stop();
                 ctx.close();
-            }, 200);
+            }, 300);
         } catch (e) {
             console.log("Audio tidak didukung");
         }
     };
 
     const handleScan = (nisTerbaca) => {
+        setSending(true);
         router.post(
             "/presensi-santri",
             {
                 nis: nisTerbaca,
             },
             {
-                onSuccess: (response) => {
+                onSuccess: () => {
                     playBeep();
                     toast.success(`Presensi berhasil!`);
                     setNis("");
-                    setScanning(false);
+                    setSending(false);
                 },
                 onError: (errors) => {
                     toast.error(
                         errors?.error ||
                             "Santri sudah presensi atau data tidak ditemukan.",
                     );
-                    setScanning(false);
+                    setNis("");
+                    setSending(false);
                 },
             },
         );
@@ -82,6 +84,16 @@ export default function Santri() {
                     />
                 </div>
 
+                {/* Tombol Rekap */}
+                <div className="mb-4">
+                    <a
+                        href="/presensi-santri/rekap"
+                        className="block bg-white border border-slate-200 text-slate-600 py-2.5 rounded-2xl text-sm font-medium text-center hover:bg-slate-50 transition"
+                    >
+                        Lihat Rekap Presensi
+                    </a>
+                </div>
+
                 {/* Input manual scan */}
                 <div className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl mb-4">
                     <p className="text-xs font-semibold text-slate-500 mb-2">
@@ -104,7 +116,7 @@ export default function Santri() {
                         />
                         <button
                             onClick={() => handleScan(nis)}
-                            disabled={!nis}
+                            disabled={!nis || sending}
                             className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-5 py-2.5 rounded-2xl text-sm font-semibold shadow-lg disabled:opacity-50"
                         >
                             Simpan
@@ -114,6 +126,11 @@ export default function Santri() {
                         Scan QR santri lalu NIS akan terisi otomatis, tekan
                         Enter untuk simpan
                     </p>
+                    {sending && (
+                        <p className="text-xs text-slate-400 mt-2">
+                            Menyimpan...
+                        </p>
+                    )}
                 </div>
 
                 {/* Info tanggal */}

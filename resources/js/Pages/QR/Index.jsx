@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { QRCodeSVG } from "qrcode.react";
-import { usePage } from "@inertiajs/react";
+import { usePage, router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
@@ -11,19 +12,18 @@ export default function Index() {
     const [scanning, setScanning] = useState(false);
     const [mode, setMode] = useState("camera");
     const [manualInput, setManualInput] = useState("");
+    const [sending, setSending] = useState(false);
     const scannerRef = useRef(null);
     const inputRef = useRef(null);
 
     const isAdmin = user.role === "admin";
-    const profil = user.ustadz || user.santri || user.walisantri;
+    const profil = user.ustadz || user.santri;
     const qrValue =
         user.role === "ustadz"
             ? profil?.niu
             : user.role === "santri"
               ? profil?.nis
-              : user.role === "walisantri"
-                ? profil?.niw
-                : "";
+              : "";
     const nama = profil?.nama_lengkap || "Admin";
 
     useEffect(() => {
@@ -39,6 +39,62 @@ export default function Index() {
             inputRef.current.focus();
         }
     }, [mode]);
+
+    // Kirim presensi saat scan berhasil
+    useEffect(() => {
+        if (scanResult && isAdmin) {
+            kirimPresensi(scanResult);
+        }
+    }, [scanResult]);
+
+    const kirimPresensi = (nis) => {
+        setSending(true);
+        router.post(
+            "/presensi-santri",
+            { nis },
+            {
+                onSuccess: () => {
+                    playBeep();
+                    toast.success(`Presensi ${nis} berhasil!`);
+                    setScanResult(null);
+                    setManualInput("");
+                    setSending(false);
+                },
+                onError: (errors) => {
+                    toast.error(
+                        errors?.error ||
+                            "Santri sudah presensi atau data tidak ditemukan.",
+                    );
+                    setTimeout(() => {
+                        setScanResult(null);
+                        setManualInput("");
+                    }, 2000);
+                    setSending(false);
+                },
+            },
+        );
+    };
+
+    const playBeep = () => {
+        try {
+            const ctx = new (
+                window.AudioContext || window.webkitAudioContext
+            )();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 1200;
+            gain.gain.value = 0.1;
+            osc.start();
+            setTimeout(() => {
+                osc.stop();
+                ctx.close();
+            }, 300);
+        } catch (e) {
+            console.log("Audio tidak didukung");
+        }
+    };
 
     const startScan = async () => {
         setScanning(true);
@@ -73,7 +129,7 @@ export default function Index() {
     const handleManualSubmit = (e) => {
         e.preventDefault();
         if (manualInput.trim()) {
-            setScanResult(manualInput.trim());
+            kirimPresensi(manualInput.trim());
         }
     };
 
@@ -81,7 +137,7 @@ export default function Index() {
         <AppLayout>
             <div className="max-w-md mx-auto text-center">
                 <h2 className="text-lg font-bold text-slate-800 mb-6">
-                    {isAdmin ? "Scan Kode" : "Kode Saya"}
+                    {isAdmin ? "Presensi Santri" : "Kode Saya"}
                 </h2>
 
                 {isAdmin ? (
@@ -116,7 +172,8 @@ export default function Index() {
                                 {!scanning ? (
                                     <button
                                         onClick={startScan}
-                                        className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl hover:scale-105 active:scale-95 transition-all"
+                                        disabled={sending}
+                                        className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-8 py-4 rounded-full text-base font-semibold shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                                     >
                                         Mulai Scan
                                     </button>
@@ -149,34 +206,22 @@ export default function Index() {
                                 />
                                 <button
                                     type="submit"
-                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-8 py-3 rounded-full text-sm font-semibold shadow-lg"
+                                    disabled={sending}
+                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-8 py-3 rounded-full text-sm font-semibold shadow-lg disabled:opacity-50"
                                 >
-                                    Cek Kode
+                                    Simpan Presensi
                                 </button>
                             </form>
                         )}
 
-                        {scanResult && (
-                            <div className="bg-emerald-50 rounded-2xl p-4 mt-4 border border-emerald-100">
-                                <p className="text-sm text-emerald-700 font-medium">
-                                    Hasil Scan:
-                                </p>
-                                <p className="text-lg font-bold text-emerald-800 mt-1 font-mono">
-                                    {scanResult}
-                                </p>
-                                <button
-                                    onClick={() => setScanResult(null)}
-                                    className="text-xs text-emerald-600 mt-2 underline"
-                                >
-                                    Reset
-                                </button>
-                            </div>
+                        {sending && (
+                            <p className="text-xs text-slate-400 mt-4">
+                                Menyimpan presensi...
+                            </p>
                         )}
                     </>
                 ) : (
-                    /* Non-admin: Tampil Kode */
                     <div className="bg-gradient-to-br from-[#3D7ABA] to-[#20B5E8] rounded-[30px] p-8 shadow-2xl text-white">
-                        {/* Avatar */}
                         <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4 border-2 border-white/30">
                             {nama?.charAt(0) || "A"}
                         </div>
@@ -184,8 +229,6 @@ export default function Index() {
                         <p className="text-sm text-white/70">
                             {user.role.toUpperCase()} • {qrValue}
                         </p>
-
-                        {/* QR Code */}
                         <div className="mt-6 bg-white rounded-2xl p-4 inline-block shadow-lg">
                             <QRCodeSVG
                                 value={qrValue}
@@ -194,7 +237,6 @@ export default function Index() {
                                 includeMargin
                             />
                         </div>
-
                         <p className="text-xs text-white/60 mt-4">
                             Tunjukkan kode ini untuk presensi
                         </p>
@@ -203,7 +245,7 @@ export default function Index() {
 
                 <p className="text-xs text-slate-400 mt-6">
                     {isAdmin
-                        ? "Gunakan kamera atau barcode scanner"
+                        ? "Scan QR santri untuk presensi"
                         : `© ${new Date().getFullYear()} Pondok Pesantren Al-Amanah`}
                 </p>
             </div>

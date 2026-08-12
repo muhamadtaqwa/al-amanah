@@ -6,6 +6,7 @@ use App\Http\Controllers\SantriController;
 use App\Http\Controllers\UstadzController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\PresensiSantriController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PinjamGedungController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\PsbController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LetterController;
 use Illuminate\Support\Facades\Route;
-
 
 // Auth
 Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -72,10 +72,14 @@ Route::middleware('auth')->group(function () {
     // Tagihan
     Route::get('/tagihan', [PembayaranController::class, 'tagihan']);
 
-    // Presensi
+    // Presensi Ustadz
     Route::get('/presensi', [PresensiController::class, 'index']);
     Route::post('/presensi', [PresensiController::class, 'store']);
     Route::delete('/presensi/{id}', [PresensiController::class, 'destroy']);
+
+    // Presensi Santri
+    Route::get('/presensi-santri', [PresensiSantriController::class, 'index']);
+    Route::post('/presensi-santri', [PresensiSantriController::class, 'store']);
 
     // Rekap
     Route::get('/rekap', [RekapController::class, 'index']);

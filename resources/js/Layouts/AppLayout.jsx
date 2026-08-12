@@ -102,6 +102,12 @@ export default function AppLayout({ children }) {
             roles: ["admin", "ustadz"],
         },
         {
+            label: "Presensi Santri",
+            path: "/presensi-santri",
+            icon: "fa-clipboard-check",
+            roles: ["admin"],
+        },
+        {
             label: "Pinjam Gedung",
             path: "/pinjam-gedung",
             icon: "fa-building",

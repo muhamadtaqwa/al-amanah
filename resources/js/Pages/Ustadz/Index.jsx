@@ -222,54 +222,57 @@ export default function Index() {
                                 className="fixed inset-0 bg-black/50"
                                 onClick={closeModal}
                             ></div>
-                            <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-6 border border-sky-100 my-4">
+                            <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm md:max-w-2xl p-6 border border-sky-100 my-4">
                                 <h3 className="font-semibold text-lg mb-4">
                                     {editData ? "Edit" : "Tambah"} Ustadz
                                 </h3>
                                 <form
                                     onSubmit={submit}
-                                    className="space-y-2.5 max-h-[70vh] overflow-y-auto pr-1"
+                                    className="space-y-2.5 max-h-[70vh] md:max-h-[80vh] overflow-y-auto pr-1"
                                 >
-                                    {editData && (
+                                    <div className="md:grid md:grid-rows-7 md:grid-flow-col md:auto-cols-fr md:gap-x-4 md:gap-y-2.5 space-y-2.5 md:space-y-0">
+                                        {editData && (
+                                            <input
+                                                type="text"
+                                                value={editData.niu}
+                                                disabled
+                                                className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50 outline-none"
+                                            />
+                                        )}
                                         <input
                                             type="text"
-                                            value={editData.niu}
-                                            disabled
-                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50 outline-none"
+                                            placeholder="NIP/NIPPPK/NUPTK"
+                                            value={data.nip_nuptk}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "nip_nuptk",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         />
-                                    )}
-                                    <input
-                                        type="text"
-                                        placeholder="NIP/NIPPPK/NUPTK"
-                                        value={data.nip_nuptk}
-                                        onChange={(e) =>
-                                            setData("nip_nuptk", e.target.value)
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="NIK"
-                                        value={data.nik}
-                                        onChange={(e) =>
-                                            setData("nik", e.target.value)
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Nama Lengkap"
-                                        value={data.nama_lengkap}
-                                        onChange={(e) =>
-                                            setData(
-                                                "nama_lengkap",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                        required
-                                    />
-                                    <div className="grid grid-cols-2 gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="NIK"
+                                            value={data.nik}
+                                            onChange={(e) =>
+                                                setData("nik", e.target.value)
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Nama Lengkap"
+                                            value={data.nama_lengkap}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "nama_lengkap",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                                            required
+                                        />
                                         <input
                                             type="text"
                                             placeholder="Tempat Lahir"
@@ -293,123 +296,134 @@ export default function Index() {
                                             }
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         />
-                                    </div>
-                                    <select
-                                        value={data.jenis_kelamin}
-                                        onChange={(e) =>
-                                            setData(
-                                                "jenis_kelamin",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
-                                    >
-                                        <option value="">
-                                            Pilih Jenis Kelamin
-                                        </option>
-                                        <option value="laki-laki">
-                                            Laki-laki
-                                        </option>
-                                        <option value="perempuan">
-                                            Perempuan
-                                        </option>
-                                    </select>
-                                    <select
-                                        value={data.pendidikan_terakhir}
-                                        onChange={(e) =>
-                                            setData(
-                                                "pendidikan_terakhir",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
-                                    >
-                                        <option value="">
-                                            Pilih Pendidikan Terakhir
-                                        </option>
-                                        <option value="SMA/Sederajat">
-                                            SMA/Sederajat
-                                        </option>
-                                        <option value="D1">D1</option>
-                                        <option value="D2">D2</option>
-                                        <option value="D3">D3</option>
-                                        <option value="S1">S1</option>
-                                        <option value="S2">S2</option>
-                                        <option value="S3">S3</option>
-                                    </select>
-                                    <input
-                                        type="text"
-                                        placeholder="Alamat"
-                                        value={data.alamat}
-                                        onChange={(e) =>
-                                            setData("alamat", e.target.value)
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                    />
-                                    <select
-                                        value={data.status_kepegawaian}
-                                        onChange={(e) =>
-                                            setData(
-                                                "status_kepegawaian",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
-                                    >
-                                        <option value="">
-                                            Status Kepegawaian
-                                        </option>
-                                        <option value="PNS">PNS</option>
-                                        <option value="PPPK">PPPK</option>
-                                        <option value="Honorer">Honorer</option>
-                                    </select>
-                                    <input
-                                        type="date"
-                                        value={data.tanggal_mulai_tugas}
-                                        onChange={(e) =>
-                                            setData(
-                                                "tanggal_mulai_tugas",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                    />
-                                    <select
-                                        value={data.status}
-                                        onChange={(e) =>
-                                            setData("status", e.target.value)
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
-                                    >
-                                        <option value="aktif">Aktif</option>
-                                        <option value="tidak aktif">
-                                            Tidak Aktif
-                                        </option>
-                                    </select>
-                                    <input
-                                        type="text"
-                                        placeholder="Nomor HP"
-                                        value={data.nomor_hp}
-                                        onChange={(e) =>
-                                            setData("nomor_hp", e.target.value)
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                    />
-                                    {!editData && (
-                                        <input
-                                            type="password"
-                                            placeholder="Password"
-                                            value={data.password}
+                                        <select
+                                            value={data.jenis_kelamin}
                                             onChange={(e) =>
                                                 setData(
-                                                    "password",
+                                                    "jenis_kelamin",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                        >
+                                            <option value="">
+                                                Jenis Kelamin
+                                            </option>
+                                            <option value="laki-laki">
+                                                Laki-laki
+                                            </option>
+                                            <option value="perempuan">
+                                                Perempuan
+                                            </option>
+                                        </select>
+                                        <select
+                                            value={data.pendidikan_terakhir}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "pendidikan_terakhir",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                        >
+                                            <option value="">
+                                                Pendidikan Terakhir
+                                            </option>
+                                            <option value="SMA/Sederajat">
+                                                SMA/Sederajat
+                                            </option>
+                                            <option value="D1">D1</option>
+                                            <option value="D2">D2</option>
+                                            <option value="D3">D3</option>
+                                            <option value="S1">S1</option>
+                                            <option value="S2">S2</option>
+                                            <option value="S3">S3</option>
+                                        </select>
+                                        <input
+                                            type="text"
+                                            placeholder="Alamat"
+                                            value={data.alamat}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "alamat",
                                                     e.target.value,
                                                 )
                                             }
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                            required
                                         />
-                                    )}
+                                        <select
+                                            value={data.status_kepegawaian}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "status_kepegawaian",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                        >
+                                            <option value="">
+                                                Status Kepegawaian
+                                            </option>
+                                            <option value="PNS">PNS</option>
+                                            <option value="PPPK">PPPK</option>
+                                            <option value="Honorer">
+                                                Honorer
+                                            </option>
+                                        </select>
+                                        <input
+                                            type="date"
+                                            value={data.tanggal_mulai_tugas}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "tanggal_mulai_tugas",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                                        />
+                                        <select
+                                            value={data.status}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "status",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                        >
+                                            <option value="aktif">Aktif</option>
+                                            <option value="tidak aktif">
+                                                Tidak Aktif
+                                            </option>
+                                        </select>
+                                        <input
+                                            type="text"
+                                            placeholder="Nomor HP"
+                                            value={data.nomor_hp}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "nomor_hp",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                                        />
+                                        {!editData && (
+                                            <input
+                                                type="password"
+                                                placeholder="Password"
+                                                value={data.password}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "password",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                                                required
+                                            />
+                                        )}
+                                    </div>
                                     <div className="flex gap-2 pt-2">
                                         <button
                                             type="button"

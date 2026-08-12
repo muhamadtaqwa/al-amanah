@@ -204,7 +204,7 @@ export default function Index() {
                 <p className="text-xs text-slate-400 mt-6">
                     {isAdmin
                         ? "Gunakan kamera atau barcode scanner"
-                        : "Tunjukkan kode ini"}
+                        : `© ${new Date().getFullYear()} Pondok Pesantren Al-Amanah`}
                 </p>
             </div>
         </AppLayout>

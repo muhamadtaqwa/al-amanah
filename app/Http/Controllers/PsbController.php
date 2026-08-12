@@ -87,7 +87,6 @@ class PsbController extends Controller
         $psb->update(['status' => $request->status, 'catatan' => $request->catatan]);
 
         if ($request->status === 'diterima') {
-            // Generate NIS
             $prefix = $psb->jenis_kelamin === 'laki-laki' ? 'PA' : 'PI';
             $last = Santri::where('nis', 'like', $prefix . '%')->orderBy('nis', 'desc')->first();
             if ($last) {
@@ -99,7 +98,7 @@ class PsbController extends Controller
 
             $user = User::create([
                 'username' => $nis,
-                'password' => Hash::make($nis),
+                'password' => Hash::make('santri123'),
                 'role' => 'santri',
             ]);
             $user->assignRole('santri');

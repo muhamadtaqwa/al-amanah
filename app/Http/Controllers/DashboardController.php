@@ -70,7 +70,11 @@ class DashboardController extends Controller
         foreach ($logins as $l) {
             $nama = 'Seseorang';
             if ($l->user) {
-                $nama = $l->user->ustadz->nama_lengkap ?? $l->user->santri->nama_lengkap ?? $l->user->username;
+                if ($l->user->role === 'admin') {
+                    $nama = 'Admin Pondok';
+                } else {
+                    $nama = $l->user->ustadz->nama_lengkap ?? $l->user->santri->nama_lengkap ?? $l->user->username;
+                }
             }
             $data->push([
                 'teks' => $nama . ' login',

@@ -60,6 +60,12 @@ export default function AppLayout({ children }) {
             roles: ["admin"],
         },
         {
+            label: "Surat",
+            path: "/surat",
+            icon: "fa-envelope",
+            roles: ["admin"],
+        },
+        {
             label: "Export EMIS",
             path: "/export",
             icon: "fa-file-export",

@@ -13,7 +13,9 @@ use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\InventarisController;
 use App\Http\Controllers\PsbController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\LetterController;
 use Illuminate\Support\Facades\Route;
+
 
 // Auth
 Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -108,4 +110,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/inventaris', [InventarisController::class, 'store']);
     Route::put('/inventaris/{id}', [InventarisController::class, 'update']);
     Route::delete('/inventaris/{id}', [InventarisController::class, 'destroy']);
+
+    // Surat
+    Route::get('/surat', [LetterController::class, 'index']);
+    Route::post('/surat', [LetterController::class, 'store']);
+    Route::put('/surat/{id}', [LetterController::class, 'update']);
+    Route::delete('/surat/{id}', [LetterController::class, 'destroy']);
 });

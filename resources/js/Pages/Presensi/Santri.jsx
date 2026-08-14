@@ -138,6 +138,7 @@ export default function Santri() {
                     {new Date(selectedDate + "T12:00:00").toLocaleDateString(
                         "id-ID",
                         {
+                            weekday: "long",
                             day: "numeric",
                             month: "long",
                             year: "numeric",

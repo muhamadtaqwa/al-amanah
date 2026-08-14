@@ -3,7 +3,7 @@ import AppLayout from "@/Layouts/AppLayout";
 import { usePage } from "@inertiajs/react";
 
 export default function Dashboard() {
-    const { auth, stats, aktivitas } = usePage().props;
+    const { auth, stats, aktivitas, presensiSantri } = usePage().props;
     const user = auth.user;
     const [time, setTime] = useState(new Date());
     const [hijri, setHijri] = useState("");
@@ -55,6 +55,7 @@ export default function Dashboard() {
                         </p>
                         <p className="text-xs text-white/80">
                             {time.toLocaleDateString("id-ID", {
+                                weekday: "long",
                                 day: "numeric",
                                 month: "long",
                                 year: "numeric",
@@ -88,6 +89,22 @@ export default function Dashboard() {
                             </div>
                             <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
                                 <p className="text-[11px] text-slate-400">
+                                    Santri Putra
+                                </p>
+                                <p className="mt-1 text-lg font-bold text-blue-500">
+                                    {stats?.santriPutra || 0}
+                                </p>
+                            </div>
+                            <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
+                                <p className="text-[11px] text-slate-400">
+                                    Santri Putri
+                                </p>
+                                <p className="mt-1 text-lg font-bold text-pink-500">
+                                    {stats?.santriPutri || 0}
+                                </p>
+                            </div>
+                            <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
+                                <p className="text-[11px] text-slate-400">
                                     Belum Bayar
                                 </p>
                                 <p className="mt-1 text-lg font-bold text-orange-500">
@@ -96,13 +113,10 @@ export default function Dashboard() {
                             </div>
                             <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
                                 <p className="text-[11px] text-slate-400">
-                                    Pemasukan Bulan Ini
+                                    Sudah Bayar
                                 </p>
-                                <p className="mt-1 text-base font-bold text-emerald-500 font-mono tracking-tight">
-                                    Rp{" "}
-                                    {(
-                                        stats?.pemasukanBulanIni || 0
-                                    ).toLocaleString()}
+                                <p className="mt-1 text-lg font-bold text-emerald-500">
+                                    {stats?.totalSudahBayar || 0}
                                 </p>
                             </div>
                             <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
@@ -115,7 +129,7 @@ export default function Dashboard() {
                             </div>
                             <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
                                 <p className="text-[11px] text-slate-400">
-                                    Jumlah User
+                                    Total User
                                 </p>
                                 <p className="mt-1 text-lg font-bold text-purple-500">
                                     {stats?.totalUser || 0}
@@ -185,7 +199,7 @@ export default function Dashboard() {
                                 <p className="text-[11px] text-slate-400">
                                     Status
                                 </p>
-                                <p className="mt-1 text-sm font-bold text-emerald-500">
+                                <p className="mt-1 text-lg font-bold text-emerald-500">
                                     {user.ustadz?.status
                                         ?.charAt(0)
                                         .toUpperCase() +
@@ -203,6 +217,12 @@ export default function Dashboard() {
                                     className="rounded-xl bg-[#3D7ABA]/10 p-3 text-center text-xs font-medium text-[#3D7ABA]"
                                 >
                                     Presensi
+                                </a>
+                                <a
+                                    href="/timeline"
+                                    className="rounded-xl bg-blue-50 p-3 text-center text-xs font-medium text-blue-500"
+                                >
+                                    Timeline
                                 </a>
                                 <a
                                     href="/qr"
@@ -237,7 +257,7 @@ export default function Dashboard() {
                                 <p className="text-[11px] text-slate-400">
                                     Status
                                 </p>
-                                <p className="mt-1 text-sm font-bold text-emerald-500">
+                                <p className="mt-1 text-lg font-bold text-emerald-500">
                                     {user.santri?.status
                                         ?.charAt(0)
                                         .toUpperCase() +
@@ -245,6 +265,15 @@ export default function Dashboard() {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Kalender Presensi */}
+                        <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                            <h2 className="text-sm font-bold text-slate-700 mb-3">
+                                Presensi Bulan Ini
+                            </h2>
+                            <CalendarPresensi data={presensiSantri || []} />
+                        </div>
+
                         <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
                             <h2 className="text-sm font-bold text-slate-700 mb-2">
                                 Menu Cepat
@@ -280,5 +309,70 @@ export default function Dashboard() {
                 )}
             </div>
         </AppLayout>
+    );
+}
+
+function CalendarPresensi({ data }) {
+    const today = new Date();
+    const tahun = today.getFullYear();
+    const bulan = today.getMonth();
+
+    const firstDay = new Date(tahun, bulan, 1);
+    const lastDay = new Date(tahun, bulan + 1, 0);
+    const totalDays = lastDay.getDate();
+    const startOffset = firstDay.getDay();
+
+    const days = [];
+    for (let i = 0; i < startOffset; i++) {
+        days.push(null);
+    }
+    for (let d = 1; d <= totalDays; d++) {
+        days.push(d);
+    }
+
+    const namaBulan = new Date(tahun, bulan).toLocaleDateString("id-ID", {
+        month: "long",
+        year: "numeric",
+    });
+    const namaHari = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+    return (
+        <div>
+            <p className="text-xs font-semibold text-slate-600 mb-2">
+                {namaBulan}
+            </p>
+            <div className="grid grid-cols-7 gap-1 mb-1">
+                {namaHari.map((h) => (
+                    <div
+                        key={h}
+                        className="text-center text-[10px] text-slate-400 font-medium"
+                    >
+                        {h}
+                    </div>
+                ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+                {days.map((day, i) => {
+                    if (!day) return <div key={i}></div>;
+                    const tglStr = `${tahun}-${String(bulan + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                    const hadir = data.includes(tglStr);
+                    const isFuture = day > today.getDate();
+                    return (
+                        <div
+                            key={i}
+                            className={`h-9 rounded-lg flex items-center justify-center text-xs font-medium ${
+                                hadir
+                                    ? "bg-emerald-500 text-white"
+                                    : isFuture
+                                      ? "bg-white text-slate-300"
+                                      : "bg-slate-100 text-slate-400"
+                            }`}
+                        >
+                            {day}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     );
 }

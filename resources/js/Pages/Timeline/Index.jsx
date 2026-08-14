@@ -163,6 +163,7 @@ export default function Index() {
                                             {new Date(
                                                 item.tanggal,
                                             ).toLocaleDateString("id-ID", {
+                                                weekday: "long",
                                                 day: "numeric",
                                                 month: "short",
                                                 year: "numeric",

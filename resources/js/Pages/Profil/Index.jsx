@@ -201,7 +201,7 @@ export default function Index() {
                         {user.role}
                     </p>
                     <p className="text-xs text-white/60 mt-2">
-                        ID: {user.username}
+                        {user.username}
                     </p>
                 </div>
 

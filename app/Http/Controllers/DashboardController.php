@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Pembayaran;
 use App\Models\Login;
 use App\Models\Psb;
+use App\Models\PresensiSantri;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -22,17 +23,31 @@ class DashboardController extends Controller
         $totalBelumBayar = $pembayaran->filter(
             fn($p) => $p->status === 'menunggu' || $p->status === 'dicicil'
         )->count();
+        $totalSudahBayar = $pembayaran->filter(
+            fn($p) => $p->status === 'lunas'
+        )->count();
 
         $aktivitas = $this->getAktivitas();
+
+        $presensiSantri = [];
+        if (auth()->user()->role === 'santri') {
+            $nis = auth()->user()->santri->nis;
+            $presensiSantri = PresensiSantri::where('nis', $nis)
+                ->whereMonth('tanggal', $bulanIni)
+                ->whereYear('tanggal', $tahunIni)
+                ->pluck('tanggal')
+                ->map(fn($t) => $t->format('Y-m-d'))
+                ->toArray();
+        }
 
         return Inertia::render('Dashboard', [
             'stats' => [
                 'totalSantri'       => Santri::count(),
+                'santriPutra'       => Santri::where('jenis_kelamin', 'laki-laki')->count(),
+                'santriPutri'       => Santri::where('jenis_kelamin', 'perempuan')->count(),
                 'totalUstadz'       => Ustadz::count(),
                 'totalBelumBayar'   => $totalBelumBayar,
-                'pemasukanBulanIni' => Pembayaran::whereHas('details', function ($q) use ($bulanIni, $tahunIni) {
-                    $q->whereMonth('tgl_bayar', $bulanIni)->whereYear('tgl_bayar', $tahunIni);
-                })->get()->sum('total_dibayar'),
+                'totalSudahBayar'   => $totalSudahBayar,
                 'userAktif'         => DB::table('sessions')
                     ->whereNotNull('user_id')
                     ->where('last_activity', '>=', now()->subMinutes(5)->timestamp)
@@ -42,6 +57,7 @@ class DashboardController extends Controller
                 'totalKunjungan'    => Login::count(),
             ],
             'aktivitas' => $aktivitas,
+            'presensiSantri' => $presensiSantri,
         ]);
     }
 

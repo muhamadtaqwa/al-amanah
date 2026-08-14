@@ -38,6 +38,18 @@ export default function AppLayout({ children }) {
             icon: "fa-timeline",
             roles: ["admin", "ustadz", "santri"],
         },
+        {
+            label: "Jadwal Sholat",
+            path: "/jadwal-sholat",
+            icon: "fa-kaaba",
+            roles: ["admin", "ustadz", "santri"],
+        },
+        {
+            label: "Al-Qur'an",
+            path: "/al-quran",
+            icon: "fa-book-quran",
+            roles: ["admin", "ustadz", "santri"],
+        },
     ];
 
     const menuData = [

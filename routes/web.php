@@ -34,6 +34,12 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index']);
 
+    // Jadwal Sholat
+    Route::get('/jadwal-sholat', fn() => inertia('JadwalSholat/Index'));
+
+    // Al-Quran
+    Route::get('/al-quran', fn() => inertia('AlQuran/Index'));
+
     // PSB Verifikasi (admin)
     Route::get('/psb/verifikasi', [PsbController::class, 'index']);
     Route::put('/psb/{id}/verifikasi', [PsbController::class, 'verifikasi']);

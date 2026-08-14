@@ -4,3 +4,15 @@
 body {
     font-family: "Poppins", sans-serif;
 }
+
+@font-face {
+    font-family: "LPMQ";
+    src: url("/fonts/LPMQ IsepMisbah.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+.font-mushaf {
+    font-family: "LPMQ", "Amiri", "Scheherazade", serif;
+    line-height: 2.5;
+}

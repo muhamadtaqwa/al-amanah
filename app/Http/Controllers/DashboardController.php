@@ -36,7 +36,6 @@ class DashboardController extends Controller
                 ->whereMonth('tanggal', $bulanIni)
                 ->whereYear('tanggal', $tahunIni)
                 ->pluck('tanggal')
-                ->map(fn($t) => $t->format('Y-m-d'))
                 ->toArray();
         }
 

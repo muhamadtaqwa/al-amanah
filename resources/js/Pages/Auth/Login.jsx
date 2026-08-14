@@ -143,6 +143,11 @@ export default function Login() {
                                                 setShowPassword(!showPassword)
                                             }
                                             disabled={processing}
+                                            aria-label={
+                                                showPassword
+                                                    ? "Sembunyikan password"
+                                                    : "Tampilkan password"
+                                            }
                                             className="absolute right-5 top-1/2 -translate-y-1/2 text-[#3D7ABA] hover:text-[#20B5E8]"
                                         >
                                             {showPassword ? (
@@ -193,6 +198,7 @@ export default function Login() {
                     <div
                         className="absolute inset-0 bg-black/50"
                         onClick={() => setShowLupa(false)}
+                        aria-hidden="true"
                     ></div>
                     <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-8 border border-sky-100 text-center">
                         <h3 className="font-semibold text-lg">

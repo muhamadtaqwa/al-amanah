@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
+import {
+    getProvinsi,
+    getKabupaten,
+    getKecamatan,
+    getDesa,
+} from "@/Services/Wilayah";
 
 export default function Index() {
     const { santris, auth } = usePage().props;
@@ -9,6 +15,11 @@ export default function Index() {
     const [showModal, setShowModal] = useState(false);
     const [editData, setEditData] = useState(null);
     const [search, setSearch] = useState("");
+
+    const [provinsiList, setProvinsiList] = useState([]);
+    const [kabupatenList, setKabupatenList] = useState([]);
+    const [kecamatanList, setKecamatanList] = useState([]);
+    const [desaList, setDesaList] = useState([]);
 
     const prodiList = [
         "S1 Kedokteran",
@@ -66,47 +77,6 @@ export default function Index() {
         "S3 Studi Islam",
     ];
 
-    const provinsiList = [
-        "Aceh",
-        "Sumatera Utara",
-        "Sumatera Barat",
-        "Riau",
-        "Jambi",
-        "Sumatera Selatan",
-        "Bengkulu",
-        "Lampung",
-        "Kepulauan Bangka Belitung",
-        "Kepulauan Riau",
-        "DKI Jakarta",
-        "Jawa Barat",
-        "Jawa Tengah",
-        "DI Yogyakarta",
-        "Jawa Timur",
-        "Banten",
-        "Bali",
-        "Nusa Tenggara Barat",
-        "Nusa Tenggara Timur",
-        "Kalimantan Barat",
-        "Kalimantan Tengah",
-        "Kalimantan Selatan",
-        "Kalimantan Timur",
-        "Kalimantan Utara",
-        "Sulawesi Utara",
-        "Sulawesi Tengah",
-        "Sulawesi Selatan",
-        "Sulawesi Tenggara",
-        "Gorontalo",
-        "Sulawesi Barat",
-        "Maluku",
-        "Maluku Utara",
-        "Papua",
-        "Papua Barat",
-        "Papua Selatan",
-        "Papua Tengah",
-        "Papua Pegunungan",
-        "Papua Barat Daya",
-    ];
-
     const { data, setData, post, put, reset, processing } = useForm({
         jenis_kelamin: "",
         nisn: "",
@@ -134,6 +104,50 @@ export default function Index() {
         no_hp_orang_tua: "",
         password: "",
     });
+
+    useEffect(() => {
+        getProvinsi()
+            .then(setProvinsiList)
+            .catch(() => {});
+    }, []);
+
+    const handleProvinsiChange = (nama) => {
+        setData("provinsi", nama);
+        const prov = provinsiList.find((p) => p.name === nama);
+        if (prov) {
+            getKabupaten(prov.id).then((res) => {
+                setKabupatenList(res);
+                setKecamatanList([]);
+                setDesaList([]);
+                setData((prev) => ({
+                    ...prev,
+                    kabupaten: "",
+                    kecamatan: "",
+                    desa: "",
+                }));
+            });
+        }
+    };
+
+    const handleKabupatenChange = (nama) => {
+        setData("kabupaten", nama);
+        const kab = kabupatenList.find((k) => k.name === nama);
+        if (kab) {
+            getKecamatan(kab.id).then((res) => {
+                setKecamatanList(res);
+                setDesaList([]);
+                setData((prev) => ({ ...prev, kecamatan: "", desa: "" }));
+            });
+        }
+    };
+
+    const handleKecamatanChange = (nama) => {
+        setData("kecamatan", nama);
+        const kec = kecamatanList.find((k) => k.name === nama);
+        if (kec) {
+            getDesa(kec.id).then(setDesaList);
+        }
+    };
 
     const openCreate = () => {
         reset();
@@ -472,56 +486,92 @@ export default function Index() {
                                             }
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         />
-                                        <input
-                                            type="text"
-                                            placeholder="Desa"
+
+                                        {/* Provinsi */}
+                                        <select
+                                            value={data.provinsi}
+                                            onChange={(e) =>
+                                                handleProvinsiChange(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none capitalize"
+                                        >
+                                            <option value="">Provinsi</option>
+                                            {provinsiList.map((p) => (
+                                                <option
+                                                    key={p.id}
+                                                    value={p.name}
+                                                >
+                                                    {p.name}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {/* Kabupaten */}
+                                        <select
+                                            value={data.kabupaten}
+                                            onChange={(e) =>
+                                                handleKabupatenChange(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none capitalize"
+                                            disabled={!data.provinsi}
+                                        >
+                                            <option value="">Kabupaten</option>
+                                            {kabupatenList.map((k) => (
+                                                <option
+                                                    key={k.id}
+                                                    value={k.name}
+                                                >
+                                                    {k.name}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {/* Kecamatan */}
+                                        <select
+                                            value={data.kecamatan}
+                                            onChange={(e) =>
+                                                handleKecamatanChange(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none capitalize"
+                                            disabled={!data.kabupaten}
+                                        >
+                                            <option value="">Kecamatan</option>
+                                            {kecamatanList.map((k) => (
+                                                <option
+                                                    key={k.id}
+                                                    value={k.name}
+                                                >
+                                                    {k.name}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {/* Desa */}
+                                        <select
                                             value={data.desa}
                                             onChange={(e) =>
                                                 setData("desa", e.target.value)
                                             }
-                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Kecamatan"
-                                            value={data.kecamatan}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "kecamatan",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Kabupaten"
-                                            value={data.kabupaten}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "kabupaten",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                        />
-                                        <select
-                                            value={data.provinsi}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "provinsi",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none capitalize"
+                                            disabled={!data.kecamatan}
                                         >
-                                            <option value="">Provinsi</option>
-                                            {provinsiList.map((p) => (
-                                                <option key={p} value={p}>
-                                                    {p}
+                                            <option value="">Desa</option>
+                                            {desaList.map((d) => (
+                                                <option
+                                                    key={d.id}
+                                                    value={d.name}
+                                                >
+                                                    {d.name}
                                                 </option>
                                             ))}
                                         </select>
+
                                         <select
                                             value={data.program_studi}
                                             onChange={(e) =>

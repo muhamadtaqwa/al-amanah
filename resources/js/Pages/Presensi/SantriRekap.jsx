@@ -22,11 +22,11 @@ export default function SantriRekap() {
             <div>
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-slate-800">
-                        Rekap Presensi Santri
+                        Rekap Bulanan
                     </h2>
                     <a
                         href="/presensi-santri"
-                        className="text-sm text-[#3D7ABA] font-medium hover:underline"
+                        className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg hover:scale-[1.02] transition"
                     >
                         Kembali
                     </a>
@@ -121,7 +121,7 @@ export default function SantriRekap() {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm font-bold text-emerald-600">
-                                        {r.total_hadir} hadir
+                                        {r.total_hadir} Hadir
                                     </p>
                                     <p className="text-[10px] text-slate-400">
                                         Terakhir:{" "}

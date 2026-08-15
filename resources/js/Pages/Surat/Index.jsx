@@ -18,6 +18,17 @@ export default function Index() {
         penandatangan: "",
     });
 
+    const salin = (teks) => {
+        navigator.clipboard
+            .writeText(teks)
+            .then(() => {
+                toast.success("Nomor surat tersalin!");
+            })
+            .catch(() => {
+                toast.error("Gagal menyalin.");
+            });
+    };
+
     const openCreate = () => {
         reset();
         setEditData(null);
@@ -120,9 +131,9 @@ export default function Index() {
                     </select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filtered.length === 0 && (
-                        <p className="text-center text-slate-400 py-10">
+                        <p className="text-center text-slate-400 py-10 sm:col-span-2">
                             Belum ada surat
                         </p>
                     )}
@@ -161,9 +172,18 @@ export default function Index() {
                                     )}
                                 </div>
                             </div>
-                            <p className="text-xs font-mono text-slate-400 mb-1">
-                                {l.nomor_surat}
-                            </p>
+                            <div className="flex items-center gap-2 mb-1">
+                                <p className="text-xs font-mono text-slate-400">
+                                    {l.nomor_surat}
+                                </p>
+                                <button
+                                    onClick={() => salin(l.nomor_surat)}
+                                    className="text-slate-400 hover:text-[#3D7ABA] transition"
+                                    aria-label="Salin nomor surat"
+                                >
+                                    <i className="fa-solid fa-copy text-xs"></i>
+                                </button>
+                            </div>
                             <h3 className="font-semibold text-sm truncate">
                                 {l.perihal}
                             </h3>

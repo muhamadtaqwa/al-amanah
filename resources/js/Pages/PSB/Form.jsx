@@ -214,7 +214,7 @@ export default function Form() {
                     </p>
                     <a
                         href="/psb/cek"
-                        className="text-xs text-[#3D7ABA] underline mt-1 inline-block"
+                        className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-6 py-2.5 rounded-2xl text-xs font-semibold shadow-lg inline-block mt-3"
                     >
                         Cek Status Pendaftaran
                     </a>

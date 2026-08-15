@@ -1,148 +1,264 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import { getListSurat, getDetailSurat } from "@/Services/AlQuran";
 
 export default function Index() {
-    const [surat, setSurat] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
+    const [listSurat, setListSurat] = useState([]);
+    const [nomor, setNomor] = useState(1);
     const [detail, setDetail] = useState(null);
-    const [showDetail, setShowDetail] = useState(false);
-    const [loadingDetail, setLoadingDetail] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [pickerOpen, setPickerOpen] = useState(false);
+    const [pickerSearch, setPickerSearch] = useState("");
+    const pickerRef = useRef(null);
 
     useEffect(() => {
-        getListSurat()
+        getListSurat().then((res) => {
+            if (res?.data) setListSurat(res.data);
+        });
+    }, []);
+
+    useEffect(() => {
+        setLoading(true);
+        getDetailSurat(nomor)
             .then((res) => {
-                if (res?.data) {
-                    setSurat(res.data);
-                }
+                if (res?.data) setDetail(res.data);
                 setLoading(false);
             })
             .catch(() => setLoading(false));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [nomor]);
+
+    useEffect(() => {
+        const onClickOutside = (e) => {
+            if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+                setPickerOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", onClickOutside);
+        return () => document.removeEventListener("mousedown", onClickOutside);
     }, []);
 
-    const openDetail = async (nomor) => {
-        if (!nomor) return;
-        setShowDetail(true);
-        setDetail(null);
-        setLoadingDetail(true);
-        try {
-            const res = await getDetailSurat(nomor);
-            if (res?.data) {
-                setDetail(res.data);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        setLoadingDetail(false);
-    };
-
-    const filtered = surat.filter(
+    const filteredList = listSurat.filter(
         (s) =>
-            s.namaLatin?.toLowerCase().includes(search.toLowerCase()) ||
-            String(s.nomor).includes(search),
+            s.namaLatin?.toLowerCase().includes(pickerSearch.toLowerCase()) ||
+            String(s.nomor).includes(pickerSearch),
     );
+
+    const goTo = (n) => {
+        if (n < 1 || n > 114) return;
+        setNomor(n);
+        setPickerOpen(false);
+        setPickerSearch("");
+    };
 
     return (
         <AppLayout>
-            <div>
-                <h2 className="text-lg font-bold text-slate-800 mb-4">
-                    Al-Qur'an
-                </h2>
+            <div className="min-h-screen bg-[#EEF8FD]">
+                {/* Header navigasi */}
+                <div className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] shadow-md">
+                    <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+                        <button
+                            onClick={() => goTo(nomor - 1)}
+                            disabled={nomor <= 1}
+                            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                            aria-label="Surat sebelumnya"
+                        >
+                            ‹
+                        </button>
 
-                <input
-                    type="text"
-                    placeholder="Cari surat..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm mb-4 outline-none"
-                />
-
-                {loading ? (
-                    <p className="text-center text-slate-400 py-10">
-                        Memuat...
-                    </p>
-                ) : (
-                    <div className="space-y-2">
-                        {filtered.map((s, index) => (
-                            <div
-                                key={index}
-                                onClick={() => openDetail(s.nomor)}
-                                className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm cursor-pointer hover:shadow-md transition"
+                        <div className="relative flex-1" ref={pickerRef}>
+                            <button
+                                onClick={() => setPickerOpen((v) => !v)}
+                                className="w-full flex items-center justify-between gap-2 bg-white/10 hover:bg-white/15 rounded-full px-4 py-2 text-left transition"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-[#3D7ABA]/10 text-[#3D7ABA] rounded-full flex items-center justify-center text-xs font-bold">
-                                        {s.nomor}
+                                <span className="min-w-0">
+                                    <span className="block text-[11px] text-white/60 leading-none mb-0.5">
+                                        Surat {nomor} dari 114
+                                    </span>
+                                    <span className="block text-sm font-semibold text-white truncate">
+                                        {detail?.namaLatin || "Memuat..."}
+                                    </span>
+                                </span>
+                                <svg
+                                    className={`w-4 h-4 text-white/70 shrink-0 transition-transform ${pickerOpen ? "rotate-180" : ""}`}
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path
+                                        d="M5.5 7.5l4.5 4.5 4.5-4.5"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        fill="none"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                </svg>
+                            </button>
+
+                            {pickerOpen && (
+                                <div className="absolute left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-sky-100 overflow-hidden">
+                                    <div className="p-2 border-b border-slate-100">
+                                        <input
+                                            autoFocus
+                                            type="text"
+                                            value={pickerSearch}
+                                            onChange={(e) =>
+                                                setPickerSearch(e.target.value)
+                                            }
+                                            placeholder="Cari nama atau nomor surat..."
+                                            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 outline-none focus:border-[#20B5E8]"
+                                        />
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-sm">
-                                            {s.namaLatin}
-                                        </p>
-                                        <p className="text-xs text-slate-400">
-                                            {s.jumlahAyat} ayat
-                                        </p>
+                                    <div className="max-h-72 overflow-y-auto">
+                                        {filteredList.map((s) => (
+                                            <button
+                                                key={s.nomor}
+                                                onClick={() => goTo(s.nomor)}
+                                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#3D7ABA]/5 transition ${
+                                                    s.nomor === nomor
+                                                        ? "bg-[#3D7ABA]/10"
+                                                        : ""
+                                                }`}
+                                            >
+                                                <span className="w-7 h-7 shrink-0 rounded-full border border-sky-200 text-[#3D7ABA] text-[11px] font-bold flex items-center justify-center">
+                                                    {s.nomor}
+                                                </span>
+                                                <span className="flex-1 min-w-0">
+                                                    <span className="block text-sm font-medium text-slate-800 truncate">
+                                                        {s.namaLatin}
+                                                    </span>
+                                                    <span className="block text-[11px] text-slate-400">
+                                                        {s.jumlahAyat} ayat
+                                                    </span>
+                                                </span>
+                                                <span className="font-mushaf text-lg text-[#3D7ABA]">
+                                                    {s.nama}
+                                                </span>
+                                            </button>
+                                        ))}
+                                        {filteredList.length === 0 && (
+                                            <p className="text-center text-sm text-slate-400 py-6">
+                                                Surat tidak ditemukan.
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            )}
+                        </div>
 
-                {showDetail && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto">
-                        <div className="flex min-h-full items-center justify-center p-4">
+                        <button
+                            onClick={() => goTo(nomor + 1)}
+                            disabled={nomor >= 114}
+                            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition"
+                            aria-label="Surat berikutnya"
+                        >
+                            ›
+                        </button>
+                    </div>
+                </div>
+
+                {/* Halaman mushaf */}
+                <div className="max-w-3xl mx-auto px-3 sm:px-6 py-6">
+                    {loading || !detail ? (
+                        <div className="py-24 text-center text-slate-400 text-sm">
+                            Memuat ayat...
+                        </div>
+                    ) : (
+                        <div
+                            className="rounded-[26px] p-[3px]"
+                            style={{
+                                background:
+                                    "linear-gradient(135deg,#20B5E8,#7DD3FC,#20B5E8)",
+                            }}
+                        >
                             <div
-                                className="fixed inset-0 bg-black/50"
-                                onClick={() => setShowDetail(false)}
-                            ></div>
-                            <div className="relative bg-[#FFF8E7] rounded-[30px] shadow-2xl w-full max-w-2xl p-6 border-2 border-amber-200 my-4">
-                                {loadingDetail || !detail ? (
-                                    <p className="text-center text-slate-400 py-8">
-                                        Memuat...
-                                    </p>
-                                ) : (
-                                    <>
-                                        <div className="text-center mb-6 pb-4 border-b-2 border-amber-200">
-                                            <h3 className="font-bold text-xl text-emerald-800">
-                                                {detail.namaLatin}
-                                            </h3>
-                                            <p className="text-xs text-slate-400 mt-1">
-                                                {detail.jumlahAyat} ayat •{" "}
-                                                {detail.arti}
-                                            </p>
-                                        </div>
-                                        <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-1">
-                                            {detail.ayat?.map((a, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="text-center"
-                                                >
-                                                    <p
-                                                        className="font-mushaf text-right text-2xl leading-loose text-slate-800"
-                                                        dir="rtl"
-                                                    >
-                                                        {a.teksArab}
-                                                    </p>
-                                                    <div className="flex justify-center my-2">
-                                                        <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium">
-                                                            {a.nomorAyat}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <button
-                                            onClick={() => setShowDetail(false)}
-                                            className="mt-6 w-full border border-amber-300 text-slate-600 py-2.5 rounded-2xl text-sm hover:bg-amber-50 transition"
+                                className="rounded-[23px] px-5 py-7 sm:px-10 sm:py-10 border-2 border-double border-sky-200/70"
+                                style={{
+                                    backgroundColor: "#FFFFFF",
+                                    backgroundImage:
+                                        "radial-gradient(circle at top left, rgba(61,122,186,0.06), transparent 55%), radial-gradient(circle at bottom right, rgba(32,181,232,0.06), transparent 55%)",
+                                }}
+                            >
+                                {/* Kepala surat */}
+                                <div className="text-center mb-8">
+                                    <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full border border-sky-200 bg-[#3D7ABA]/5">
+                                        <span className="font-mushaf text-2xl text-[#3D7ABA]">
+                                            {detail.nama}
+                                        </span>
+                                        <span className="w-px h-4 bg-sky-200" />
+                                        <span
+                                            className="text-sm text-slate-600 tracking-wide"
+                                            style={{
+                                                fontFamily: "'Lora', serif",
+                                            }}
                                         >
-                                            Tutup
-                                        </button>
-                                    </>
-                                )}
+                                            {detail.namaLatin}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-400 mt-2">
+                                        {detail.tempatTurun} ·{" "}
+                                        {detail.jumlahAyat} ayat · {detail.arti}
+                                    </p>
+
+                                    {detail.nomor !== 9 && (
+                                        <p
+                                            dir="rtl"
+                                            className="font-mushaf text-[26px] sm:text-3xl text-[#3D7ABA] mt-6"
+                                        >
+                                            بِسْمِ اللَّهِ الرَّحْمَٰنِ
+                                            الرَّحِيمِ
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Teks ayat mengalir, gaya mushaf */}
+                                <div
+                                    dir="rtl"
+                                    className="font-mushaf text-justify text-[24px] sm:text-[28px] leading-[2.7] text-slate-800"
+                                    style={{ textAlignLast: "right" }}
+                                >
+                                    {detail.ayat?.map((a) => (
+                                        <span key={a.nomorAyat}>
+                                            {a.teksArab}
+                                            <span
+                                                className="inline-flex items-center justify-center mx-1.5 align-middle rounded-full border-[1.5px] border-sky-300 text-[#3D7ABA] font-sans select-none"
+                                                style={{
+                                                    width: "1.7em",
+                                                    height: "1.7em",
+                                                    fontSize: "0.55em",
+                                                    fontWeight: 700,
+                                                    lineHeight: 1,
+                                                }}
+                                            >
+                                                {a.nomorAyat}
+                                            </span>
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {/* Navigasi bawah */}
+                    {!loading && detail && (
+                        <div className="flex items-center justify-between gap-3 mt-6">
+                            <button
+                                onClick={() => goTo(nomor - 1)}
+                                disabled={nomor <= 1}
+                                className="flex-1 text-sm font-medium text-[#3D7ABA] border border-sky-200 rounded-2xl py-3 disabled:opacity-30 hover:bg-[#3D7ABA]/5 transition"
+                            >
+                                ‹ Surat Sebelumnya
+                            </button>
+                            <button
+                                onClick={() => goTo(nomor + 1)}
+                                disabled={nomor >= 114}
+                                className="flex-1 text-sm font-medium text-[#3D7ABA] border border-sky-200 rounded-2xl py-3 disabled:opacity-30 hover:bg-[#3D7ABA]/5 transition"
+                            >
+                                Surat Berikutnya ›
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </AppLayout>
     );

@@ -45,7 +45,7 @@ export default function Index() {
 
     return (
         <AppLayout>
-            <div className="max-w-md mx-auto">
+            <div>
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-slate-800">
                         Jadwal Sholat
@@ -67,13 +67,13 @@ export default function Index() {
                         Memuat...
                     </p>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         {sholatList.map((s) => (
                             <div
                                 key={s.label}
                                 className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
                             >
-                                <div className="flex items-center justify-between">
+                                <div className="flex justify-between">
                                     <span className="text-sm font-medium text-slate-600">
                                         {s.label}
                                     </span>

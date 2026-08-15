@@ -511,10 +511,10 @@ export default function Index() {
                     </div>
                 )}
 
-                {/* Card List */}
-                <div className="space-y-3">
+                {/* Card List - 2 kolom desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filtered.length === 0 && (
-                        <p className="text-center text-slate-400 py-10">
+                        <p className="text-center text-slate-400 py-10 sm:col-span-2">
                             Tidak ada data
                         </p>
                     )}
@@ -713,17 +713,30 @@ export default function Index() {
                                 </button>
                             </div>
                             <form onSubmit={submit} className="space-y-3">
-                                <input
-                                    type="text"
-                                    placeholder="NIS"
-                                    value={data.nis}
-                                    onChange={(e) =>
-                                        setData("nis", e.target.value)
-                                    }
-                                    disabled={!!editData}
-                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
-                                    required
-                                />
+                                {!editData ? (
+                                    <select
+                                        value={data.nis}
+                                        onChange={(e) =>
+                                            setData("nis", e.target.value)
+                                        }
+                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        required
+                                    >
+                                        <option value="">Pilih Santri</option>
+                                        {santris.map((s) => (
+                                            <option key={s.nis} value={s.nis}>
+                                                {s.nama_lengkap} ({s.nis})
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        value={data.nis}
+                                        disabled
+                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50"
+                                    />
+                                )}
                                 <select
                                     value={data.jenis}
                                     onChange={(e) =>

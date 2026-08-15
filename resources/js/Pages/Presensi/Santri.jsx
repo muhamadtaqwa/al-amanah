@@ -34,13 +34,11 @@ export default function Santri() {
         setSending(true);
         router.post(
             "/presensi-santri",
-            {
-                nis: nisTerbaca,
-            },
+            { nis: nisTerbaca },
             {
                 onSuccess: () => {
                     playBeep();
-                    toast.success(`Presensi berhasil!`);
+                    toast.success("Presensi berhasil!");
                     setNis("");
                     setSending(false);
                 },
@@ -76,22 +74,22 @@ export default function Santri() {
                     <h2 className="text-lg font-bold text-slate-800">
                         Presensi Santri
                     </h2>
+                    <a
+                        href="/presensi-santri/rekap"
+                        className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg hover:scale-[1.02] transition"
+                    >
+                        Rekap
+                    </a>
+                </div>
+
+                {/* Tanggal */}
+                <div className="mb-4">
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={handleDateChange}
-                        className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                     />
-                </div>
-
-                {/* Tombol Rekap */}
-                <div className="mb-4">
-                    <a
-                        href="/presensi-santri/rekap"
-                        className="block bg-white border border-slate-200 text-slate-600 py-2.5 rounded-2xl text-sm font-medium text-center hover:bg-slate-50 transition"
-                    >
-                        Lihat Rekap Presensi
-                    </a>
                 </div>
 
                 {/* Input manual scan */}

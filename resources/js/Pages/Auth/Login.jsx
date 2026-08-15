@@ -179,7 +179,7 @@ export default function Login() {
                                     disabled={processing}
                                     className="w-full rounded-2xl bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] py-3 font-semibold text-white shadow-lg transition duration-300 hover:scale-[1.02] hover:shadow-xl disabled:pointer-events-none disabled:opacity-50"
                                 >
-                                    {processing ? "Sedang Masuk..." : "Masuk"}
+                                    {processing ? "Sedang Login..." : "Login"}
                                 </button>
                             </form>
                         </div>

@@ -10,6 +10,17 @@ export default function Index() {
     const [editData, setEditData] = useState(null);
     const [search, setSearch] = useState("");
 
+    const salin = (teks) => {
+        navigator.clipboard
+            .writeText(teks)
+            .then(() => {
+                toast.success("Tersalin!");
+            })
+            .catch(() => {
+                toast.error("Gagal menyalin.");
+            });
+    };
+
     const { data, setData, post, put, reset, processing } = useForm({
         nip_nuptk: "",
         nik: "",
@@ -173,12 +184,45 @@ export default function Index() {
                             </h3>
                             <div className="text-[11px] text-slate-500 space-y-0.5">
                                 {u.nip_nuptk && (
-                                    <Row
-                                        label="NIP/NUPTK"
-                                        value={u.nip_nuptk}
-                                    />
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">
+                                            NIP/NUPTK
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-slate-600">
+                                                {u.nip_nuptk}
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    salin(u.nip_nuptk)
+                                                }
+                                                className="text-slate-400 hover:text-[#3D7ABA]"
+                                                aria-label="Salin NIP/NUPTK"
+                                            >
+                                                <i className="fa-solid fa-copy text-[10px]"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
-                                {u.nik && <Row label="NIK" value={u.nik} />}
+                                {u.nik && (
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">
+                                            NIK
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-slate-600">
+                                                {u.nik}
+                                            </span>
+                                            <button
+                                                onClick={() => salin(u.nik)}
+                                                className="text-slate-400 hover:text-[#3D7ABA]"
+                                                aria-label="Salin NIK"
+                                            >
+                                                <i className="fa-solid fa-copy text-[10px]"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                                 {(u.tempat_lahir || u.tanggal_lahir) && (
                                     <Row
                                         label="TTL"
@@ -208,7 +252,25 @@ export default function Index() {
                                     />
                                 )}
                                 {u.nomor_hp && (
-                                    <Row label="HP" value={u.nomor_hp} />
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">
+                                            HP
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-slate-600">
+                                                {u.nomor_hp}
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    salin(u.nomor_hp)
+                                                }
+                                                className="text-slate-400 hover:text-[#3D7ABA]"
+                                                aria-label="Salin nomor HP"
+                                            >
+                                                <i className="fa-solid fa-copy text-[10px]"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>

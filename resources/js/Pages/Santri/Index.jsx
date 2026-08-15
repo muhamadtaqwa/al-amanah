@@ -21,6 +21,17 @@ export default function Index() {
     const [kecamatanList, setKecamatanList] = useState([]);
     const [desaList, setDesaList] = useState([]);
 
+    const salin = (teks) => {
+        navigator.clipboard
+            .writeText(teks)
+            .then(() => {
+                toast.success("Tersalin!");
+            })
+            .catch(() => {
+                toast.error("Gagal menyalin.");
+            });
+    };
+
     const prodiList = [
         "S1 Kedokteran",
         "S1 Bimbingan dan Penyuluhan Islam",
@@ -313,7 +324,25 @@ export default function Index() {
                                     <Row label="NISN" value={santri.nisn} />
                                 )}
                                 {santri.nik && (
-                                    <Row label="NIK" value={santri.nik} />
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">
+                                            NIK
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-slate-600">
+                                                {santri.nik}
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    salin(santri.nik)
+                                                }
+                                                className="text-slate-400 hover:text-[#3D7ABA]"
+                                                aria-label="Salin NIK"
+                                            >
+                                                <i className="fa-solid fa-copy text-[10px]"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                                 {(santri.tempat_lahir ||
                                     santri.tanggal_lahir) && (
@@ -354,7 +383,25 @@ export default function Index() {
                                     <Row label="Kamar" value={santri.kamar} />
                                 )}
                                 {santri.nomor_hp && (
-                                    <Row label="HP" value={santri.nomor_hp} />
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">
+                                            HP
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-slate-600">
+                                                {santri.nomor_hp}
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    salin(santri.nomor_hp)
+                                                }
+                                                className="text-slate-400 hover:text-[#3D7ABA]"
+                                                aria-label="Salin nomor HP"
+                                            >
+                                                <i className="fa-solid fa-copy text-[10px]"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -487,7 +534,6 @@ export default function Index() {
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         />
 
-                                        {/* Provinsi */}
                                         <select
                                             value={data.provinsi}
                                             onChange={(e) =>
@@ -508,7 +554,6 @@ export default function Index() {
                                             ))}
                                         </select>
 
-                                        {/* Kabupaten */}
                                         <select
                                             value={data.kabupaten}
                                             onChange={(e) =>
@@ -530,7 +575,6 @@ export default function Index() {
                                             ))}
                                         </select>
 
-                                        {/* Kecamatan */}
                                         <select
                                             value={data.kecamatan}
                                             onChange={(e) =>
@@ -552,7 +596,6 @@ export default function Index() {
                                             ))}
                                         </select>
 
-                                        {/* Desa */}
                                         <select
                                             value={data.desa}
                                             onChange={(e) =>

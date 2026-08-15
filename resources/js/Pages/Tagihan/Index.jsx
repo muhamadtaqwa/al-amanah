@@ -11,6 +11,17 @@ export default function Index() {
     const [fileName, setFileName] = useState("");
     const fileRef = useRef(null);
 
+    const salin = (teks) => {
+        navigator.clipboard
+            .writeText(teks)
+            .then(() => {
+                toast.success("Nomor rekening tersalin!");
+            })
+            .catch(() => {
+                toast.error("Gagal menyalin.");
+            });
+    };
+
     const handleUpload = (id) => {
         const file = fileRef.current?.files[0];
         if (!file) return toast.error("Pilih file dulu");
@@ -92,10 +103,23 @@ export default function Index() {
                             Rekening Yayasan
                         </h4>
                         <Row label="Bank" value={rekening.bank} />
-                        <Row
-                            label="No. Rekening"
-                            value={rekening.nomor_rekening}
-                        />
+                        <div className="flex justify-between text-[11px]">
+                            <span className="text-slate-400">No. Rekening</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-slate-600">
+                                    {rekening.nomor_rekening}
+                                </span>
+                                <button
+                                    onClick={() =>
+                                        salin(rekening.nomor_rekening)
+                                    }
+                                    className="text-slate-400 hover:text-[#3D7ABA] transition"
+                                    aria-label="Salin nomor rekening"
+                                >
+                                    <i className="fa-solid fa-copy text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
                         <Row label="Atas Nama" value={rekening.atas_nama} />
                     </div>
                 )}

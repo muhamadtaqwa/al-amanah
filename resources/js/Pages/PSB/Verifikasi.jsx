@@ -60,6 +60,22 @@ export default function Verifikasi() {
                             </span>
                         )}
                     </h2>
+                    <div className="flex gap-2">
+                        <a
+                            href="/psb"
+                            target="_blank"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg"
+                        >
+                            Form PSB
+                        </a>
+                        <a
+                            href="/psb/cek"
+                            target="_blank"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg"
+                        >
+                            Cek Status
+                        </a>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-2 mb-4">

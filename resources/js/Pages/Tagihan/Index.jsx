@@ -36,12 +36,17 @@ export default function Index() {
         filter === "semua"
             ? tagihan
             : tagihan.filter((t) => t.status === filter);
+
+    const totalSemua = tagihan.reduce(
+        (s, t) => s + parseInt(t.nominal || 0),
+        0,
+    );
     const totalBelum = tagihan
         .filter((t) => t.status === "menunggu" || t.status === "dicicil")
-        .reduce((s, t) => s + (t.sisa || t.nominal), 0);
+        .reduce((s, t) => s + (t.sisa || 0), 0);
     const totalLunas = tagihan
         .filter((t) => t.status === "lunas")
-        .reduce((s, t) => s + t.nominal, 0);
+        .reduce((s, t) => s + parseInt(t.nominal || 0), 0);
 
     return (
         <AppLayout>
@@ -56,7 +61,7 @@ export default function Index() {
                             Total Semua
                         </span>
                         <span className="text-base font-extrabold text-[#3D7ABA] font-mono tracking-tight">
-                            Rp {(totalBelum + totalLunas).toLocaleString()}
+                            Rp {totalSemua.toLocaleString()}
                         </span>
                     </div>
                     {totalLunas > 0 && (

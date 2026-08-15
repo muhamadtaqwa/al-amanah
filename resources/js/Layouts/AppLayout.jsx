@@ -27,6 +27,18 @@ export default function AppLayout({ children }) {
             roles: ["admin", "ustadz", "santri"],
         },
         {
+            label: "Jadwal Sholat",
+            path: "/jadwal-sholat",
+            icon: "fa-person-praying",
+            roles: ["admin", "ustadz", "santri"],
+        },
+        {
+            label: "Al-Qur'an",
+            path: "/al-quran",
+            icon: "fa-book-quran",
+            roles: ["admin", "ustadz", "santri"],
+        },
+        {
             label: "QR Code",
             path: "/qr",
             icon: "fa-qrcode",
@@ -36,18 +48,6 @@ export default function AppLayout({ children }) {
             label: "Timeline",
             path: "/timeline",
             icon: "fa-timeline",
-            roles: ["admin", "ustadz", "santri"],
-        },
-        {
-            label: "Jadwal Sholat",
-            path: "/jadwal-sholat",
-            icon: "fa-kaaba",
-            roles: ["admin", "ustadz", "santri"],
-        },
-        {
-            label: "Al-Qur'an",
-            path: "/al-quran",
-            icon: "fa-book-quran",
             roles: ["admin", "ustadz", "santri"],
         },
     ];
@@ -172,7 +172,7 @@ export default function AppLayout({ children }) {
     const CategoryTitle = ({ children, collapsed }) => {
         if (collapsed) return null;
         return (
-            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
+            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
                 {children}
             </p>
         );
@@ -188,6 +188,7 @@ export default function AppLayout({ children }) {
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="absolute left-4 top-1/2 -translate-y-1/2 text-white"
+                        aria-label="Buka menu"
                     >
                         <i className="fa-solid fa-bars text-lg"></i>
                     </button>
@@ -222,6 +223,7 @@ export default function AppLayout({ children }) {
                         <button
                             onClick={() => setSidebarOpen(false)}
                             className="ml-auto text-slate-400"
+                            aria-label="Tutup menu"
                         >
                             &times;
                         </button>
@@ -233,7 +235,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -251,7 +253,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -269,7 +271,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -287,7 +289,7 @@ export default function AppLayout({ children }) {
                                 key={m.path}
                                 href={m.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
                                 <i
                                     className={`fa-solid ${m.icon} w-5 text-center`}
@@ -300,7 +302,7 @@ export default function AppLayout({ children }) {
                         <Link
                             href="/profil"
                             onClick={() => setSidebarOpen(false)}
-                            className={`flex items-center gap-3 px-6 py-2.5 text-sm ${isActive("/profil") ? activeClass : inactiveClass}`}
+                            className={`flex items-center gap-3 px-6 py-2 text-sm ${isActive("/profil") ? activeClass : inactiveClass}`}
                         >
                             <div className="w-5 h-5 rounded-full bg-[#3D7ABA] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                                 {initial}
@@ -309,7 +311,7 @@ export default function AppLayout({ children }) {
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-6 py-2.5 text-sm text-red-500 font-medium hover:bg-red-50"
+                            className="w-full flex items-center gap-3 px-6 py-2 text-sm text-red-500 font-medium hover:bg-red-50"
                         >
                             <i className="fa-solid fa-right-from-bracket w-5 text-center"></i>
                             Logout
@@ -338,6 +340,7 @@ export default function AppLayout({ children }) {
                 <button
                     onClick={toggleSidebar}
                     className="absolute -right-3 top-20 w-6 h-6 bg-white shadow-md rounded-full flex items-center justify-center text-xs text-slate-400 hover:text-[#3D7ABA]"
+                    aria-label="Toggle sidebar"
                 >
                     <i
                         className={`fa-solid ${sidebarCollapsed ? "fa-chevron-right" : "fa-chevron-left"}`}

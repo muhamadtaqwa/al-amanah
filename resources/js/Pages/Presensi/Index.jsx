@@ -161,10 +161,12 @@ export default function Index() {
                                 {item.kitab && (
                                     <Row label="Kitab" value={item.kitab} />
                                 )}
-                                <Row
-                                    label="Bisyaroh"
-                                    value={`Rp ${item.honor_default?.toLocaleString()}`}
-                                />
+                                {isAdmin && (
+                                    <Row
+                                        label="Bisyaroh"
+                                        value={`Rp ${item.honor_default?.toLocaleString()}`}
+                                    />
+                                )}
                                 {item.sesi && (
                                     <Row label="Sesi" value={item.sesi} />
                                 )}
@@ -175,7 +177,7 @@ export default function Index() {
 
                 <div className="pt-4">
                     <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-                        Rekap Honor Bulan Ini
+                        Rekap Kehadiran Bulan Ini
                     </h3>
                     {rekap.length === 0 ? (
                         <p className="text-xs text-slate-400">Belum ada data</p>
@@ -197,7 +199,7 @@ export default function Index() {
                                             {r.total_hadir}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between mb-1">
+                                    <div className="flex justify-between">
                                         <span className="text-slate-500">
                                             Tidak
                                         </span>
@@ -205,27 +207,33 @@ export default function Index() {
                                             {r.total_tidak_hadir}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">
-                                            Honor
-                                        </span>
-                                        <span className="font-bold text-[#3D7ABA] font-mono">
-                                            Rp{" "}
-                                            {parseInt(
-                                                r.total_honor || 0,
-                                            ).toLocaleString()}
-                                        </span>
-                                    </div>
+                                    {isAdmin && (
+                                        <>
+                                            <div className="flex justify-between mt-1">
+                                                <span className="text-slate-500">
+                                                    Honor
+                                                </span>
+                                                <span className="font-bold text-[#3D7ABA] font-mono">
+                                                    Rp{" "}
+                                                    {parseInt(
+                                                        r.total_honor || 0,
+                                                    ).toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ))}
-                            <div className="rounded-2xl bg-gradient-to-r from-[#3D7ABA]/10 to-[#20B5E8]/10 p-4 flex items-center justify-between text-sm font-bold">
-                                <span className="text-[#3D7ABA]">
-                                    Total Honor
-                                </span>
-                                <span className="text-[#3D7ABA] font-mono">
-                                    Rp {totalHonor.toLocaleString()}
-                                </span>
-                            </div>
+                            {isAdmin && (
+                                <div className="rounded-2xl bg-gradient-to-r from-[#3D7ABA]/10 to-[#20B5E8]/10 p-4 flex items-center justify-between text-sm font-bold">
+                                    <span className="text-[#3D7ABA]">
+                                        Total Honor
+                                    </span>
+                                    <span className="text-[#3D7ABA] font-mono">
+                                        Rp {totalHonor.toLocaleString()}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

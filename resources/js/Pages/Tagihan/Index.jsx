@@ -15,7 +15,7 @@ export default function Index() {
         navigator.clipboard
             .writeText(teks)
             .then(() => {
-                toast.success("Nomor rekening tersalin!");
+                toast.success("Tersalin!");
             })
             .catch(() => {
                 toast.error("Gagal menyalin.");
@@ -72,7 +72,7 @@ export default function Index() {
                             Total Semua
                         </span>
                         <span className="text-base font-extrabold text-[#3D7ABA] font-mono tracking-tight">
-                            Rp {totalSemua.toLocaleString()}
+                            Rp {parseInt(totalSemua || 0).toLocaleString()}
                         </span>
                     </div>
                     {totalLunas > 0 && (
@@ -81,7 +81,7 @@ export default function Index() {
                                 Lunas
                             </span>
                             <span className="text-base font-extrabold text-emerald-600 font-mono tracking-tight">
-                                Rp {totalLunas.toLocaleString()}
+                                Rp {parseInt(totalLunas || 0).toLocaleString()}
                             </span>
                         </div>
                     )}
@@ -91,7 +91,7 @@ export default function Index() {
                                 Belum Lunas
                             </span>
                             <span className="text-base font-extrabold text-red-500 font-mono tracking-tight">
-                                Rp {totalBelum.toLocaleString()}
+                                Rp {parseInt(totalBelum || 0).toLocaleString()}
                             </span>
                         </div>
                     )}
@@ -124,6 +124,38 @@ export default function Index() {
                     </div>
                 )}
 
+                {/* Kontak WA Pondok */}
+                <div className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl mb-4">
+                    <h4 className="text-xs font-semibold text-slate-500 mb-2">
+                        Kontak Pondok
+                    </h4>
+                    <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-400">No. WhatsApp</span>
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium text-slate-600">
+                                085708075004
+                            </span>
+                            <button
+                                onClick={() => salin("085708075004")}
+                                className="text-slate-400 hover:text-[#3D7ABA] transition"
+                                aria-label="Salin nomor WhatsApp"
+                            >
+                                <i className="fa-solid fa-copy text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex justify-between text-[11px] mt-1">
+                        <span className="text-slate-400">Tautan Chat</span>
+                        <a
+                            href="https://wa.me/6285708075004"
+                            target="_blank"
+                            className="font-medium text-emerald-600 hover:underline"
+                        >
+                            WhatsApp
+                        </a>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-3 gap-2 mb-4">
                     {["semua", "menunggu", "lunas"].map((f) => (
                         <button
@@ -140,9 +172,9 @@ export default function Index() {
                     ))}
                 </div>
 
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filtered.length === 0 && (
-                        <p className="text-center text-slate-400 py-10">
+                        <p className="text-center text-slate-400 py-10 sm:col-span-2">
                             Tidak ada tagihan
                         </p>
                     )}
@@ -167,7 +199,8 @@ export default function Index() {
                                     </span>
                                 </div>
                                 <p className="text-base font-bold font-mono tracking-tight">
-                                    Rp {parseInt(t.nominal).toLocaleString()}
+                                    Rp{" "}
+                                    {parseInt(t.nominal || 0).toLocaleString()}
                                 </p>
                             </div>
                             <h3 className="font-semibold text-sm truncate mb-2">
@@ -183,11 +216,11 @@ export default function Index() {
                                     <>
                                         <Row
                                             label="Dibayar"
-                                            value={`Rp ${t.total_dibayar?.toLocaleString()}`}
+                                            value={`Rp ${parseInt(t.total_dibayar || 0).toLocaleString()}`}
                                         />
                                         <Row
                                             label="Sisa"
-                                            value={`Rp ${t.sisa?.toLocaleString()}`}
+                                            value={`Rp ${parseInt(t.sisa || 0).toLocaleString()}`}
                                         />
                                     </>
                                 )}
@@ -281,7 +314,7 @@ export default function Index() {
                                                     }
                                                     className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg"
                                                 >
-                                                    Upload Bukti TF
+                                                    Upload Bukti Transfer
                                                 </button>
                                             )}
                                         </>

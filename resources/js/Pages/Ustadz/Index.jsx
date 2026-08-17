@@ -347,17 +347,24 @@ export default function Index() {
                                             }
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         />
-                                        <input
-                                            type="date"
-                                            value={data.tanggal_lahir}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "tanggal_lahir",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                        />
+
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">
+                                                Tanggal Lahir
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={data.tanggal_lahir}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "tanggal_lahir",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                                            />
+                                        </div>
+
                                         <select
                                             value={data.jenis_kelamin}
                                             onChange={(e) =>
@@ -378,6 +385,7 @@ export default function Index() {
                                                 Perempuan
                                             </option>
                                         </select>
+
                                         <select
                                             value={data.pendidikan_terakhir}
                                             onChange={(e) =>
@@ -401,6 +409,7 @@ export default function Index() {
                                             <option value="S2">S2</option>
                                             <option value="S3">S3</option>
                                         </select>
+
                                         <input
                                             type="text"
                                             placeholder="Alamat"
@@ -413,6 +422,7 @@ export default function Index() {
                                             }
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
                                         />
+
                                         <select
                                             value={data.status_kepegawaian}
                                             onChange={(e) =>
@@ -432,17 +442,24 @@ export default function Index() {
                                                 Honorer
                                             </option>
                                         </select>
-                                        <input
-                                            type="date"
-                                            value={data.tanggal_mulai_tugas}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "tanggal_mulai_tugas",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                        />
+
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">
+                                                Mulai Tugas
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={data.tanggal_mulai_tugas}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "tanggal_mulai_tugas",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                                            />
+                                        </div>
+
                                         <select
                                             value={data.status}
                                             onChange={(e) =>
@@ -458,6 +475,7 @@ export default function Index() {
                                                 Tidak Aktif
                                             </option>
                                         </select>
+
                                         <input
                                             type="text"
                                             placeholder="Nomor HP"

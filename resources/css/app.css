@@ -3,6 +3,8 @@
 
 body {
     font-family: "Poppins", sans-serif;
+    background-color: #eef8fd;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 @font-face {
@@ -14,5 +16,5 @@ body {
 
 .font-mushaf {
     font-family: "LPMQ", "Amiri", "Scheherazade", serif;
-    line-height: 2.5;
+    line-height: 2;
 }

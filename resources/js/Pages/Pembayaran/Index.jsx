@@ -25,6 +25,9 @@ export default function Index() {
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [deleteKategoriTarget, setDeleteKategoriTarget] = useState(null);
     const [statusFilter, setStatusFilter] = useState(filters.status || "semua");
+    const [showBukti, setShowBukti] = useState(null);
+    const [verifikasiTarget, setVerifikasiTarget] = useState(null);
+    const [nominalVerifikasi, setNominalVerifikasi] = useState("");
     const firstFieldRef = useRef(null);
 
     const { data, setData, post, put, reset, processing, errors, clearErrors } =
@@ -172,18 +175,30 @@ export default function Index() {
         });
     };
 
-    const handleVerifikasi = (id, status) => {
-        setVerifyingId(id);
+    const openVerifikasi = (p) => {
+        setVerifikasiTarget(p);
+        setNominalVerifikasi(p.sisa || "");
+    };
+
+    const handleVerifikasi = (p, status) => {
+        setVerifyingId(p.id);
         router.post(
-            `/pembayaran/${id}/verifikasi`,
-            { status_verifikasi: status },
+            `/pembayaran/${p.id}/verifikasi`,
             {
-                onSuccess: () =>
+                status_verifikasi: status,
+                nominal_dibayar:
+                    status === "lunas" ? nominalVerifikasi : undefined,
+            },
+            {
+                onSuccess: () => {
                     toast.success(
                         status === "lunas"
-                            ? "Pembayaran diterima!"
+                            ? "Pembayaran disetujui!"
                             : "Pembayaran ditolak!",
-                    ),
+                    );
+                    setVerifikasiTarget(null);
+                    setNominalVerifikasi("");
+                },
                 onError: () => toast.error("Gagal verifikasi."),
                 onFinish: () => setVerifyingId(null),
             },
@@ -307,6 +322,114 @@ export default function Index() {
                         </button>
                     ))}
                 </div>
+
+                {/* Modal Lihat Bukti */}
+                {showBukti && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/70"
+                            onClick={() => setShowBukti(null)}
+                        ></div>
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-lg p-4 border border-sky-100">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-lg">
+                                    Bukti Transfer
+                                </h3>
+                                <button
+                                    onClick={() => setShowBukti(null)}
+                                    className="text-slate-400 hover:text-slate-600 text-lg"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                            <img
+                                src={`/storage/${showBukti}`}
+                                alt="Bukti Transfer"
+                                className="w-full rounded-2xl"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal Verifikasi */}
+                {verifikasiTarget && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50"
+                            onClick={() => setVerifikasiTarget(null)}
+                        ></div>
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-6 border border-sky-100">
+                            <h3 className="font-semibold text-lg mb-4">
+                                Verifikasi Pembayaran
+                            </h3>
+                            {verifikasiTarget.bukti && (
+                                <img
+                                    src={`/storage/${verifikasiTarget.bukti}`}
+                                    alt="Bukti"
+                                    className="w-full h-40 object-cover rounded-2xl mb-3"
+                                />
+                            )}
+                            <div className="text-xs text-slate-500 mb-3">
+                                <p>
+                                    Santri:{" "}
+                                    {verifikasiTarget.santri?.nama_lengkap}
+                                </p>
+                                <p>
+                                    Nominal Tagihan: Rp{" "}
+                                    {parseInt(
+                                        verifikasiTarget.nominal || 0,
+                                    ).toLocaleString()}
+                                </p>
+                                <p>
+                                    Sisa: Rp{" "}
+                                    {parseInt(
+                                        verifikasiTarget.sisa || 0,
+                                    ).toLocaleString()}
+                                </p>
+                            </div>
+                            <input
+                                type="number"
+                                value={nominalVerifikasi}
+                                onChange={(e) =>
+                                    setNominalVerifikasi(e.target.value)
+                                }
+                                placeholder="Nominal yang dibayar"
+                                className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none mb-3"
+                            />
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() =>
+                                        handleVerifikasi(
+                                            verifikasiTarget,
+                                            "ditolak",
+                                        )
+                                    }
+                                    disabled={
+                                        verifyingId === verifikasiTarget.id
+                                    }
+                                    className="flex-1 bg-red-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
+                                >
+                                    Tolak
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        handleVerifikasi(
+                                            verifikasiTarget,
+                                            "lunas",
+                                        )
+                                    }
+                                    disabled={
+                                        verifyingId === verifikasiTarget.id ||
+                                        !nominalVerifikasi
+                                    }
+                                    className="flex-1 bg-emerald-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
+                                >
+                                    Terima
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Kategori Modal */}
                 {showKategori && isAdmin && (
@@ -544,9 +667,14 @@ export default function Index() {
                                             {statusLabel(p.status)}
                                         </span>
                                         {p.bukti && (
-                                            <span className="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full">
-                                                Bukti
-                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    setShowBukti(p.bukti)
+                                                }
+                                                className="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full"
+                                            >
+                                                Lihat Bukti
+                                            </button>
                                         )}
                                     </div>
                                     {isAdmin && (
@@ -632,30 +760,14 @@ export default function Index() {
                                         )}
                                         {p.status_verifikasi === "menunggu" &&
                                             p.bukti && (
-                                                <>
-                                                    <button
-                                                        onClick={() =>
-                                                            handleVerifikasi(
-                                                                p.id,
-                                                                "lunas",
-                                                            )
-                                                        }
-                                                        className="text-[10px] bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg"
-                                                    >
-                                                        Terima
-                                                    </button>
-                                                    <button
-                                                        onClick={() =>
-                                                            handleVerifikasi(
-                                                                p.id,
-                                                                "ditolak",
-                                                            )
-                                                        }
-                                                        className="text-[10px] bg-red-100 text-red-700 px-2.5 py-1 rounded-lg"
-                                                    >
-                                                        Tolak
-                                                    </button>
-                                                </>
+                                                <button
+                                                    onClick={() =>
+                                                        openVerifikasi(p)
+                                                    }
+                                                    className="text-[10px] bg-blue-100 text-blue-700 px-2.5 py-1 rounded-lg"
+                                                >
+                                                    Verifikasi
+                                                </button>
                                             )}
                                     </div>
                                 )}

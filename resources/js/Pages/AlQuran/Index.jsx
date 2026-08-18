@@ -4,6 +4,7 @@ import {
     useLayoutEffect,
     useRef,
     useCallback,
+    useMemo,
 } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import {
@@ -36,17 +37,12 @@ export default function Index() {
     const contentRef = useRef(null);
     const abortRef = useRef(null);
 
-    // Fetch halaman dengan AbortController
     useEffect(() => {
-        if (abortRef.current) {
-            abortRef.current.abort();
-        }
+        if (abortRef.current) abortRef.current.abort();
         const controller = new AbortController();
         abortRef.current = controller;
-
         setLoading(true);
         setReady(false);
-
         getHalamanMushaf(halaman, controller.signal)
             .then((res) => {
                 if (res?.verses) setDetail(res);
@@ -65,8 +61,7 @@ export default function Index() {
             .then((res) => {
                 if (res?.chapters) setListSurat(res.chapters);
             })
-            .catch(() => toast.error("Gagal memuat daftar surat."));
-
+            .catch(() => {});
         getListJuz()
             .then((res) => {
                 if (res?.juzs) {
@@ -79,28 +74,51 @@ export default function Index() {
                     setListJuz(unik);
                 }
             })
-            .catch(() => toast.error("Gagal memuat daftar juz."));
+            .catch(() => {});
     }, []);
 
     useEffect(() => {
         const onClickOutside = (e) => {
-            if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+            if (pickerRef.current && !pickerRef.current.contains(e.target))
                 setPickerMode(null);
-            }
         };
         document.addEventListener("mousedown", onClickOutside);
         return () => document.removeEventListener("mousedown", onClickOutside);
     }, []);
 
+    // Susun ulang kata-kata per baris asli Mushaf Madinah (line_number dari API),
+    // bukan paragraf yang di-wrap otomatis oleh browser.
+    const baris = useMemo(() => {
+        if (!detail?.verses) return [];
+        const perBaris = new Map();
+        detail.verses.forEach((v) => {
+            const nomorAyat = v.verse_key.split(":")[1];
+            const kata = (v.words || []).filter(
+                (w) => w.char_type_name !== "end",
+            );
+            kata.forEach((w, idx) => {
+                const arr = perBaris.get(w.line_number) || [];
+                arr.push({
+                    key: `${v.verse_key}-${w.position}`,
+                    text: w.text_uthmani,
+                    akhirAyat: idx === kata.length - 1,
+                    nomorAyat,
+                });
+                perBaris.set(w.line_number, arr);
+            });
+        });
+        return [...perBaris.entries()]
+            .sort((a, b) => a[0] - b[0])
+            .map(([nomorBaris, kata]) => ({ nomorBaris, kata }));
+    }, [detail]);
+
     const fitToStage = useCallback(() => {
         const stage = stageRef.current;
         const content = contentRef.current;
         if (!stage || !content) return;
-
         const stageRect = stage.getBoundingClientRect();
         const contentRect = content.getBoundingClientRect();
         if (contentRect.width === 0 || contentRect.height === 0) return;
-
         const scaleX = stageRect.width / contentRect.width;
         const scaleY = stageRect.height / contentRect.height;
         const next = Math.min(scaleX, scaleY, 1.5);
@@ -111,10 +129,8 @@ export default function Index() {
     useLayoutEffect(() => {
         if (loading || !detail) return;
         fitToStage();
-        if (document.fonts?.ready) {
-            document.fonts.ready.then(fitToStage);
-        }
-    }, [loading, detail, fitToStage]);
+        if (document.fonts?.ready) document.fonts.ready.then(fitToStage);
+    }, [loading, detail, baris, fitToStage]);
 
     useEffect(() => {
         let raf;
@@ -149,18 +165,12 @@ export default function Index() {
     const handleTouchEnd = (e) => {
         if (touchStartX.current === null || touchStartY.current === null)
             return;
-
         const deltaX = e.changedTouches[0].clientX - touchStartX.current;
         const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
-            if (deltaX > 0) {
-                goTo(halaman + 1);
-            } else {
-                goTo(halaman - 1);
-            }
+            if (deltaX > 0) goTo(halaman + 1);
+            else goTo(halaman - 1);
         }
-
         touchStartX.current = null;
         touchStartY.current = null;
     };
@@ -170,9 +180,19 @@ export default function Index() {
             const res = await getHalamanDariSurat(suratId);
             const halamanSurat = res?.chapter?.pages?.[0];
             if (halamanSurat) goTo(halamanSurat);
-            else toast.error("Surat tidak ditemukan.");
         } catch {
             toast.error("Gagal membuka surat.");
+        }
+        setPickerMode(null);
+    };
+
+    const pilihAyatHandlerByKey = async (surat, ayat) => {
+        try {
+            const res = await getHalamanDariAyat(surat, ayat);
+            const halamanAyat = res?.verse?.page_number;
+            if (halamanAyat) goTo(halamanAyat);
+        } catch {
+            toast.error("Gagal membuka ayat.");
         }
         setPickerMode(null);
     };
@@ -180,23 +200,11 @@ export default function Index() {
     const pilihAyatHandler = async () => {
         const surat = listSurat.find((s) => s.id === pilihSurat);
         const maxAyat = surat?.verses_count || 1;
-
         if (pilihAyat < 1 || pilihAyat > maxAyat) {
-            toast.error(
-                `Ayat tidak valid. Surat ${surat?.name_simple} hanya ${maxAyat} ayat.`,
-            );
+            toast.error("Ayat tidak valid.");
             return;
         }
-
-        try {
-            const res = await getHalamanDariAyat(pilihSurat, pilihAyat);
-            const halamanAyat = res?.verse?.page_number;
-            if (halamanAyat) goTo(halamanAyat);
-            else toast.error("Ayat tidak ditemukan.");
-        } catch {
-            toast.error("Gagal membuka ayat.");
-        }
-        setPickerMode(null);
+        pilihAyatHandlerByKey(pilihSurat, pilihAyat);
     };
 
     const pilihJuzHandler = (juz) => {
@@ -206,24 +214,9 @@ export default function Index() {
         pilihAyatHandlerByKey(suratPertama, ayatPertama);
     };
 
-    const pilihAyatHandlerByKey = async (surat, ayat) => {
-        try {
-            const res = await getHalamanDariAyat(surat, ayat);
-            const halamanAyat = res?.verse?.page_number;
-            if (halamanAyat) goTo(halamanAyat);
-            else toast.error("Ayat tidak ditemukan.");
-        } catch {
-            toast.error("Gagal membuka ayat.");
-        }
-        setPickerMode(null);
-    };
-
-    // Reset ayat saat ganti surat
     const handleGantiSurat = (suratId) => {
         setPilihSurat(Number(suratId));
         setPilihAyat(1);
-        const surat = listSurat.find((s) => s.id === Number(suratId));
-        toast.success(`Surat ${surat?.name_simple} dipilih.`);
     };
 
     const suratLatin = detail?.meta?.surah_name_simple || "Al-Fatihah";
@@ -245,7 +238,7 @@ export default function Index() {
             >
                 {/* Header navigasi */}
                 <div className="shrink-0 px-4 py-3 relative" ref={pickerRef}>
-                    <div className="grid grid-cols-3 gap-2 max-w-3xl mx-auto">
+                    <div className="grid grid-cols-3 gap-2 mx-auto">
                         <button
                             onClick={() => setPickerMode("surat")}
                             className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate"
@@ -267,7 +260,7 @@ export default function Index() {
                     </div>
 
                     {pickerMode && (
-                        <div className="absolute left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-sky-100 overflow-hidden z-50 max-w-3xl mx-auto">
+                        <div className="absolute left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-sky-100 overflow-hidden z-50 mx-auto">
                             <div className="p-2 border-b border-slate-100">
                                 <input
                                     autoFocus
@@ -370,70 +363,60 @@ export default function Index() {
                 {/* Stage */}
                 <div
                     ref={stageRef}
-                    className="flex-1 min-h-0 relative flex items-start justify-center px-2 sm:px-4 py-2 overflow-hidden"
+                    className="flex-1 min-h-0 relative flex items-stretch justify-center px-4 sm:px-6 py-3 overflow-hidden"
                 >
                     {loading || !detail ? (
-                        <div className="text-slate-400 text-sm">
+                        <div className="text-slate-400 text-sm flex items-center justify-center">
                             Memuat halaman...
                         </div>
                     ) : (
                         <div
                             ref={contentRef}
-                            className="w-full max-w-3xl"
                             style={{
+                                width: "max-content",
+                                maxWidth: "none",
                                 transform: `scale(${scale})`,
                                 transformOrigin: "top center",
                                 opacity: ready ? 1 : 0,
                                 transition: "opacity 0.15s ease",
                             }}
                         >
-                            <div
-                                className="rounded-[26px] p-[3px]"
-                                style={{
-                                    background:
-                                        "linear-gradient(135deg,#3D7ABA,#20B5E8,#3D7ABA)",
-                                }}
-                            >
+                            {/* Setiap div di bawah = satu baris ASLI Mushaf Madinah
+                                (dari line_number API), bukan hasil word-wrap browser */}
+                            {baris.map((b) => (
                                 <div
-                                    className="rounded-[23px] px-4 py-4 sm:px-8 sm:py-6 border-2 border-double border-sky-200/70"
+                                    key={b.nomorBaris}
+                                    dir="rtl"
+                                    className="font-mushaf whitespace-nowrap text-[26px] text-slate-800"
                                     style={{
-                                        backgroundColor: "#FFFFFF",
-                                        backgroundImage:
-                                            "radial-gradient(circle at top left, rgba(61,122,186,0.06), transparent 55%), radial-gradient(circle at bottom right, rgba(32,181,232,0.06), transparent 55%)",
+                                        direction: "rtl",
+                                        textAlign: "justify",
+                                        textAlignLast: "justify",
                                     }}
                                 >
-                                    <div
-                                        dir="rtl"
-                                        className="font-mushaf text-justify text-[16px] sm:text-[18px] leading-[1.6] text-slate-800"
-                                        style={{
-                                            direction: "rtl",
-                                            textAlignLast: "right",
-                                        }}
-                                    >
-                                        {detail.verses?.map((v) => (
-                                            <span key={v.id}>
-                                                {v.text_uthmani}
+                                    {b.kata.map((w) => (
+                                        <span key={w.key}>
+                                            {w.text}{" "}
+                                            {w.akhirAyat && (
                                                 <span
-                                                    className="inline-flex items-center justify-center mx-1 align-middle rounded-full border-[1.5px] border-sky-300 text-[#3D7ABA] font-sans select-none"
+                                                    className="inline-flex items-center justify-center mx-1 align-middle rounded-full border border-slate-300 text-slate-600 select-none"
                                                     style={{
-                                                        width: "1.5em",
-                                                        height: "1.5em",
+                                                        width: "0.85em",
+                                                        height: "0.85em",
                                                         fontSize: "0.5em",
-                                                        fontWeight: 700,
+                                                        fontWeight: 600,
                                                         lineHeight: 1,
+                                                        fontFamily:
+                                                            "Amiri, serif",
                                                     }}
                                                 >
-                                                    {angkaArab(
-                                                        v.verse_key.split(
-                                                            ":",
-                                                        )[1],
-                                                    )}
+                                                    {angkaArab(w.nomorAyat)}
                                                 </span>
-                                            </span>
-                                        ))}
-                                    </div>
+                                            )}
+                                        </span>
+                                    ))}
                                 </div>
-                            </div>
+                            ))}
                         </div>
                     )}
                 </div>

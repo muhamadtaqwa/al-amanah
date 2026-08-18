@@ -130,8 +130,36 @@ class PembayaranController extends Controller
     public function verifikasi(Request $request, $id)
     {
         $p = Pembayaran::findOrFail($id);
-        $request->validate(['status_verifikasi' => 'required|in:lunas,ditolak']);
-        $p->update(['status_verifikasi' => $request->status_verifikasi]);
+
+        if ($request->status_verifikasi === 'lunas') {
+            $request->validate([
+                'nominal_dibayar' => 'required|integer|min:1',
+            ]);
+
+            // Simpan detail cicilan
+            PembayaranDetail::create([
+                'pembayaran_id' => $p->id,
+                'nominal' => $request->nominal_dibayar,
+                'tgl_bayar' => now(),
+                'nip' => auth()->user()->username ?? 'admin',
+            ]);
+
+            $p->refresh();
+
+            // Update status sesuai sisa
+            if ($p->sisa <= 0) {
+                $p->update([
+                    'status_verifikasi' => 'lunas',
+                    'tgl_bayar' => now(),
+                ]);
+            } else {
+                $p->update(['status_verifikasi' => 'menunggu']); // status jadi dicicil via accessor
+            }
+        } else {
+            $request->validate(['status_verifikasi' => 'required|in:ditolak']);
+            $p->update(['status_verifikasi' => 'ditolak']);
+        }
+
         return back()->with('success', $request->status_verifikasi === 'lunas' ? 'Pembayaran disetujui.' : 'Pembayaran ditolak.');
     }
 

@@ -23,6 +23,12 @@ export default function Index() {
     const [scale, setScale] = useState(1);
     const [ready, setReady] = useState(false);
 
+    // State ukuran font
+    const [fontSize, setFontSize] = useState(() => {
+        const saved = localStorage.getItem("quran-font-size");
+        return saved ? Number(saved) : 24;
+    });
+
     const [listSurat, setListSurat] = useState([]);
     const [listJuz, setListJuz] = useState([]);
     const [pickerMode, setPickerMode] = useState(null);
@@ -36,6 +42,37 @@ export default function Index() {
     const stageRef = useRef(null);
     const contentRef = useRef(null);
     const abortRef = useRef(null);
+
+    // Batas ukuran font
+    const MIN_FONT_SIZE = 14;
+    const MAX_FONT_SIZE = 40;
+    const FONT_STEP = 2;
+
+    // Fungsi ubah font size
+    const zoomIn = () => {
+        setFontSize((prev) => {
+            const next = Math.min(prev + FONT_STEP, MAX_FONT_SIZE);
+            localStorage.setItem("quran-font-size", String(next));
+            return next;
+        });
+        setReady(false);
+    };
+
+    const zoomOut = () => {
+        setFontSize((prev) => {
+            const next = Math.max(prev - FONT_STEP, MIN_FONT_SIZE);
+            localStorage.setItem("quran-font-size", String(next));
+            return next;
+        });
+        setReady(false);
+    };
+
+    const resetFontSize = () => {
+        const defaultSize = 24;
+        setFontSize(defaultSize);
+        localStorage.setItem("quran-font-size", String(defaultSize));
+        setReady(false);
+    };
 
     useEffect(() => {
         if (abortRef.current) abortRef.current.abort();
@@ -86,8 +123,7 @@ export default function Index() {
         return () => document.removeEventListener("mousedown", onClickOutside);
     }, []);
 
-    // Susun ulang kata-kata per baris asli Mushaf Madinah (line_number dari API),
-    // bukan paragraf yang di-wrap otomatis oleh browser.
+    // Susun ulang kata-kata per baris asli Mushaf Madinah
     const baris = useMemo(() => {
         if (!detail?.verses) return [];
         const perBaris = new Map();
@@ -112,6 +148,8 @@ export default function Index() {
             .map(([nomorBaris, kata]) => ({ nomorBaris, kata }));
     }, [detail]);
 
+    const SAFETY_MARGIN = 0.97;
+
     const fitToStage = useCallback(() => {
         const stage = stageRef.current;
         const content = contentRef.current;
@@ -119,8 +157,8 @@ export default function Index() {
         const stageRect = stage.getBoundingClientRect();
         const contentRect = content.getBoundingClientRect();
         if (contentRect.width === 0 || contentRect.height === 0) return;
-        const scaleX = stageRect.width / contentRect.width;
-        const scaleY = stageRect.height / contentRect.height;
+        const scaleX = (stageRect.width / contentRect.width) * SAFETY_MARGIN;
+        const scaleY = (stageRect.height / contentRect.height) * SAFETY_MARGIN;
         const next = Math.min(scaleX, scaleY, 1.5);
         setScale(Math.max(next, 0.2));
         setReady(true);
@@ -129,8 +167,14 @@ export default function Index() {
     useLayoutEffect(() => {
         if (loading || !detail) return;
         fitToStage();
-        if (document.fonts?.ready) document.fonts.ready.then(fitToStage);
-    }, [loading, detail, baris, fitToStage]);
+        if (document.fonts?.ready) {
+            document.fonts.ready.then(() => {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(fitToStage);
+                });
+            });
+        }
+    }, [loading, detail, baris, fitToStage, fontSize]);
 
     useEffect(() => {
         let raf;
@@ -179,7 +223,9 @@ export default function Index() {
         try {
             const res = await getHalamanDariSurat(suratId);
             const halamanSurat = res?.chapter?.pages?.[0];
-            if (halamanSurat) goTo(halamanSurat);
+            if (halamanSurat) {
+                setHalaman(halamanSurat);
+            }
         } catch {
             toast.error("Gagal membuka surat.");
         }
@@ -190,7 +236,9 @@ export default function Index() {
         try {
             const res = await getHalamanDariAyat(surat, ayat);
             const halamanAyat = res?.verse?.page_number;
-            if (halamanAyat) goTo(halamanAyat);
+            if (halamanAyat) {
+                setHalaman(halamanAyat);
+            }
         } catch {
             toast.error("Gagal membuka ayat.");
         }
@@ -238,29 +286,37 @@ export default function Index() {
             >
                 {/* Header navigasi */}
                 <div className="shrink-0 px-4 py-3 relative" ref={pickerRef}>
-                    <div className="grid grid-cols-3 gap-2 mx-auto">
+                    <div className="grid grid-cols-4 gap-2 mx-auto max-w-md">
                         <button
                             onClick={() => setPickerMode("surat")}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2"
                         >
-                            {suratLatin}
+                            Surat
                         </button>
                         <button
-                            onClick={() => setPickerMode("ayat")}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg"
+                            onClick={zoomOut}
+                            disabled={fontSize <= MIN_FONT_SIZE}
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            Ayat {angkaArab(ayatAwal)}
+                            A-
                         </button>
                         <button
-                            onClick={() => setPickerMode("juz")}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg"
+                            onClick={resetFontSize}
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2"
                         >
-                            Juz {angkaArab(juzInfo)}
+                            {fontSize}
+                        </button>
+                        <button
+                            onClick={zoomIn}
+                            disabled={fontSize >= MAX_FONT_SIZE}
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            A+
                         </button>
                     </div>
 
                     {pickerMode && (
-                        <div className="absolute left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-sky-100 overflow-hidden z-50 mx-auto">
+                        <div className="absolute left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-sky-100 overflow-hidden z-50 mx-auto max-w-md">
                             <div className="p-2 border-b border-slate-100">
                                 <input
                                     autoFocus
@@ -381,17 +437,16 @@ export default function Index() {
                                 transition: "opacity 0.15s ease",
                             }}
                         >
-                            {/* Setiap div di bawah = satu baris ASLI Mushaf Madinah
-                                (dari line_number API), bukan hasil word-wrap browser */}
                             {baris.map((b) => (
                                 <div
                                     key={b.nomorBaris}
                                     dir="rtl"
-                                    className="font-mushaf whitespace-nowrap text-[26px] text-slate-800"
+                                    className="font-mushaf whitespace-nowrap text-slate-800"
                                     style={{
                                         direction: "rtl",
                                         textAlign: "justify",
                                         textAlignLast: "justify",
+                                        fontSize: `${fontSize}px`,
                                     }}
                                 >
                                     {b.kata.map((w) => (

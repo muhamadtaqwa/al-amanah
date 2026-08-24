@@ -15,6 +15,7 @@ use App\Http\Controllers\InventarisController;
 use App\Http\Controllers\PsbController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LetterController;
+use App\Http\Controllers\PushSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 // Auth
@@ -100,6 +101,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil', [ProfileController::class, 'edit']);
     Route::put('/profil', [ProfileController::class, 'update']);
     Route::post('/profil/ganti-password', [ProfileController::class, 'gantiPassword']);
+    Route::post('/simpan-lokasi', [ProfileController::class, 'simpanLokasi']);
+    Route::post('/simpan-notif-adzan', [ProfileController::class, 'simpanNotifAdzan']);
 
     // Pinjam Gedung
     Route::get('/pinjam-gedung', [PinjamGedungController::class, 'index']);
@@ -115,6 +118,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/timeline', [TimelineController::class, 'store']);
     Route::put('/timeline/{id}', [TimelineController::class, 'update']);
     Route::delete('/timeline/{id}', [TimelineController::class, 'destroy']);
+
+    // Push Subscription
+    Route::post('/push-subscribe', [PushSubscriptionController::class, 'store']);
+    Route::delete('/push-unsubscribe', [PushSubscriptionController::class, 'destroy']);
+    Route::post('/test-notif/jenis', [PushSubscriptionController::class, 'kirimTestJenis']);
 
     // Inventaris
     Route::get('/inventaris', [InventarisController::class, 'index']);

@@ -15,6 +15,15 @@ import {
     getHalamanDariAyat,
 } from "@/Services/AlQuran";
 import toast from "react-hot-toast";
+import {
+    Highlighter,
+    Minus,
+    Plus,
+    Bookmark,
+    BookmarkCheck,
+    Trash2,
+    BookOpen,
+} from "lucide-react";
 
 export default function Index() {
     const [halaman, setHalaman] = useState(1);
@@ -26,7 +35,21 @@ export default function Index() {
     // State ukuran font
     const [fontSize, setFontSize] = useState(() => {
         const saved = localStorage.getItem("quran-font-size");
-        return saved ? Number(saved) : 24;
+        return saved ? Number(saved) : 16;
+    });
+
+    // State mode tandai (stabilo + bookmark)
+    const [modeTandai, setModeTandai] = useState(false);
+    const [tandaiTarget, setTandaiTarget] = useState(null);
+    const [tandaiData, setTandaiData] = useState(() => {
+        const saved = localStorage.getItem("quran-tandai");
+        return saved ? JSON.parse(saved) : {};
+    });
+
+    // State halaman terakhir
+    const [halamanTerakhir, setHalamanTerakhir] = useState(() => {
+        const saved = localStorage.getItem("quran-halaman-terakhir");
+        return saved ? Number(saved) : 1;
     });
 
     const [listSurat, setListSurat] = useState([]);
@@ -48,6 +71,14 @@ export default function Index() {
     const MAX_FONT_SIZE = 40;
     const FONT_STEP = 2;
 
+    // Warna stabilo
+    const WARNA_STABILO = {
+        kuning: { bg: "rgba(250, 204, 21, 0.35)", border: "#EAB308" },
+        hijau: { bg: "rgba(74, 222, 128, 0.35)", border: "#22C55E" },
+        biru: { bg: "rgba(96, 165, 250, 0.35)", border: "#3B82F6" },
+        merah: { bg: "rgba(248, 113, 113, 0.35)", border: "#EF4444" },
+    };
+
     // Fungsi ubah font size
     const zoomIn = () => {
         setFontSize((prev) => {
@@ -67,11 +98,54 @@ export default function Index() {
         setReady(false);
     };
 
-    const resetFontSize = () => {
-        const defaultSize = 24;
-        setFontSize(defaultSize);
-        localStorage.setItem("quran-font-size", String(defaultSize));
-        setReady(false);
+    // Simpan halaman terakhir
+    useEffect(() => {
+        if (halaman && halaman !== halamanTerakhir) {
+            setHalamanTerakhir(halaman);
+            localStorage.setItem("quran-halaman-terakhir", String(halaman));
+        }
+    }, [halaman]);
+
+    // Fungsi tandai
+    const simpanTandai = (verseKey, tipe, nilai) => {
+        const newData = { ...tandaiData };
+        const existing = newData[verseKey] || {};
+
+        if (tipe === "stabilo") {
+            existing.stabilo = nilai;
+        } else if (tipe === "bookmark") {
+            existing.bookmark = !existing.bookmark;
+        } else if (tipe === "hapus") {
+            delete newData[verseKey];
+            setTandaiData(newData);
+            localStorage.setItem("quran-tandai", JSON.stringify(newData));
+            setTandaiTarget(null);
+            toast.success("Tanda dihapus");
+            return;
+        }
+
+        existing.timestamp = new Date().toISOString();
+        newData[verseKey] = existing;
+        setTandaiData(newData);
+        localStorage.setItem("quran-tandai", JSON.stringify(newData));
+        setTandaiTarget(null);
+        toast.success("Tanda disimpan");
+    };
+
+    const handleAyatClick = (verseKey) => {
+        if (modeTandai) {
+            setTandaiTarget(verseKey);
+        }
+    };
+
+    const lanjutBaca = () => {
+        if (halamanTerakhir && halamanTerakhir !== halaman) {
+            setHalaman(halamanTerakhir);
+            toast.success(`Lanjut ke halaman ${halamanTerakhir}`);
+        } else {
+            toast("Anda sudah di halaman terakhir", { icon: "📖" });
+        }
+        setPickerMode(null);
     };
 
     useEffect(() => {
@@ -139,6 +213,7 @@ export default function Index() {
                     text: w.text_uthmani,
                     akhirAyat: idx === kata.length - 1,
                     nomorAyat,
+                    verseKey: v.verse_key,
                 });
                 perBaris.set(w.line_number, arr);
             });
@@ -277,6 +352,11 @@ export default function Index() {
             String(s.id).includes(pickerSearch),
     );
 
+    // Daftar bookmark untuk ditampilkan
+    const daftarBookmark = Object.entries(tandaiData)
+        .filter(([, v]) => v.bookmark)
+        .map(([key, v]) => ({ key, ...v }));
+
     return (
         <AppLayout>
             <div
@@ -289,33 +369,155 @@ export default function Index() {
                     <div className="grid grid-cols-4 gap-2 mx-auto max-w-md">
                         <button
                             onClick={() => setPickerMode("surat")}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg px-2 flex items-center justify-center"
                         >
-                            Surat
+                            <span>Surat</span>
                         </button>
                         <button
                             onClick={zoomOut}
                             disabled={fontSize <= MIN_FONT_SIZE}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg px-2 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            A-
-                        </button>
-                        <button
-                            onClick={resetFontSize}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2"
-                        >
-                            {fontSize}
+                            <Minus className="w-4 h-4" />
                         </button>
                         <button
                             onClick={zoomIn}
                             disabled={fontSize >= MAX_FONT_SIZE}
-                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg truncate px-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-xs font-semibold shadow-lg px-2 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            A+
+                            <Plus className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => {
+                                setModeTandai(!modeTandai);
+                                if (modeTandai) setTandaiTarget(null);
+                            }}
+                            className={`py-2.5 rounded-2xl text-xs font-semibold shadow-lg px-2 flex items-center justify-center transition ${
+                                modeTandai
+                                    ? "bg-green-500 text-white"
+                                    : "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white"
+                            }`}
+                            title={
+                                modeTandai
+                                    ? "Nonaktifkan mode tandai"
+                                    : "Aktifkan mode tandai"
+                            }
+                        >
+                            <Highlighter className="w-4 h-4" />
                         </button>
                     </div>
 
-                    {pickerMode && (
+                    {/* Popup tandai (stabilo + bookmark) */}
+                    {tandaiTarget && modeTandai && (
+                        <div
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+                            onClick={() => setTandaiTarget(null)}
+                        >
+                            <div
+                                className="bg-white rounded-2xl shadow-xl p-4 mx-4 w-full max-w-xs"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <p className="text-sm font-semibold text-slate-700 mb-1 text-center">
+                                    Tandai Ayat
+                                </p>
+                                <p className="text-xs text-slate-500 mb-3 text-center">
+                                    {tandaiTarget}
+                                </p>
+
+                                {/* Stabilo */}
+                                <p className="text-xs font-medium text-slate-600 mb-2">
+                                    Stabilo:
+                                </p>
+                                <div className="flex gap-3 justify-center mb-3">
+                                    <button
+                                        onClick={() =>
+                                            simpanTandai(
+                                                tandaiTarget,
+                                                "stabilo",
+                                                "kuning",
+                                            )
+                                        }
+                                        className="w-9 h-9 rounded-full bg-yellow-400/50 border-2 border-yellow-500 hover:scale-110 transition"
+                                        title="Kuning"
+                                    />
+                                    <button
+                                        onClick={() =>
+                                            simpanTandai(
+                                                tandaiTarget,
+                                                "stabilo",
+                                                "hijau",
+                                            )
+                                        }
+                                        className="w-9 h-9 rounded-full bg-green-400/50 border-2 border-green-500 hover:scale-110 transition"
+                                        title="Hijau"
+                                    />
+                                    <button
+                                        onClick={() =>
+                                            simpanTandai(
+                                                tandaiTarget,
+                                                "stabilo",
+                                                "biru",
+                                            )
+                                        }
+                                        className="w-9 h-9 rounded-full bg-blue-400/50 border-2 border-blue-500 hover:scale-110 transition"
+                                        title="Biru"
+                                    />
+                                    <button
+                                        onClick={() =>
+                                            simpanTandai(
+                                                tandaiTarget,
+                                                "stabilo",
+                                                "merah",
+                                            )
+                                        }
+                                        className="w-9 h-9 rounded-full bg-red-400/50 border-2 border-red-500 hover:scale-110 transition"
+                                        title="Merah"
+                                    />
+                                </div>
+
+                                {/* Bookmark */}
+                                <p className="text-xs font-medium text-slate-600 mb-2">
+                                    Hafalan:
+                                </p>
+                                <button
+                                    onClick={() =>
+                                        simpanTandai(tandaiTarget, "bookmark")
+                                    }
+                                    className={`w-full py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition ${
+                                        tandaiData[tandaiTarget]?.bookmark
+                                            ? "bg-amber-100 text-amber-700 border border-amber-300"
+                                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                                    }`}
+                                >
+                                    {tandaiData[tandaiTarget]?.bookmark ? (
+                                        <>
+                                            <BookmarkCheck className="w-4 h-4" />
+                                            <span>Terbookmark</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Bookmark className="w-4 h-4" />
+                                            <span>Bookmark Hafalan</span>
+                                        </>
+                                    )}
+                                </button>
+
+                                {/* Hapus */}
+                                <button
+                                    onClick={() =>
+                                        simpanTandai(tandaiTarget, "hapus")
+                                    }
+                                    className="w-full py-2 mt-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span>Hapus Semua Tanda</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Panel Surat */}
+                    {pickerMode === "surat" && (
                         <div className="absolute left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-sky-100 overflow-hidden z-50 mx-auto max-w-md">
                             <div className="p-2 border-b border-slate-100">
                                 <input
@@ -325,92 +527,76 @@ export default function Index() {
                                     onChange={(e) =>
                                         setPickerSearch(e.target.value)
                                     }
-                                    placeholder="Cari..."
+                                    placeholder="Cari surat..."
                                     className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 outline-none focus:border-[#20B5E8]"
                                 />
                             </div>
                             <div className="max-h-72 overflow-y-auto">
-                                {pickerMode === "surat" &&
-                                    filteredSurat.map((s) => (
-                                        <button
-                                            key={s.id}
-                                            onClick={() =>
-                                                pilihSuratHandler(s.id)
-                                            }
-                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#3D7ABA]/5 transition"
-                                        >
-                                            <span className="w-7 h-7 shrink-0 rounded-full border border-sky-200 text-[#3D7ABA] text-[11px] font-bold flex items-center justify-center">
-                                                {angkaArab(s.id)}
-                                            </span>
-                                            <span className="flex-1 min-w-0">
-                                                <span className="block text-sm font-medium text-slate-800 truncate">
-                                                    {s.name_simple}
-                                                </span>
-                                                <span className="block text-[11px] text-slate-400">
-                                                    {s.verses_count} ayat
-                                                </span>
-                                            </span>
-                                            <span className="font-mushaf text-lg text-[#3D7ABA]">
-                                                {s.name_arabic}
-                                            </span>
-                                        </button>
-                                    ))}
+                                {/* Tombol Lanjut Baca */}
+                                <button
+                                    onClick={lanjutBaca}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left bg-amber-50 hover:bg-amber-100 transition border-b border-amber-100"
+                                >
+                                    <span className="w-7 h-7 shrink-0 rounded-full bg-amber-500 text-white flex items-center justify-center">
+                                        <BookOpen className="w-4 h-4" />
+                                    </span>
+                                    <span className="text-sm font-medium text-amber-700">
+                                        Lanjut Baca - Halaman {halamanTerakhir}
+                                    </span>
+                                </button>
 
-                                {pickerMode === "ayat" && (
-                                    <div className="p-3 space-y-2">
-                                        <select
-                                            value={pilihSurat}
-                                            onChange={(e) =>
-                                                handleGantiSurat(e.target.value)
-                                            }
-                                            className="w-full border border-slate-200 rounded-2xl px-3 py-2 text-sm bg-white outline-none"
-                                        >
-                                            {listSurat.map((s) => (
-                                                <option key={s.id} value={s.id}>
-                                                    {s.name_simple}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <input
-                                            type="number"
-                                            value={pilihAyat}
-                                            onChange={(e) =>
-                                                setPilihAyat(
-                                                    Number(e.target.value),
-                                                )
-                                            }
-                                            className="w-full border border-slate-200 rounded-2xl px-3 py-2 text-sm outline-none"
-                                            min="1"
-                                            max={
-                                                listSurat.find(
-                                                    (s) => s.id === pilihSurat,
-                                                )?.verses_count || 1
-                                            }
-                                        />
-                                        <button
-                                            onClick={pilihAyatHandler}
-                                            className="w-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2 rounded-2xl text-sm font-semibold"
-                                        >
-                                            Buka Ayat
-                                        </button>
+                                {/* Daftar Bookmark */}
+                                {daftarBookmark.length > 0 && (
+                                    <div className="border-b border-slate-100">
+                                        <p className="px-3 py-2 text-xs font-semibold text-slate-500 bg-slate-50">
+                                            📖 Bookmark Hafalan (
+                                            {daftarBookmark.length})
+                                        </p>
+                                        {daftarBookmark.map((b) => (
+                                            <button
+                                                key={b.key}
+                                                onClick={() => {
+                                                    const [surat, ayat] =
+                                                        b.key.split(":");
+                                                    pilihAyatHandlerByKey(
+                                                        surat,
+                                                        ayat,
+                                                    );
+                                                }}
+                                                className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-amber-50 transition"
+                                            >
+                                                <BookmarkCheck className="w-4 h-4 text-amber-500 shrink-0" />
+                                                <span className="text-sm text-slate-700">
+                                                    {b.key}
+                                                </span>
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
 
-                                {pickerMode === "juz" &&
-                                    listJuz.map((j) => (
-                                        <button
-                                            key={j.juz_number}
-                                            onClick={() => pilihJuzHandler(j)}
-                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#3D7ABA]/5 transition"
-                                        >
-                                            <span className="w-7 h-7 shrink-0 rounded-full border border-sky-200 text-[#3D7ABA] text-[11px] font-bold flex items-center justify-center">
-                                                {angkaArab(j.juz_number)}
+                                {/* Daftar Surat */}
+                                {filteredSurat.map((s) => (
+                                    <button
+                                        key={s.id}
+                                        onClick={() => pilihSuratHandler(s.id)}
+                                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#3D7ABA]/5 transition"
+                                    >
+                                        <span className="w-7 h-7 shrink-0 rounded-full border border-sky-200 text-[#3D7ABA] text-[11px] font-bold flex items-center justify-center">
+                                            {angkaArab(s.id)}
+                                        </span>
+                                        <span className="flex-1 min-w-0">
+                                            <span className="block text-sm font-medium text-slate-800 truncate">
+                                                {s.name_simple}
                                             </span>
-                                            <span className="text-sm font-medium text-slate-800">
-                                                Juz {angkaArab(j.juz_number)}
+                                            <span className="block text-[11px] text-slate-400">
+                                                {s.verses_count} ayat
                                             </span>
-                                        </button>
-                                    ))}
+                                        </span>
+                                        <span className="font-mushaf text-lg text-[#3D7ABA]">
+                                            {s.name_arabic}
+                                        </span>
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     )}
@@ -449,27 +635,87 @@ export default function Index() {
                                         fontSize: `${fontSize}px`,
                                     }}
                                 >
-                                    {b.kata.map((w) => (
-                                        <span key={w.key}>
-                                            {w.text}{" "}
-                                            {w.akhirAyat && (
-                                                <span
-                                                    className="inline-flex items-center justify-center mx-1 align-middle rounded-full border border-slate-300 text-slate-600 select-none"
-                                                    style={{
-                                                        width: "0.85em",
-                                                        height: "0.85em",
-                                                        fontSize: "0.5em",
-                                                        fontWeight: 600,
-                                                        lineHeight: 1,
-                                                        fontFamily:
-                                                            "Amiri, serif",
-                                                    }}
-                                                >
-                                                    {angkaArab(w.nomorAyat)}
-                                                </span>
-                                            )}
-                                        </span>
-                                    ))}
+                                    {b.kata.map((w) => {
+                                        const tandaInfo =
+                                            tandaiData[w.verseKey];
+                                        return (
+                                            <span
+                                                key={w.key}
+                                                style={{
+                                                    backgroundColor:
+                                                        tandaInfo?.stabilo
+                                                            ? WARNA_STABILO[
+                                                                  tandaInfo
+                                                                      .stabilo
+                                                              ]?.bg
+                                                            : "transparent",
+                                                    borderRadius:
+                                                        tandaInfo?.stabilo
+                                                            ? "4px"
+                                                            : "0",
+                                                    cursor: modeTandai
+                                                        ? "pointer"
+                                                        : "default",
+                                                }}
+                                            >
+                                                {w.text}{" "}
+                                                {w.akhirAyat && (
+                                                    <span
+                                                        onClick={() =>
+                                                            handleAyatClick(
+                                                                w.verseKey,
+                                                            )
+                                                        }
+                                                        className={`inline-flex items-center justify-center mx-1 align-middle rounded-full select-none transition ${
+                                                            modeTandai
+                                                                ? "cursor-pointer"
+                                                                : ""
+                                                        }`}
+                                                        style={{
+                                                            width: "2em",
+                                                            height: "2em",
+                                                            fontSize: "0.55em",
+                                                            fontWeight: 700,
+                                                            lineHeight: 1,
+                                                            fontFamily:
+                                                                "Amiri, serif",
+                                                            background:
+                                                                "linear-gradient(135deg, #D4A94E 0%, #B8860B 50%, #D4A94E 100%)",
+                                                            color: "#1a1a1a",
+                                                            border: "1px solid #8B6914",
+                                                            boxShadow:
+                                                                modeTandai
+                                                                    ? "0 0 0 2px #3B82F6"
+                                                                    : tandaInfo?.stabilo
+                                                                      ? `0 0 0 2px ${WARNA_STABILO[tandaInfo.stabilo]?.border}`
+                                                                      : tandaInfo?.bookmark
+                                                                        ? "0 0 0 2px #F59E0B"
+                                                                        : "0 1px 2px rgba(0,0,0,0.2)",
+                                                            cursor: modeTandai
+                                                                ? "pointer"
+                                                                : "default",
+                                                        }}
+                                                        title={
+                                                            modeTandai
+                                                                ? "Klik untuk tandai"
+                                                                : tandaInfo?.bookmark
+                                                                  ? "Bookmark hafalan"
+                                                                  : ""
+                                                        }
+                                                    >
+                                                        {tandaInfo?.bookmark &&
+                                                        !modeTandai ? (
+                                                            <BookmarkCheck className="w-3 h-3" />
+                                                        ) : (
+                                                            angkaArab(
+                                                                w.nomorAyat,
+                                                            )
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </span>
+                                        );
+                                    })}
                                 </div>
                             ))}
                         </div>

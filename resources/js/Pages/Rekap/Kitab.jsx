@@ -82,24 +82,25 @@ export default function Kitab() {
                     ))}
                 </div>
 
-                <div className="space-y-3">
+                {/* 2 Kolom di desktop */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {rekap.length === 0 && (
-                        <p className="text-center text-slate-400 py-10">
+                        <p className="text-center text-slate-400 py-10 md:col-span-2">
                             Tidak ada data Kitab
                         </p>
                     )}
                     {rekap.map((s) => (
                         <div
                             key={s.nis}
-                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-sm hover:shadow-md transition-all"
                         >
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">
                                         {s.nama?.charAt(0)}
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-sm">
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-sm truncate">
                                             {s.nama}
                                         </p>
                                         <p className="text-xs text-slate-400">
@@ -108,11 +109,11 @@ export default function Kitab() {
                                     </div>
                                 </div>
                                 <span
-                                    className={`text-xs px-2 py-1 rounded-full font-medium ${s.total_belum === 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                    className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${s.total_belum === 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
                                 >
                                     {s.total_belum === 0
                                         ? "Lunas"
-                                        : `${s.total_belum} belum`}
+                                        : `${s.total_belum} Belum`}
                                 </span>
                             </div>
                             <div className="text-[11px] text-slate-500 space-y-0.5">

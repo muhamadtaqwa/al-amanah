@@ -1,6 +1,6 @@
 {
     "name": "Al-Amanah Mobile",
-    "short_name": "Al-Amanah",
+    "short_name": "Al-Amanah Mobile",
     "description": "Sistem Informasi Pondok Pesantren Al-Amanah",
     "start_url": "/",
     "display": "standalone",
@@ -11,12 +11,14 @@
         {
             "src": "/icon-amanah.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "/icon-amanah.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         }
     ]
 }

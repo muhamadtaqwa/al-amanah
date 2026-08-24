@@ -114,4 +114,35 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Password berhasil diubah.');
     }
+
+    public function simpanLokasi(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        $request->user()->update([
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        return back()->with('success', 'Lokasi tersimpan');
+    }
+
+    public function simpanNotifAdzan(Request $request)
+    {
+        $request->validate([
+            'key' => 'required|in:subuh,dzuhur,ashar,maghrib,isya',
+            'value' => 'required|boolean',
+        ]);
+
+        $field = 'notif_' . $request->key;
+
+        $request->user()->update([
+            $field => $request->value,
+        ]);
+
+        return back()->with('success', 'Preferensi notifikasi tersimpan');
+    }
 }

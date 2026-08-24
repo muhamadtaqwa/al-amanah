@@ -94,17 +94,18 @@ export default function Santri() {
                     className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none mb-4"
                 />
 
-                <div className="space-y-1.5">
+                {/* 2 Kolom di desktop */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {filtered.map((s) => (
                         <div
                             key={s.nis}
-                            className="w-full rounded-2xl p-4 flex items-center gap-3 bg-white border border-slate-100 shadow-sm"
+                            className="rounded-2xl p-4 flex items-center gap-3 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all"
                         >
-                            <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-500">
+                            <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-500 shrink-0">
                                 {s.nama_lengkap?.charAt(0)}
                             </div>
-                            <div className="flex-1">
-                                <p className="font-semibold text-sm">
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm truncate">
                                     {s.nama_lengkap}
                                 </p>
                                 <p className="text-xs text-slate-400">
@@ -113,7 +114,7 @@ export default function Santri() {
                             </div>
                             <button
                                 onClick={() => handleLihat(s.nis)}
-                                className="text-xs bg-[#3D7ABA]/10 text-[#3D7ABA] px-3 py-1.5 rounded-full font-medium hover:bg-[#3D7ABA]/20 transition"
+                                className="text-xs bg-[#3D7ABA]/10 text-[#3D7ABA] px-3 py-1.5 rounded-full font-medium hover:bg-[#3D7ABA]/20 transition shrink-0"
                             >
                                 Lihat
                             </button>
@@ -136,7 +137,7 @@ export default function Santri() {
                                 <>
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-10 h-10 bg-[#3D7ABA] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                            <div className="w-10 h-10 bg-[#3D7ABA] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                                                 {selected?.nama_lengkap?.charAt(
                                                     0,
                                                 )}
@@ -174,7 +175,7 @@ export default function Santri() {
                                                     >
                                                         {d.total_belum === 0
                                                             ? "Lunas"
-                                                            : `${d.total_belum} belum`}
+                                                            : `${d.total_belum} Belum`}
                                                     </span>
                                                 </div>
                                                 <div className="text-[11px] text-slate-500 space-y-0.5">

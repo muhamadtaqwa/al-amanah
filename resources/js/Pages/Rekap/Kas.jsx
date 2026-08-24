@@ -31,6 +31,34 @@ export default function Kas() {
         },
     ];
 
+    const urutBulan = (bulan) => {
+        const urutan = [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
+        ];
+        return [...bulan].sort((a, b) => {
+            const namaA =
+                a.nama_pembayaran
+                    ?.replace("Kas Bulanan - ", "")
+                    .replace(` - ${a.nama}`, "") || "";
+            const namaB =
+                b.nama_pembayaran
+                    ?.replace("Kas Bulanan - ", "")
+                    .replace(` - ${b.nama}`, "") || "";
+            return urutan.indexOf(namaA) - urutan.indexOf(namaB);
+        });
+    };
+
     return (
         <AppLayout>
             <div>
@@ -82,24 +110,25 @@ export default function Kas() {
                     ))}
                 </div>
 
-                <div className="space-y-3">
+                {/* 2 Kolom di desktop */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {rekap.length === 0 && (
-                        <p className="text-center text-slate-400 py-10">
+                        <p className="text-center text-slate-400 py-10 md:col-span-2">
                             Tidak ada data Kas
                         </p>
                     )}
                     {rekap.map((s) => (
                         <div
                             key={s.nis}
-                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl"
+                            className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-sm hover:shadow-md transition-all"
                         >
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                    <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">
                                         {s.nama?.charAt(0)}
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-sm">
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-sm truncate">
                                             {s.nama}
                                         </p>
                                         <p className="text-xs text-slate-400">
@@ -108,15 +137,15 @@ export default function Kas() {
                                     </div>
                                 </div>
                                 <span
-                                    className={`text-xs px-2 py-1 rounded-full font-medium ${s.total_belum === 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                    className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${s.total_belum === 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
                                 >
                                     {s.total_belum === 0
                                         ? "Lunas"
-                                        : `${s.total_belum} belum`}
+                                        : `${s.total_belum} Belum`}
                                 </span>
                             </div>
 
-                            {s.per_bulan?.map((bulan) => (
+                            {urutBulan(s.per_bulan || []).map((bulan) => (
                                 <div
                                     key={bulan.id}
                                     className="flex justify-between text-[11px] bg-slate-50 rounded-lg px-3 py-1.5 mb-1"
@@ -127,7 +156,7 @@ export default function Kas() {
                                             .replace(` - ${s.nama}`, "")}
                                     </span>
                                     <span
-                                        className={`font-medium ${bulan.status === "lunas" ? "text-emerald-600" : "text-red-500"}`}
+                                        className={`font-medium shrink-0 ${bulan.status === "lunas" ? "text-emerald-600" : "text-red-500"}`}
                                     >
                                         {bulan.status === "lunas"
                                             ? "Lunas"

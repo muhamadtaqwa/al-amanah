@@ -2,12 +2,14 @@ import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
+import { UserCircle, Bell } from "lucide-react";
 
 export default function Index() {
     const { auth } = usePage().props;
     const user = auth.user;
     const profil = user.ustadz || user.santri;
     const [showModal, setShowModal] = useState(false);
+    const [loadingNotif, setLoadingNotif] = useState(null);
 
     const prodiList = [
         "S1 Kedokteran",
@@ -166,6 +168,33 @@ export default function Index() {
         router.post("/logout");
     };
 
+    const notifList = [
+        "Acara",
+        "Adzan",
+        "Tenggat",
+        "Tagihan",
+        "Lunas",
+        "Ditolak",
+    ];
+
+    const kirimTestNotif = (jenis) => {
+        setLoadingNotif(jenis);
+        router.post(
+            "/test-notif/jenis",
+            { jenis: jenis.toLowerCase() },
+            {
+                onSuccess: () => {
+                    setLoadingNotif(null);
+                    toast.success("Notifikasi dikirim!");
+                },
+                onError: () => {
+                    setLoadingNotif(null);
+                    toast.error("Gagal mengirim.");
+                },
+            },
+        );
+    };
+
     const submit = (e) => {
         e.preventDefault();
         put("/profil", {
@@ -176,6 +205,7 @@ export default function Index() {
             onError: () => toast.error("Gagal mengupdate profil."),
         });
     };
+
     const handleGantiPassword = (e) => {
         e.preventDefault();
         passwordForm.post("/profil/ganti-password", {
@@ -189,216 +219,233 @@ export default function Index() {
 
     return (
         <AppLayout>
-            <div className="max-w-2xl mx-auto space-y-4">
-                <div className="rounded-[30px] bg-gradient-to-br from-[#3D7ABA] to-[#20B5E8] p-6 shadow-2xl text-white text-center">
-                    <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-4xl font-bold mb-4 border-2 border-white/30 mx-auto">
-                        {profil?.nama_lengkap?.charAt(0) || "A"}
-                    </div>
-                    <h3 className="font-bold text-xl">
-                        {profil?.nama_lengkap || "Admin Pondok"}
-                    </h3>
-                    <p className="text-white/80 text-sm capitalize mt-1">
-                        {user.role}
-                    </p>
-                    <p className="text-xs text-white/60 mt-2">
-                        {user.username}
-                    </p>
-                </div>
-
-                {(user.role === "ustadz" || user.role === "santri") && (
-                    <div className="rounded-[30px] border border-sky-100 bg-white p-6 shadow-2xl">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-sm text-slate-700">
-                                Informasi Profil
-                            </h3>
-                            <button
-                                onClick={() => setShowModal(true)}
-                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-xs font-semibold shadow-lg"
-                            >
-                                Edit Profil
-                            </button>
+            <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                    {/* Kolom 1: Card Profil */}
+                    <div className="rounded-[30px] bg-gradient-to-br from-[#3D7ABA] to-[#20B5E8] p-6 shadow-2xl text-white text-center">
+                        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold mb-3 border-2 border-white/30 mx-auto">
+                            {profil?.nama_lengkap?.charAt(0) || "A"}
                         </div>
-                        <div className="text-xs text-slate-500 space-y-1.5">
-                            {user.role === "ustadz" && (
-                                <>
-                                    <Row label="NIU" value={profil?.niu} />
-                                    <Row
-                                        label="NIP/NUPTK"
-                                        value={profil?.nip_nuptk}
-                                    />
-                                    <Row label="NIK" value={profil?.nik} />
-                                    <Row
-                                        label="Nama"
-                                        value={profil?.nama_lengkap}
-                                    />
-                                    <Row
-                                        label="Tempat, Tgl Lahir"
-                                        value={`${profil?.tempat_lahir || "-"}, ${formatTgl(profil?.tanggal_lahir)}`}
-                                    />
-                                    <Row
-                                        label="Jenis Kelamin"
-                                        value={
-                                            profil?.jenis_kelamin ===
-                                            "laki-laki"
-                                                ? "Laki-laki"
-                                                : profil?.jenis_kelamin ===
-                                                    "perempuan"
-                                                  ? "Perempuan"
-                                                  : "-"
-                                        }
-                                    />
-                                    <Row
-                                        label="Pendidikan"
-                                        value={profil?.pendidikan_terakhir}
-                                    />
-                                    <Row
-                                        label="Alamat"
-                                        value={profil?.alamat}
-                                    />
-                                    <Row
-                                        label="Status"
-                                        value={
-                                            profil?.status
-                                                ?.charAt(0)
-                                                .toUpperCase() +
-                                            profil?.status?.slice(1)
-                                        }
-                                    />
-                                    <Row
-                                        label="Status Kepegawaian"
-                                        value={profil?.status_kepegawaian}
-                                    />
-                                    <Row
-                                        label="Nomor HP"
-                                        value={profil?.nomor_hp}
-                                    />
-                                </>
-                            )}
-                            {user.role === "santri" && (
-                                <>
-                                    <Row label="NIS" value={profil?.nis} />
-                                    <Row label="NISN" value={profil?.nisn} />
-                                    <Row label="NIK" value={profil?.nik} />
-                                    <Row
-                                        label="Nama"
-                                        value={profil?.nama_lengkap}
-                                    />
-                                    <Row
-                                        label="Tempat, Tgl Lahir"
-                                        value={`${profil?.tempat_lahir || "-"}, ${formatTgl(profil?.tanggal_lahir)}`}
-                                    />
-                                    <Row
-                                        label="Jenis Kelamin"
-                                        value={
-                                            profil?.jenis_kelamin ===
-                                            "laki-laki"
-                                                ? "Laki-laki"
-                                                : profil?.jenis_kelamin ===
-                                                    "perempuan"
-                                                  ? "Perempuan"
-                                                  : "-"
-                                        }
-                                    />
-                                    <Row
-                                        label="Program Studi"
-                                        value={profil?.program_studi}
-                                    />
-                                    <Row
-                                        label="Angkatan"
-                                        value={profil?.angkatan}
-                                    />
-                                    <Row
-                                        label="Tahun Masuk"
-                                        value={profil?.tahun_masuk}
-                                    />
-                                    <Row label="Kamar" value={profil?.kamar} />
-                                    <Row
-                                        label="Nomor HP"
-                                        value={profil?.nomor_hp}
-                                    />
-                                    <Row
-                                        label="Status"
-                                        value={
-                                            profil?.status
-                                                ?.charAt(0)
-                                                .toUpperCase() +
-                                            profil?.status?.slice(1)
-                                        }
-                                    />
-                                    <hr className="border-slate-100 my-2" />
-                                    <p className="font-semibold text-slate-600">
-                                        Orang Tua
-                                    </p>
-                                    <Row
-                                        label="Nama Ayah"
-                                        value={profil?.nama_ayah}
-                                    />
-                                    <Row
-                                        label="Nama Ibu"
-                                        value={profil?.nama_ibu}
-                                    />
-                                    <Row
-                                        label="No HP Orang Tua"
-                                        value={profil?.no_hp_orang_tua}
-                                    />
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {user.role === "admin" && (
-                    <div className="rounded-[30px] border border-sky-100 bg-white p-6 shadow-2xl">
-                        <h3 className="font-semibold text-sm text-slate-700 mb-4">
-                            Ganti Password User
+                        <h3 className="font-bold text-lg">
+                            {profil?.nama_lengkap || "Admin Pondok"}
                         </h3>
-                        <form
-                            onSubmit={handleGantiPassword}
-                            className="space-y-3"
-                        >
-                            <input
-                                type="text"
-                                placeholder="Username"
-                                value={passwordForm.data.username}
-                                onChange={(e) =>
-                                    passwordForm.setData(
-                                        "username",
-                                        e.target.value,
-                                    )
-                                }
-                                className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                required
-                            />
-                            <input
-                                type="password"
-                                placeholder="Password Baru"
-                                value={passwordForm.data.password_baru}
-                                onChange={(e) =>
-                                    passwordForm.setData(
-                                        "password_baru",
-                                        e.target.value,
-                                    )
-                                }
-                                className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                required
-                            />
-                            <button
-                                type="submit"
-                                disabled={passwordForm.processing}
-                                className="w-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold shadow-lg transition disabled:opacity-50"
-                            >
-                                Simpan
-                            </button>
-                        </form>
+                        <p className="text-white/80 text-sm capitalize mt-1">
+                            {user.role}
+                        </p>
+                        <p className="text-xs text-white/60 mt-1">
+                            {user.username}
+                        </p>
                     </div>
-                )}
 
-                <button
-                    onClick={handleLogout}
-                    className="w-full bg-red-500 text-white py-3 rounded-2xl text-sm font-semibold shadow-lg hover:bg-red-600 transition"
-                >
-                    Logout
-                </button>
+                    {/* Kolom 2: Informasi Profil / Ganti Password */}
+                    {(user.role === "ustadz" || user.role === "santri") && (
+                        <div className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-sm text-slate-700 flex items-center gap-2">
+                                    <UserCircle className="w-4 h-4 text-[#3D7ABA]" />
+                                    Informasi Profil
+                                </h3>
+                                <button
+                                    onClick={() => setShowModal(true)}
+                                    className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-lg"
+                                >
+                                    Edit
+                                </button>
+                            </div>
+                            <div className="text-xs text-slate-500 space-y-1.5 max-h-[400px] overflow-y-auto pr-1">
+                                {user.role === "ustadz" && (
+                                    <>
+                                        <Row label="NIU" value={profil?.niu} />
+                                        <Row
+                                            label="NIP/NUPTK"
+                                            value={profil?.nip_nuptk}
+                                        />
+                                        <Row label="NIK" value={profil?.nik} />
+                                        <Row
+                                            label="Nama"
+                                            value={profil?.nama_lengkap}
+                                        />
+                                        <Row
+                                            label="Tempat, Tgl Lahir"
+                                            value={`${profil?.tempat_lahir || "-"}, ${formatTgl(profil?.tanggal_lahir)}`}
+                                        />
+                                        <Row
+                                            label="Jenis Kelamin"
+                                            value={
+                                                profil?.jenis_kelamin ===
+                                                "laki-laki"
+                                                    ? "Laki-laki"
+                                                    : profil?.jenis_kelamin ===
+                                                        "perempuan"
+                                                      ? "Perempuan"
+                                                      : "-"
+                                            }
+                                        />
+                                        <Row
+                                            label="Pendidikan"
+                                            value={profil?.pendidikan_terakhir}
+                                        />
+                                        <Row
+                                            label="Alamat"
+                                            value={profil?.alamat}
+                                        />
+                                        <Row
+                                            label="Nomor HP"
+                                            value={profil?.nomor_hp}
+                                        />
+                                    </>
+                                )}
+                                {user.role === "santri" && (
+                                    <>
+                                        <Row label="NIS" value={profil?.nis} />
+                                        <Row
+                                            label="NISN"
+                                            value={profil?.nisn}
+                                        />
+                                        <Row label="NIK" value={profil?.nik} />
+                                        <Row
+                                            label="Nama"
+                                            value={profil?.nama_lengkap}
+                                        />
+                                        <Row
+                                            label="Tempat, Tgl Lahir"
+                                            value={`${profil?.tempat_lahir || "-"}, ${formatTgl(profil?.tanggal_lahir)}`}
+                                        />
+                                        <Row
+                                            label="Jenis Kelamin"
+                                            value={
+                                                profil?.jenis_kelamin ===
+                                                "laki-laki"
+                                                    ? "Laki-laki"
+                                                    : profil?.jenis_kelamin ===
+                                                        "perempuan"
+                                                      ? "Perempuan"
+                                                      : "-"
+                                            }
+                                        />
+                                        <Row
+                                            label="Program Studi"
+                                            value={profil?.program_studi}
+                                        />
+                                        <Row
+                                            label="Angkatan"
+                                            value={profil?.angkatan}
+                                        />
+                                        <Row
+                                            label="Kamar"
+                                            value={profil?.kamar}
+                                        />
+                                        <Row
+                                            label="Nomor HP"
+                                            value={profil?.nomor_hp}
+                                        />
+                                        <hr className="border-slate-100 my-2" />
+                                        <p className="font-semibold text-slate-600">
+                                            Orang Tua
+                                        </p>
+                                        <Row
+                                            label="Nama Ayah"
+                                            value={profil?.nama_ayah}
+                                        />
+                                        <Row
+                                            label="Nama Ibu"
+                                            value={profil?.nama_ibu}
+                                        />
+                                        <Row
+                                            label="No HP Ortu"
+                                            value={profil?.no_hp_orang_tua}
+                                        />
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {user.role === "admin" && (
+                        <div className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl">
+                            <h3 className="font-semibold text-sm text-slate-700 mb-3">
+                                Ganti Password User
+                            </h3>
+                            <form
+                                onSubmit={handleGantiPassword}
+                                className="space-y-2.5"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Username"
+                                    value={passwordForm.data.username}
+                                    onChange={(e) =>
+                                        passwordForm.setData(
+                                            "username",
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none"
+                                    required
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="Password Baru"
+                                    value={passwordForm.data.password_baru}
+                                    onChange={(e) =>
+                                        passwordForm.setData(
+                                            "password_baru",
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none"
+                                    required
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={passwordForm.processing}
+                                    className="w-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2 rounded-xl text-sm font-semibold shadow-lg disabled:opacity-50"
+                                >
+                                    Simpan
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* Kolom 3: Test Notifikasi + Logout untuk admin */}
+                    <div className="space-y-4">
+                        {user.role === "admin" && (
+                            <div className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl">
+                                <h3 className="font-semibold text-sm text-slate-700 mb-3 flex items-center gap-2">
+                                    <Bell className="w-4 h-4 text-[#3D7ABA]" />
+                                    Test Notifikasi
+                                </h3>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {notifList.map((label) => (
+                                        <button
+                                            key={label}
+                                            onClick={() =>
+                                                kirimTestNotif(label)
+                                            }
+                                            disabled={
+                                                loadingNotif ===
+                                                label.toLowerCase()
+                                            }
+                                            className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2 rounded-xl text-xs font-semibold shadow-md disabled:opacity-50"
+                                        >
+                                            {loadingNotif ===
+                                            label.toLowerCase()
+                                                ? "..."
+                                                : label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <button
+                            onClick={handleLogout}
+                            className="w-full bg-red-500 text-white py-3 rounded-2xl text-sm font-semibold shadow-lg hover:bg-red-600 transition"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </div>
 
                 {showModal && (
                     <div className="fixed inset-0 z-50 overflow-y-auto">

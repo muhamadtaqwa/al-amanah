@@ -7,8 +7,11 @@ use App\Models\PembayaranDetail;
 use App\Models\RekeningYayasan;
 use App\Models\Santri;
 use App\Models\JenisPembayaran;
+use App\Models\PushSubscription;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Minishlink\WebPush\WebPush;
+use Minishlink\WebPush\Subscription;
 
 class PembayaranController extends Controller
 {
@@ -46,7 +49,16 @@ class PembayaranController extends Controller
             'tgl_jatuh_tempo' => 'nullable|date',
         ]);
 
-        Pembayaran::create($request->all() + ['status_verifikasi' => 'menunggu']);
+        $pembayaran = Pembayaran::create($request->all() + ['status_verifikasi' => 'menunggu']);
+
+        // Kirim notifikasi ke santri
+        $this->kirimNotifKeSantri(
+            $pembayaran->nis,
+            '📄 Tagihan Baru',
+            $pembayaran->nama_pembayaran . ' - Rp ' . number_format($pembayaran->nominal, 0, ',', '.'),
+            '/tagihan'
+        );
+
         return back()->with('success', 'Tagihan berhasil dibuat.');
     }
 
@@ -79,6 +91,14 @@ class PembayaranController extends Controller
 
         if ($p->sisa <= 0) {
             $p->update(['status_verifikasi' => 'lunas', 'tgl_bayar' => now()]);
+
+            // Kirim notifikasi lunas
+            $this->kirimNotifKeSantri(
+                $p->nis,
+                '✅ Pembayaran Diterima',
+                $p->nama_pembayaran . ' - LUNAS',
+                '/tagihan'
+            );
         }
 
         return back()->with('success', 'Cicilan berhasil.');
@@ -105,13 +125,22 @@ class PembayaranController extends Controller
 
         $count = 0;
         foreach ($santris as $s) {
-            Pembayaran::create([
+            $pembayaran = Pembayaran::create([
                 'nis' => $s->nis,
                 'jenis' => $request->jenis,
                 'nama_pembayaran' => $request->nama_pembayaran . ' - ' . ($request->bulan ?? '') . ' ' . ($request->tahun ?? '') . ' - ' . $s->nama_lengkap,
                 'nominal' => $request->nominal,
                 'tgl_jatuh_tempo' => $request->tgl_jatuh_tempo,
             ]);
+
+            // Kirim notifikasi ke santri
+            $this->kirimNotifKeSantri(
+                $pembayaran->nis,
+                '📄 Tagihan Baru',
+                $pembayaran->nama_pembayaran . ' - Rp ' . number_format($pembayaran->nominal, 0, ',', '.'),
+                '/tagihan'
+            );
+
             $count++;
         }
 
@@ -136,7 +165,6 @@ class PembayaranController extends Controller
                 'nominal_dibayar' => 'required|integer|min:1',
             ]);
 
-            // Simpan detail cicilan
             PembayaranDetail::create([
                 'pembayaran_id' => $p->id,
                 'nominal' => $request->nominal_dibayar,
@@ -146,18 +174,33 @@ class PembayaranController extends Controller
 
             $p->refresh();
 
-            // Update status sesuai sisa
             if ($p->sisa <= 0) {
                 $p->update([
                     'status_verifikasi' => 'lunas',
                     'tgl_bayar' => now(),
                 ]);
+
+                // Kirim notifikasi lunas
+                $this->kirimNotifKeSantri(
+                    $p->nis,
+                    '✅ Pembayaran Diterima',
+                    $p->nama_pembayaran . ' - LUNAS',
+                    '/tagihan'
+                );
             } else {
-                $p->update(['status_verifikasi' => 'menunggu']); // status jadi dicicil via accessor
+                $p->update(['status_verifikasi' => 'menunggu']);
             }
         } else {
             $request->validate(['status_verifikasi' => 'required|in:ditolak']);
             $p->update(['status_verifikasi' => 'ditolak']);
+
+            // Kirim notifikasi ditolak
+            $this->kirimNotifKeSantri(
+                $p->nis,
+                '❌ Pembayaran Ditolak',
+                $p->nama_pembayaran . ' - pembayaran ditolak',
+                '/tagihan'
+            );
         }
 
         return back()->with('success', $request->status_verifikasi === 'lunas' ? 'Pembayaran disetujui.' : 'Pembayaran ditolak.');
@@ -198,5 +241,46 @@ class PembayaranController extends Controller
     {
         JenisPembayaran::findOrFail($id)->delete();
         return back()->with('success', 'Kategori dihapus.');
+    }
+
+    private function kirimNotifKeSantri($nis, $title, $body, $url)
+    {
+        $santri = Santri::where('nis', $nis)->first();
+        if (!$santri || !$santri->user_id) return;
+
+        $subscriptions = PushSubscription::where('user_id', $santri->user_id)->get();
+        if ($subscriptions->isEmpty()) return;
+
+        $auth = [
+            'VAPID' => [
+                'subject' => config('webpush.vapid.subject'),
+                'publicKey' => config('webpush.vapid.public_key'),
+                'privateKey' => config('webpush.vapid.private_key'),
+            ],
+        ];
+
+        $webPush = new WebPush($auth);
+
+        foreach ($subscriptions as $sub) {
+            $subscription = Subscription::create([
+                'endpoint' => $sub->endpoint,
+                'publicKey' => $sub->p256dh,
+                'authToken' => $sub->auth,
+            ]);
+
+            $webPush->queueNotification(
+                $subscription,
+                json_encode([
+                    'title' => $title,
+                    'body' => $body,
+                    'icon' => '/icon-amanah.png',
+                    'url' => $url,
+                ])
+            );
+        }
+
+        foreach ($webPush->flush() as $report) {
+            // Handle report
+        }
     }
 }

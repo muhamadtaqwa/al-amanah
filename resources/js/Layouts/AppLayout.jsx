@@ -1,6 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
 import { Toaster } from "react-hot-toast";
+import axios from "axios";
+import {
+    Home,
+    CloudSun,
+    BookOpenText,
+    QrCode,
+    CalendarDays,
+    GraduationCap,
+    Users,
+    FileSignature,
+    Mail,
+    FileDown,
+    Wallet,
+    ChartBar,
+    FileText,
+    ClipboardList,
+    ClipboardCheck,
+    Building,
+    Box,
+    User,
+    LogOut,
+    Menu,
+    X,
+    PanelLeftClose,
+    PanelLeftOpen,
+} from "lucide-react";
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
 
 export default function AppLayout({ children }) {
     const { auth } = usePage().props;
@@ -19,35 +58,84 @@ export default function AppLayout({ children }) {
         localStorage.setItem("sidebarCollapsed", newState);
     };
 
+    // Push Notification Setup
+    useEffect(() => {
+        if (auth?.user) {
+            setupPushNotification();
+        }
+    }, [auth]);
+
+    const setupPushNotification = async () => {
+        try {
+            if (
+                !("Notification" in window) ||
+                !("serviceWorker" in navigator)
+            ) {
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+
+            if (permission !== "granted") {
+                return;
+            }
+
+            const registration = await navigator.serviceWorker.ready;
+
+            let subscription = await registration.pushManager.getSubscription();
+
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(
+                        import.meta.env.VITE_VAPID_PUBLIC_KEY,
+                    ),
+                });
+            }
+
+            const subscriptionData = subscription.toJSON();
+
+            axios
+                .post("/push-subscribe", {
+                    endpoint: subscriptionData.endpoint,
+                    p256dh: subscriptionData.keys.p256dh,
+                    auth: subscriptionData.keys.auth,
+                })
+                .catch(() => {});
+        } catch (error) {
+            // Silent fail
+        }
+    };
+
     const menuUtama = [
         {
             label: "Dashboard",
             path: "/",
-            icon: "fa-home",
+            icon: Home,
             roles: ["admin", "ustadz", "santri"],
         },
         {
             label: "Jadwal Sholat",
             path: "/jadwal-sholat",
-            icon: "fa-person-praying",
+            icon: CloudSun,
             roles: ["admin", "ustadz", "santri"],
         },
         {
             label: "Al-Qur'an",
             path: "/al-quran",
-            icon: "fa-book-quran",
+            icon: BookOpenText,
             roles: ["admin", "ustadz", "santri"],
         },
         {
             label: "QR Code",
             path: "/qr",
-            icon: "fa-qrcode",
+            icon: QrCode,
             roles: ["admin", "ustadz", "santri"],
         },
         {
             label: "Timeline",
             path: "/timeline",
-            icon: "fa-timeline",
+            icon: CalendarDays,
             roles: ["admin", "ustadz", "santri"],
         },
     ];
@@ -56,31 +144,21 @@ export default function AppLayout({ children }) {
         {
             label: "Santri",
             path: "/santri",
-            icon: "fa-user-graduate",
+            icon: GraduationCap,
             roles: ["admin"],
         },
-        {
-            label: "Ustadz",
-            path: "/ustadz",
-            icon: "fa-chalkboard-user",
-            roles: ["admin"],
-        },
+        { label: "Ustadz", path: "/ustadz", icon: Users, roles: ["admin"] },
         {
             label: "PSB",
             path: "/psb/verifikasi",
-            icon: "fa-file-signature",
+            icon: FileSignature,
             roles: ["admin"],
         },
-        {
-            label: "Surat",
-            path: "/surat",
-            icon: "fa-envelope",
-            roles: ["admin"],
-        },
+        { label: "Surat", path: "/surat", icon: Mail, roles: ["admin"] },
         {
             label: "Export EMIS",
             path: "/export",
-            icon: "fa-file-export",
+            icon: FileDown,
             roles: ["admin"],
         },
     ];
@@ -89,19 +167,14 @@ export default function AppLayout({ children }) {
         {
             label: "Pembayaran",
             path: "/pembayaran",
-            icon: "fa-money-bill-wave",
+            icon: Wallet,
             roles: ["admin"],
         },
-        {
-            label: "Rekap",
-            path: "/rekap",
-            icon: "fa-chart-bar",
-            roles: ["admin"],
-        },
+        { label: "Rekap", path: "/rekap", icon: ChartBar, roles: ["admin"] },
         {
             label: "Tagihan",
             path: "/tagihan",
-            icon: "fa-file-invoice",
+            icon: FileText,
             roles: ["santri"],
         },
     ];
@@ -110,25 +183,25 @@ export default function AppLayout({ children }) {
         {
             label: "Presensi Ustadz",
             path: "/presensi",
-            icon: "fa-clipboard-list",
+            icon: ClipboardList,
             roles: ["admin", "ustadz"],
         },
         {
             label: "Presensi Santri",
             path: "/presensi-santri",
-            icon: "fa-clipboard-check",
+            icon: ClipboardCheck,
             roles: ["admin"],
         },
         {
             label: "Pinjam Gedung",
             path: "/pinjam-gedung",
-            icon: "fa-building",
+            icon: Building,
             roles: ["admin"],
         },
         {
             label: "Inventaris",
             path: "/inventaris",
-            icon: "fa-box",
+            icon: Box,
             roles: ["admin"],
         },
     ];
@@ -138,25 +211,25 @@ export default function AppLayout({ children }) {
 
     const bottomNavByRole = {
         admin: [
-            { label: "Beranda", path: "/", icon: "fa-home" },
-            { label: "Bayar", path: "/pembayaran", icon: "fa-money-bill-wave" },
-            { label: "QR", path: "/qr", icon: "fa-qrcode", isCenter: true },
-            { label: "Rekap", path: "/rekap", icon: "fa-chart-bar" },
-            { label: "Presensi", path: "/presensi", icon: "fa-clipboard-list" },
+            { label: "Beranda", path: "/", icon: Home },
+            { label: "Bayar", path: "/pembayaran", icon: Wallet },
+            { label: "QR", path: "/qr", icon: QrCode, isCenter: true },
+            { label: "Rekap", path: "/rekap", icon: ChartBar },
+            { label: "Presensi", path: "/presensi", icon: ClipboardList },
         ],
         ustadz: [
-            { label: "Beranda", path: "/", icon: "fa-home" },
-            { label: "Timeline", path: "/timeline", icon: "fa-timeline" },
-            { label: "QR", path: "/qr", icon: "fa-qrcode", isCenter: true },
-            { label: "Presensi", path: "/presensi", icon: "fa-clipboard-list" },
-            { label: "Profil", path: "/profil", icon: "fa-user" },
+            { label: "Beranda", path: "/", icon: Home },
+            { label: "Timeline", path: "/timeline", icon: CalendarDays },
+            { label: "QR", path: "/qr", icon: QrCode, isCenter: true },
+            { label: "Presensi", path: "/presensi", icon: ClipboardList },
+            { label: "Profil", path: "/profil", icon: User },
         ],
         santri: [
-            { label: "Beranda", path: "/", icon: "fa-home" },
-            { label: "Timeline", path: "/timeline", icon: "fa-timeline" },
-            { label: "QR", path: "/qr", icon: "fa-qrcode", isCenter: true },
-            { label: "Tagihan", path: "/tagihan", icon: "fa-file-invoice" },
-            { label: "Profil", path: "/profil", icon: "fa-user" },
+            { label: "Beranda", path: "/", icon: Home },
+            { label: "Timeline", path: "/timeline", icon: CalendarDays },
+            { label: "QR", path: "/qr", icon: QrCode, isCenter: true },
+            { label: "Tagihan", path: "/tagihan", icon: FileText },
+            { label: "Profil", path: "/profil", icon: User },
         ],
     };
 
@@ -170,15 +243,6 @@ export default function AppLayout({ children }) {
     const activeClass = "bg-[#3D7ABA]/10 text-[#3D7ABA] font-semibold";
     const inactiveClass = "text-slate-600 hover:bg-[#3D7ABA]/5";
 
-    const CategoryTitle = ({ children, collapsed }) => {
-        if (collapsed) return null;
-        return (
-            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
-                {children}
-            </p>
-        );
-    };
-
     return (
         <div className="min-h-screen bg-[#EEF8FD]">
             <Toaster position="top-right" />
@@ -191,7 +255,7 @@ export default function AppLayout({ children }) {
                         className="absolute left-4 top-1/2 -translate-y-1/2 text-white"
                         aria-label="Buka menu"
                     >
-                        <i className="fa-solid fa-bars text-lg"></i>
+                        <Menu className="w-5 h-5" />
                     </button>
                     <img
                         src="/images/logo-alamanah.png"
@@ -226,11 +290,13 @@ export default function AppLayout({ children }) {
                             className="ml-auto text-slate-400"
                             aria-label="Tutup menu"
                         >
-                            &times;
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
                     <nav className="p-2 flex-1 overflow-y-auto">
-                        <CategoryTitle collapsed={false}>Utama</CategoryTitle>
+                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
+                            Utama
+                        </p>
                         {filterMenu(menuUtama).map((m) => (
                             <Link
                                 key={m.path}
@@ -238,16 +304,14 @@ export default function AppLayout({ children }) {
                                 onClick={() => setSidebarOpen(false)}
                                 className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
-                                <i
-                                    className={`fa-solid ${m.icon} w-5 text-center`}
-                                ></i>
+                                <m.icon className="w-4 h-4 shrink-0" />
                                 {m.label}
                             </Link>
                         ))}
                         {filterMenu(menuData).length > 0 && (
-                            <CategoryTitle collapsed={false}>
+                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
                                 Data
-                            </CategoryTitle>
+                            </p>
                         )}
                         {filterMenu(menuData).map((m) => (
                             <Link
@@ -256,16 +320,14 @@ export default function AppLayout({ children }) {
                                 onClick={() => setSidebarOpen(false)}
                                 className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
-                                <i
-                                    className={`fa-solid ${m.icon} w-5 text-center`}
-                                ></i>
+                                <m.icon className="w-4 h-4 shrink-0" />
                                 {m.label}
                             </Link>
                         ))}
                         {filterMenu(menuKeuangan).length > 0 && (
-                            <CategoryTitle collapsed={false}>
+                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
                                 Keuangan
-                            </CategoryTitle>
+                            </p>
                         )}
                         {filterMenu(menuKeuangan).map((m) => (
                             <Link
@@ -274,16 +336,14 @@ export default function AppLayout({ children }) {
                                 onClick={() => setSidebarOpen(false)}
                                 className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
-                                <i
-                                    className={`fa-solid ${m.icon} w-5 text-center`}
-                                ></i>
+                                <m.icon className="w-4 h-4 shrink-0" />
                                 {m.label}
                             </Link>
                         ))}
                         {filterMenu(menuKegiatan).length > 0 && (
-                            <CategoryTitle collapsed={false}>
+                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
                                 Kegiatan
-                            </CategoryTitle>
+                            </p>
                         )}
                         {filterMenu(menuKegiatan).map((m) => (
                             <Link
@@ -292,9 +352,7 @@ export default function AppLayout({ children }) {
                                 onClick={() => setSidebarOpen(false)}
                                 className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
                             >
-                                <i
-                                    className={`fa-solid ${m.icon} w-5 text-center`}
-                                ></i>
+                                <m.icon className="w-4 h-4 shrink-0" />
                                 {m.label}
                             </Link>
                         ))}
@@ -314,7 +372,7 @@ export default function AppLayout({ children }) {
                             onClick={handleLogout}
                             className="w-full flex items-center gap-3 px-6 py-2 text-sm text-red-500 font-medium hover:bg-red-50"
                         >
-                            <i className="fa-solid fa-right-from-bracket w-5 text-center"></i>
+                            <LogOut className="w-4 h-4 shrink-0" />
                             Logout
                         </button>
                     </div>
@@ -340,17 +398,21 @@ export default function AppLayout({ children }) {
                 </div>
                 <button
                     onClick={toggleSidebar}
-                    className="absolute -right-3 top-20 w-6 h-6 bg-white shadow-md rounded-full flex items-center justify-center text-xs text-slate-400 hover:text-[#3D7ABA]"
+                    className="absolute -right-3 top-17 w-6 h-6 bg-white shadow-md rounded-full flex items-center justify-center text-xs text-slate-400 hover:text-[#3D7ABA]"
                     aria-label="Toggle sidebar"
                 >
-                    <i
-                        className={`fa-solid ${sidebarCollapsed ? "fa-chevron-right" : "fa-chevron-left"}`}
-                    ></i>
+                    {sidebarCollapsed ? (
+                        <PanelLeftOpen className="w-3.5 h-3.5" />
+                    ) : (
+                        <PanelLeftClose className="w-3.5 h-3.5" />
+                    )}
                 </button>
-                <nav className="px-2 flex-1 space-y-0 overflow-y-auto">
-                    <CategoryTitle collapsed={sidebarCollapsed}>
-                        Utama
-                    </CategoryTitle>
+                <nav className="px-2 flex-1 space-y-0.5 overflow-y-auto">
+                    {!sidebarCollapsed && (
+                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
+                            Utama
+                        </p>
+                    )}
                     {filterMenu(menuUtama).map((m) => (
                         <Link
                             key={m.path}
@@ -358,16 +420,14 @@ export default function AppLayout({ children }) {
                             className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
-                            <i
-                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
-                            ></i>
+                            <m.icon className="w-4 h-4 shrink-0" />
                             {!sidebarCollapsed && m.label}
                         </Link>
                     ))}
-                    {filterMenu(menuData).length > 0 && (
-                        <CategoryTitle collapsed={sidebarCollapsed}>
+                    {filterMenu(menuData).length > 0 && !sidebarCollapsed && (
+                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
                             Data
-                        </CategoryTitle>
+                        </p>
                     )}
                     {filterMenu(menuData).map((m) => (
                         <Link
@@ -376,17 +436,16 @@ export default function AppLayout({ children }) {
                             className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
-                            <i
-                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
-                            ></i>
+                            <m.icon className="w-4 h-4 shrink-0" />
                             {!sidebarCollapsed && m.label}
                         </Link>
                     ))}
-                    {filterMenu(menuKeuangan).length > 0 && (
-                        <CategoryTitle collapsed={sidebarCollapsed}>
-                            Keuangan
-                        </CategoryTitle>
-                    )}
+                    {filterMenu(menuKeuangan).length > 0 &&
+                        !sidebarCollapsed && (
+                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
+                                Keuangan
+                            </p>
+                        )}
                     {filterMenu(menuKeuangan).map((m) => (
                         <Link
                             key={m.path}
@@ -394,17 +453,16 @@ export default function AppLayout({ children }) {
                             className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
-                            <i
-                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
-                            ></i>
+                            <m.icon className="w-4 h-4 shrink-0" />
                             {!sidebarCollapsed && m.label}
                         </Link>
                     ))}
-                    {filterMenu(menuKegiatan).length > 0 && (
-                        <CategoryTitle collapsed={sidebarCollapsed}>
-                            Kegiatan
-                        </CategoryTitle>
-                    )}
+                    {filterMenu(menuKegiatan).length > 0 &&
+                        !sidebarCollapsed && (
+                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-2 mb-0.5">
+                                Kegiatan
+                            </p>
+                        )}
                     {filterMenu(menuKegiatan).map((m) => (
                         <Link
                             key={m.path}
@@ -412,9 +470,7 @@ export default function AppLayout({ children }) {
                             className={`flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
                             title={sidebarCollapsed ? m.label : ""}
                         >
-                            <i
-                                className={`fa-solid ${m.icon} w-4 text-center text-base`}
-                            ></i>
+                            <m.icon className="w-4 h-4 shrink-0" />
                             {!sidebarCollapsed && m.label}
                         </Link>
                     ))}
@@ -434,7 +490,7 @@ export default function AppLayout({ children }) {
                         onClick={handleLogout}
                         className={`text-red-500 text-xs font-medium hover:bg-red-50 rounded-xl px-3 py-1.5 ${sidebarCollapsed ? "w-full justify-center flex" : "w-full text-left flex items-center gap-3"}`}
                     >
-                        <i className="fa-solid fa-right-from-bracket text-sm"></i>
+                        <LogOut className="w-4 h-4 shrink-0" />
                         {!sidebarCollapsed && <span>Logout</span>}
                     </button>
                 </div>
@@ -461,9 +517,7 @@ export default function AppLayout({ children }) {
                                     <div
                                         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl border-4 border-white transition-all ${isActive(b.path) ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] scale-110" : "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8]"}`}
                                     >
-                                        <i
-                                            className={`fa-solid ${b.icon} text-white text-lg`}
-                                        ></i>
+                                        <b.icon className="w-5 h-5 text-white" />
                                     </div>
                                     <span
                                         className={`text-[9px] font-bold mt-0.5 ${isActive(b.path) ? "text-[#3D7ABA]" : "text-slate-400"}`}
@@ -480,9 +534,7 @@ export default function AppLayout({ children }) {
                                     <div
                                         className={`p-1.5 rounded-full transition-all ${isActive(b.path) ? "bg-[#3D7ABA]/10" : ""}`}
                                     >
-                                        <i
-                                            className={`fa-solid ${b.icon} text-base`}
-                                        ></i>
+                                        <b.icon className="w-4 h-4" />
                                     </div>
                                     <span className="text-[9px] font-bold mt-0.5">
                                         {b.label}

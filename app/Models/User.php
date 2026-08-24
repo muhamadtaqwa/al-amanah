@@ -9,7 +9,19 @@ class User extends Authenticatable
 {
     use HasRoles;
 
-    protected $fillable = ['username', 'password', 'role'];
+    protected $fillable = [
+        'username',
+        'password',
+        'role',
+        'latitude',
+        'longitude',
+        'notif_subuh',
+        'notif_dzuhur',
+        'notif_ashar',
+        'notif_maghrib',
+        'notif_isya',
+    ];
+
     protected $hidden = ['password', 'remember_token'];
 
     public function ustadz()

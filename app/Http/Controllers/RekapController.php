@@ -68,6 +68,16 @@ class RekapController extends Controller
                 $total = $items->sum('nominal');
                 $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
+
+                $perSpp = $items->map(function ($item) use ($santri) {
+                    return [
+                        'id' => $item->id,
+                        'nama_pembayaran' => str_replace(" - {$santri->nama_lengkap}", '', $item->nama_pembayaran),
+                        'nominal' => $item->nominal,
+                        'status' => $item->status,
+                    ];
+                })->values();
+
                 return [
                     'nis' => $items->first()->nis,
                     'nama' => $santri->nama_lengkap ?? '-',
@@ -77,6 +87,7 @@ class RekapController extends Controller
                     'total_nominal' => $total,
                     'nominal_lunas' => $dibayar,
                     'nominal_belum' => $total - $dibayar,
+                    'per_spp' => $perSpp,
                 ];
             })->sortBy('nis')->values();
 
@@ -97,6 +108,16 @@ class RekapController extends Controller
                 $total = $items->sum('nominal');
                 $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
+
+                $perKitab = $items->map(function ($item) use ($santri) {
+                    return [
+                        'id' => $item->id,
+                        'nama_pembayaran' => str_replace(" - {$santri->nama_lengkap}", '', $item->nama_pembayaran),
+                        'nominal' => $item->nominal,
+                        'status' => $item->status,
+                    ];
+                })->values();
+
                 return [
                     'nis' => $items->first()->nis,
                     'nama' => $santri->nama_lengkap ?? '-',
@@ -106,6 +127,7 @@ class RekapController extends Controller
                     'total_nominal' => $total,
                     'nominal_lunas' => $dibayar,
                     'nominal_belum' => $total - $dibayar,
+                    'per_kitab' => $perKitab,
                 ];
             })->sortBy('nis')->values();
 
@@ -119,9 +141,24 @@ class RekapController extends Controller
 
     public function kas()
     {
+        $urutanBulan = [
+            'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember',
+        ];
+
         $data = Pembayaran::where('jenis', 'Kas')->get()
             ->groupBy('nis')
-            ->map(function ($items) {
+            ->map(function ($items) use ($urutanBulan) {
                 $santri = Santri::where('nis', $items->first()->nis)->first();
                 $total = $items->sum('nominal');
                 $dibayar = $items->sum('total_dibayar');
@@ -135,7 +172,18 @@ class RekapController extends Controller
                         'status' => $item->status,
                         'tgl_bayar' => $item->tgl_bayar,
                     ];
-                })->sortBy('nama_pembayaran')->values();
+                })->sort(function ($a, $b) use ($urutanBulan) {
+                    $bulanA = trim(str_replace(['Kas Bulanan - ', '-', ' '], ['', '', ' '], $a['nama_pembayaran'] ?? ''));
+                    $bulanB = trim(str_replace(['Kas Bulanan - ', '-', ' '], ['', '', ' '], $b['nama_pembayaran'] ?? ''));
+
+                    $indexA = array_search($bulanA, $urutanBulan);
+                    $indexB = array_search($bulanB, $urutanBulan);
+
+                    if ($indexA === false) $indexA = 99;
+                    if ($indexB === false) $indexB = 99;
+
+                    return $indexA - $indexB;
+                })->values();
 
                 return [
                     'nis' => $items->first()->nis,

@@ -203,49 +203,56 @@ export default function Index() {
                     </p>
                 ) : (
                     <>
-                        {/* Waktu Sholat Wajib - 5 kolom di desktop */}
+                        {/* Waktu Sholat Wajib */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-4">
                             {waktuWajib.map((s) => {
                                 const Icon = s.icon;
                                 return (
                                     <div
                                         key={s.label}
-                                        className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm text-center"
+                                        className="rounded-2xl border border-sky-100 bg-white p-3.5 shadow-sm"
                                     >
-                                        <div className="w-10 h-10 rounded-xl bg-[#3D7ABA]/10 flex items-center justify-center mx-auto mb-2">
-                                            <Icon className="w-5 h-5 text-[#3D7ABA]" />
-                                        </div>
-                                        <span className="block text-xs font-medium text-slate-500">
-                                            {s.label}
-                                        </span>
-                                        <span className="block text-lg font-bold text-[#3D7ABA] font-mono mt-0.5">
-                                            {s.waktu?.slice(0, 5)}
-                                        </span>
+                                        {/* Mobile: horizontal layout */}
+                                        <div className="flex items-center justify-between sm:flex-col sm:text-center gap-3 sm:gap-0">
+                                            <div className="flex items-center gap-3 sm:flex-col">
+                                                <div className="w-10 h-10 rounded-xl bg-[#3D7ABA]/10 flex items-center justify-center shrink-0">
+                                                    <Icon className="w-5 h-5 text-[#3D7ABA]" />
+                                                </div>
+                                                <div className="sm:text-center">
+                                                    <span className="block text-sm font-medium text-slate-700 sm:text-xs sm:text-slate-500">
+                                                        {s.label}
+                                                    </span>
+                                                    <span className="block text-lg font-bold text-[#3D7ABA] font-mono sm:mt-0.5">
+                                                        {s.waktu?.slice(0, 5)}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                                        {/* Toggle */}
-                                        <div className="flex items-center justify-center gap-2 mt-2 pt-2 border-t border-slate-100">
-                                            <span className="text-[10px] text-slate-400">
-                                                Notif
-                                            </span>
-                                            <button
-                                                onClick={() =>
-                                                    toggleNotif(s.key)
-                                                }
-                                                className={`w-9 h-5 rounded-full transition relative shrink-0 ${
-                                                    notifSetting[s.key]
-                                                        ? "bg-green-500"
-                                                        : "bg-slate-300"
-                                                }`}
-                                                title="Notifikasi"
-                                            >
-                                                <span
-                                                    className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${
+                                            {/* Toggle - mobile di kanan, desktop di bawah */}
+                                            <div className="flex items-center gap-2 sm:justify-center sm:w-full sm:mt-2 sm:pt-2 sm:border-t sm:border-slate-100">
+                                                <span className="text-[10px] text-slate-400 sm:block hidden">
+                                                    Notif
+                                                </span>
+                                                <button
+                                                    onClick={() =>
+                                                        toggleNotif(s.key)
+                                                    }
+                                                    className={`w-10 h-5.5 rounded-full transition relative shrink-0 ${
                                                         notifSetting[s.key]
-                                                            ? "left-4"
-                                                            : "left-0.5"
+                                                            ? "bg-green-500"
+                                                            : "bg-slate-300"
                                                     }`}
-                                                ></span>
-                                            </button>
+                                                    title="Notifikasi"
+                                                >
+                                                    <span
+                                                        className={`absolute top-0.5 w-4.5 h-4.5 rounded-full bg-white shadow transition-all ${
+                                                            notifSetting[s.key]
+                                                                ? "left-5"
+                                                                : "left-0.5"
+                                                        }`}
+                                                    ></span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 );

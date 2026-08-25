@@ -2,7 +2,6 @@ import { useState } from "react";
 import { usePage, useForm, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
-import { UserCircle, Bell } from "lucide-react";
 
 export default function Index() {
     const { auth } = usePage().props;
@@ -242,7 +241,6 @@ export default function Index() {
                         <div className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl">
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="font-semibold text-sm text-slate-700 flex items-center gap-2">
-                                    <UserCircle className="w-4 h-4 text-[#3D7ABA]" />
                                     Informasi Profil
                                 </h3>
                                 <button
@@ -412,7 +410,6 @@ export default function Index() {
                         {user.role === "admin" && (
                             <div className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-2xl">
                                 <h3 className="font-semibold text-sm text-slate-700 mb-3 flex items-center gap-2">
-                                    <Bell className="w-4 h-4 text-[#3D7ABA]" />
                                     Test Notifikasi
                                 </h3>
                                 <div className="grid grid-cols-3 gap-2">

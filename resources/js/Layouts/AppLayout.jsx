@@ -506,21 +506,21 @@ export default function AppLayout({ children }) {
             {/* Bottom Nav Mobile */}
             {!hideBottomNav && (
                 <nav className="fixed bottom-3 left-4 right-4 bg-white/90 backdrop-blur-xl rounded-full shadow-2xl border border-white/50 z-30 md:hidden">
-                    <div className="flex items-end justify-around px-1 py-1 relative">
+                    <div className="flex items-end justify-around px-1 py-1.5 relative">
                         {bottomNav.map((b) =>
                             b.isCenter ? (
                                 <Link
                                     key={b.path}
                                     href={b.path}
-                                    className="flex flex-col items-center -mt-6 relative z-10"
+                                    className="flex flex-col items-center -mt-7 relative z-10"
                                 >
                                     <div
-                                        className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl border-4 border-white transition-all ${isActive(b.path) ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] scale-110" : "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8]"}`}
+                                        className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl border-4 border-white transition-all ${isActive(b.path) ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] scale-110" : "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8]"}`}
                                     >
-                                        <b.icon className="w-5 h-5 text-white" />
+                                        <b.icon className="w-6 h-6 text-white" />
                                     </div>
                                     <span
-                                        className={`text-[9px] font-bold mt-0.5 ${isActive(b.path) ? "text-[#3D7ABA]" : "text-slate-400"}`}
+                                        className={`text-[10px] font-bold mt-0.5 ${isActive(b.path) ? "text-[#3D7ABA]" : "text-slate-400"}`}
                                     >
                                         {b.label}
                                     </span>
@@ -529,14 +529,14 @@ export default function AppLayout({ children }) {
                                 <Link
                                     key={b.path}
                                     href={b.path}
-                                    className={`flex flex-col items-center py-1.5 px-1 min-w-[52px] transition-all ${isActive(b.path) ? "text-[#3D7ABA] scale-110" : "text-slate-400 hover:text-[#20B5E8]"}`}
+                                    className={`flex flex-col items-center py-2 px-1 min-w-[56px] transition-all ${isActive(b.path) ? "text-[#3D7ABA] scale-110" : "text-slate-400 hover:text-[#20B5E8]"}`}
                                 >
                                     <div
-                                        className={`p-1.5 rounded-full transition-all ${isActive(b.path) ? "bg-[#3D7ABA]/10" : ""}`}
+                                        className={`p-2 rounded-full transition-all ${isActive(b.path) ? "bg-[#3D7ABA]/10" : ""}`}
                                     >
-                                        <b.icon className="w-4 h-4" />
+                                        <b.icon className="w-5 h-5" />
                                     </div>
-                                    <span className="text-[9px] font-bold mt-0.5">
+                                    <span className="text-[10px] font-bold mt-0.5">
                                         {b.label}
                                     </span>
                                 </Link>

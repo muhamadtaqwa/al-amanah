@@ -37,16 +37,48 @@ export default function Index() {
             nama_pembayaran: "",
             nominal: "",
             tgl_jatuh_tempo: "",
+            semester: "Semester Gasal",
+            bulan: "Januari",
+            tahun: String(new Date().getFullYear()),
         });
 
     const generateForm = useForm({
         jenis: jenisPembayaran[0]?.nama || "SPP",
         nama_pembayaran: "",
         nominal: "",
-        bulan: "",
-        tahun: "",
+        semester: "Semester Gasal",
+        bulan: "Januari",
+        tahun: String(new Date().getFullYear()),
         kecualikan: "",
     });
+
+    const bulanList = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+    ];
+
+    const tahunList = ["2025", "2026", "2027"];
+
+    // Auto generate nama pembayaran
+    const getNamaOtomatis = (jenis, semester, bulan, tahun) => {
+        if (jenis === "SPP") {
+            return `SPP - ${semester} ${tahun}`;
+        }
+        if (jenis === "Kas") {
+            return `Kas Bulanan - ${bulan} ${tahun}`;
+        }
+        return "";
+    };
 
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(search), 250);
@@ -71,6 +103,9 @@ export default function Index() {
             nama_pembayaran: p.nama_pembayaran,
             nominal: p.nominal,
             tgl_jatuh_tempo: p.tgl_jatuh_tempo || "",
+            semester: "Semester Gasal",
+            bulan: "Januari",
+            tahun: String(new Date().getFullYear()),
         });
         setShowModal(true);
     };
@@ -82,15 +117,30 @@ export default function Index() {
 
     const submit = (e) => {
         e.preventDefault();
+
+        // Auto nama pembayaran saat tambah
+        let finalData = { ...data };
+        if (!editData) {
+            const namaOtomatis = getNamaOtomatis(
+                data.jenis,
+                data.semester,
+                data.bulan,
+                data.tahun,
+            );
+            if (namaOtomatis && data.jenis !== "Kitab") {
+                finalData.nama_pembayaran = namaOtomatis;
+            }
+        }
+
         editData
-            ? put(`/pembayaran/${editData.id}`, {
+            ? put(`/pembayaran/${editData.id}`, finalData, {
                   onSuccess: () => {
                       closeModal();
                       toast.success("Pembayaran diupdate!");
                   },
                   onError: () => toast.error("Gagal mengupdate."),
               })
-            : post("/pembayaran", {
+            : post("/pembayaran", finalData, {
                   onSuccess: () => {
                       closeModal();
                       toast.success("Pembayaran ditambah!");
@@ -551,19 +601,100 @@ export default function Index() {
                                         </option>
                                     ))}
                                 </select>
-                                <input
-                                    type="text"
-                                    placeholder="Nama Pembayaran"
-                                    value={generateForm.data.nama_pembayaran}
-                                    onChange={(e) =>
-                                        generateForm.setData(
-                                            "nama_pembayaran",
-                                            e.target.value,
-                                        )
-                                    }
-                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
-                                    required
-                                />
+
+                                {generateForm.data.jenis === "SPP" && (
+                                    <>
+                                        <select
+                                            value={generateForm.data.semester}
+                                            onChange={(e) =>
+                                                generateForm.setData(
+                                                    "semester",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            <option value="Semester Gasal">
+                                                Semester Gasal
+                                            </option>
+                                            <option value="Semester Genap">
+                                                Semester Genap
+                                            </option>
+                                        </select>
+                                        <select
+                                            value={generateForm.data.tahun}
+                                            onChange={(e) =>
+                                                generateForm.setData(
+                                                    "tahun",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            {tahunList.map((t) => (
+                                                <option key={t} value={t}>
+                                                    {t}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </>
+                                )}
+
+                                {generateForm.data.jenis === "Kas" && (
+                                    <>
+                                        <select
+                                            value={generateForm.data.bulan}
+                                            onChange={(e) =>
+                                                generateForm.setData(
+                                                    "bulan",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            {bulanList.map((b) => (
+                                                <option key={b} value={b}>
+                                                    {b}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            value={generateForm.data.tahun}
+                                            onChange={(e) =>
+                                                generateForm.setData(
+                                                    "tahun",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            {tahunList.map((t) => (
+                                                <option key={t} value={t}>
+                                                    {t}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </>
+                                )}
+
+                                {generateForm.data.jenis === "Kitab" && (
+                                    <input
+                                        type="text"
+                                        placeholder="Nama Pembayaran"
+                                        value={
+                                            generateForm.data.nama_pembayaran
+                                        }
+                                        onChange={(e) =>
+                                            generateForm.setData(
+                                                "nama_pembayaran",
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
+                                        required
+                                    />
+                                )}
+
                                 <input
                                     type="number"
                                     placeholder="Nominal"
@@ -576,30 +707,6 @@ export default function Index() {
                                     }
                                     className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                     required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Bulan"
-                                    value={generateForm.data.bulan}
-                                    onChange={(e) =>
-                                        generateForm.setData(
-                                            "bulan",
-                                            e.target.value,
-                                        )
-                                    }
-                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Tahun"
-                                    value={generateForm.data.tahun}
-                                    onChange={(e) =>
-                                        generateForm.setData(
-                                            "tahun",
-                                            e.target.value,
-                                        )
-                                    }
-                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                 />
                                 <input
                                     type="text"
@@ -634,7 +741,7 @@ export default function Index() {
                     </div>
                 )}
 
-                {/* Card List - 2 kolom desktop */}
+                {/* Card List */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filtered.length === 0 && (
                         <p className="text-center text-slate-400 py-10 sm:col-span-2">
@@ -700,7 +807,14 @@ export default function Index() {
                                     )}
                                 </div>
                                 <h3 className="font-semibold text-sm truncate mb-2">
-                                    {p.nama_pembayaran}
+                                    {p.nama_pembayaran
+                                        ?.replace("Kas Bulanan - ", "")
+                                        .replace("SPP - ", "")
+                                        .replace(
+                                            ` - ${p.santri?.nama_lengkap}`,
+                                            "",
+                                        )
+                                        .trim()}
                                 </h3>
                                 <div className="text-[11px] text-slate-500 space-y-0.5 mb-2">
                                     <Row label="NIS" value={p.nis} />
@@ -849,6 +963,7 @@ export default function Index() {
                                         className="w-full border rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50"
                                     />
                                 )}
+
                                 <select
                                     value={data.jenis}
                                     onChange={(e) =>
@@ -862,19 +977,89 @@ export default function Index() {
                                         </option>
                                     ))}
                                 </select>
-                                <input
-                                    type="text"
-                                    placeholder="Nama Pembayaran"
-                                    value={data.nama_pembayaran}
-                                    onChange={(e) =>
-                                        setData(
-                                            "nama_pembayaran",
-                                            e.target.value,
-                                        )
-                                    }
-                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
-                                    required
-                                />
+
+                                {data.jenis === "SPP" && (
+                                    <>
+                                        <select
+                                            value={data.semester}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "semester",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            <option value="Semester Gasal">
+                                                Semester Gasal
+                                            </option>
+                                            <option value="Semester Genap">
+                                                Semester Genap
+                                            </option>
+                                        </select>
+                                        <select
+                                            value={data.tahun}
+                                            onChange={(e) =>
+                                                setData("tahun", e.target.value)
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            {tahunList.map((t) => (
+                                                <option key={t} value={t}>
+                                                    {t}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </>
+                                )}
+
+                                {data.jenis === "Kas" && (
+                                    <>
+                                        <select
+                                            value={data.bulan}
+                                            onChange={(e) =>
+                                                setData("bulan", e.target.value)
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            {bulanList.map((b) => (
+                                                <option key={b} value={b}>
+                                                    {b}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            value={data.tahun}
+                                            onChange={(e) =>
+                                                setData("tahun", e.target.value)
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            {tahunList.map((t) => (
+                                                <option key={t} value={t}>
+                                                    {t}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </>
+                                )}
+
+                                {data.jenis === "Kitab" && (
+                                    <input
+                                        type="text"
+                                        placeholder="Nama Pembayaran"
+                                        value={data.nama_pembayaran}
+                                        onChange={(e) =>
+                                            setData(
+                                                "nama_pembayaran",
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm"
+                                        required
+                                    />
+                                )}
+
                                 <input
                                     type="number"
                                     placeholder="Nominal"

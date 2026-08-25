@@ -204,7 +204,11 @@ export default function Index() {
                                 </p>
                             </div>
                             <h3 className="font-semibold text-sm truncate mb-2">
-                                {t.nama_pembayaran}
+                                {t.nama_pembayaran
+                                    ?.replace("Kas Bulanan - ", "")
+                                    .replace("SPP - ", "")
+                                    .replace(` - ${t.santri?.nama_lengkap}`, "")
+                                    .trim()}
                             </h3>
                             <div className="text-[11px] text-slate-500 space-y-0.5">
                                 <Row label="NIS" value={t.nis} />

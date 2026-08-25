@@ -1,11 +1,11 @@
 // public/sw.js
 
 // Cache name
-const CACHE_NAME = "al-amanah-v1";
+const CACHE_NAME = "al-amanah-v2";
 const API_CACHE = "al-amanah-api-v1";
 
 // Asset yang di-cache saat install
-const ASSETS_TO_CACHE = ["/", "/manifest.json", "/icon-amanah.png"];
+const ASSETS_TO_CACHE = ["/manifest.json", "/icon-amanah.png"];
 
 // Install event - cache aset statis
 self.addEventListener("install", (event) => {
@@ -37,6 +37,11 @@ self.addEventListener("fetch", (event) => {
 
     // Skip non-GET requests
     if (request.method !== "GET") return;
+
+    // Skip navigasi halaman (biarkan network, jangan cache)
+    if (request.mode === "navigate") {
+        return;
+    }
 
     // API Quran - Stale While Revalidate
     if (request.url.includes("api.quran.com")) {
@@ -134,13 +139,11 @@ self.addEventListener("notificationclick", (event) => {
         clients
             .matchAll({ type: "window", includeUncontrolled: true })
             .then((clientList) => {
-                // Cek apakah sudah ada window yang terbuka
                 for (const client of clientList) {
                     if (client.url.includes(url) && "focus" in client) {
                         return client.focus();
                     }
                 }
-                // Buka window baru
                 if (clients.openWindow) {
                     return clients.openWindow(url);
                 }

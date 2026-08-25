@@ -108,10 +108,11 @@ class PembayaranController extends Controller
     {
         $request->validate([
             'jenis' => 'required|exists:jenis_pembayaran,nama',
-            'nama_pembayaran' => 'required',
             'nominal' => 'required|integer',
+            'semester' => 'nullable',
             'bulan' => 'nullable',
             'tahun' => 'nullable',
+            'nama_pembayaran' => 'nullable',
             'kecualikan' => 'nullable',
         ]);
 
@@ -123,20 +124,29 @@ class PembayaranController extends Controller
             $q->whereNotIn('nis', $kecualikan);
         })->get();
 
+        // Format nama pembayaran sesuai jenis
+        if ($request->jenis === 'SPP') {
+            $namaPembayaran = "SPP - {$request->semester} {$request->tahun}";
+        } elseif ($request->jenis === 'Kas') {
+            $namaPembayaran = "Kas Bulanan - {$request->bulan} {$request->tahun}";
+        } else {
+            $namaPembayaran = $request->nama_pembayaran;
+        }
+
         $count = 0;
         foreach ($santris as $s) {
             $pembayaran = Pembayaran::create([
                 'nis' => $s->nis,
                 'jenis' => $request->jenis,
-                'nama_pembayaran' => $request->nama_pembayaran . ' - ' . ($request->bulan ?? '') . ' ' . ($request->tahun ?? '') . ' - ' . $s->nama_lengkap,
+                'nama_pembayaran' => $namaPembayaran . ' - ' . $s->nama_lengkap,
                 'nominal' => $request->nominal,
                 'tgl_jatuh_tempo' => $request->tgl_jatuh_tempo,
             ]);
 
-            // Kirim notifikasi ke santri
+            // Kirim notifikasi
             $this->kirimNotifKeSantri(
                 $pembayaran->nis,
-                '📄 Tagihan Baru',
+                'Tagihan',
                 $pembayaran->nama_pembayaran . ' - Rp ' . number_format($pembayaran->nominal, 0, ',', '.'),
                 '/tagihan'
             );

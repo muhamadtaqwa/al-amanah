@@ -118,7 +118,33 @@ export default function SPP() {
                                         : `${s.total_belum} Belum`}
                                 </span>
                             </div>
-                            <div className="text-[11px] text-slate-500 space-y-0.5">
+
+                            {/* List SPP */}
+                            {s.per_spp && s.per_spp.length > 0 && (
+                                <div className="mb-2 space-y-1">
+                                    {s.per_spp.map((k) => (
+                                        <div
+                                            key={k.id}
+                                            className="flex justify-between text-[11px] bg-slate-50 rounded-lg px-3 py-1.5"
+                                        >
+                                            <span className="text-slate-500 truncate mr-2">
+                                                {k.nama_pembayaran
+                                                    ?.replace("SPP - ", "")
+                                                    .trim()}
+                                            </span>
+                                            <span
+                                                className={`font-medium shrink-0 ${k.status === "lunas" ? "text-emerald-600" : "text-red-500"}`}
+                                            >
+                                                {k.status === "lunas"
+                                                    ? "Lunas"
+                                                    : "Belum"}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="text-[11px] text-slate-500 space-y-0.5 border-t pt-2 mt-2">
                                 <Row
                                     label="Total"
                                     value={`Rp ${parseInt(s.total_nominal).toLocaleString()}`}

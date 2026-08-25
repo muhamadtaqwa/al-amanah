@@ -498,7 +498,7 @@ export default function AppLayout({ children }) {
 
             {/* Main Content */}
             <main
-                className={`pb-28 md:pb-6 transition-all duration-300 ${sidebarCollapsed ? "md:ml-20" : "md:ml-60"} ${hideBottomNav ? "pb-0" : ""}`}
+                className={`pb-24 md:pb-6 transition-all duration-300 ${sidebarCollapsed ? "md:ml-20" : "md:ml-60"} ${hideBottomNav ? "pb-0" : ""}`}
             >
                 <div className="p-4 md:p-6">{children}</div>
             </main>
@@ -506,7 +506,7 @@ export default function AppLayout({ children }) {
             {/* Bottom Nav Mobile */}
             {!hideBottomNav && (
                 <nav className="fixed bottom-3 left-4 right-4 bg-white/90 backdrop-blur-xl rounded-full shadow-2xl border border-white/50 z-30 md:hidden">
-                    <div className="flex items-end justify-around px-1 py-1.5 relative">
+                    <div className="flex items-end justify-around px-2 py-1.5 relative">
                         {bottomNav.map((b) =>
                             b.isCenter ? (
                                 <Link
@@ -529,10 +529,10 @@ export default function AppLayout({ children }) {
                                 <Link
                                     key={b.path}
                                     href={b.path}
-                                    className={`flex flex-col items-center py-2 px-1 min-w-[56px] transition-all ${isActive(b.path) ? "text-[#3D7ABA] scale-110" : "text-slate-400 hover:text-[#20B5E8]"}`}
+                                    className={`flex flex-col items-center py-1.5 px-1 min-w-[52px] transition-all ${isActive(b.path) ? "text-[#3D7ABA] scale-110" : "text-slate-400 hover:text-[#20B5E8]"}`}
                                 >
                                     <div
-                                        className={`p-2 rounded-full transition-all ${isActive(b.path) ? "bg-[#3D7ABA]/10" : ""}`}
+                                        className={`p-1.5 rounded-full transition-all ${isActive(b.path) ? "bg-[#3D7ABA]/10" : ""}`}
                                     >
                                         <b.icon className="w-5 h-5" />
                                     </div>

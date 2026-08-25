@@ -30,17 +30,16 @@ export default function Index() {
     const [nominalVerifikasi, setNominalVerifikasi] = useState("");
     const firstFieldRef = useRef(null);
 
-    const { data, setData, post, put, reset, processing, errors, clearErrors } =
-        useForm({
-            nis: "",
-            jenis: jenisPembayaran[0]?.nama || "SPP",
-            nama_pembayaran: "",
-            nominal: "",
-            tgl_jatuh_tempo: "",
-            semester: "Semester Gasal",
-            bulan: "Januari",
-            tahun: String(new Date().getFullYear()),
-        });
+    const { data, setData, reset, processing, errors, clearErrors } = useForm({
+        nis: "",
+        jenis: jenisPembayaran[0]?.nama || "SPP",
+        nama_pembayaran: "",
+        nominal: "",
+        tgl_jatuh_tempo: "",
+        semester: "Semester Gasal",
+        bulan: "Januari",
+        tahun: String(new Date().getFullYear()),
+    });
 
     const generateForm = useForm({
         jenis: jenisPembayaran[0]?.nama || "SPP",
@@ -49,6 +48,7 @@ export default function Index() {
         semester: "Semester Gasal",
         bulan: "Januari",
         tahun: String(new Date().getFullYear()),
+        target: "putra",
         kecualikan: "",
     });
 
@@ -69,13 +69,13 @@ export default function Index() {
 
     const tahunList = ["2025", "2026", "2027"];
 
-    // Auto generate nama pembayaran
+    // Auto generate nama pembayaran (tanpa prefix)
     const getNamaOtomatis = (jenis, semester, bulan, tahun) => {
         if (jenis === "SPP") {
-            return `SPP - ${semester} ${tahun}`;
+            return `${semester} ${tahun}`;
         }
         if (jenis === "Kas") {
-            return `Kas Bulanan - ${bulan} ${tahun}`;
+            return `${bulan} ${tahun}`;
         }
         return "";
     };
@@ -111,14 +111,13 @@ export default function Index() {
     };
     const closeModal = () => {
         setShowModal(false);
-        reset();
+        setEditData(null);
         clearErrors();
     };
 
     const submit = (e) => {
         e.preventDefault();
 
-        // Auto nama pembayaran saat tambah
         let finalData = { ...data };
         if (!editData) {
             const namaOtomatis = getNamaOtomatis(
@@ -132,21 +131,30 @@ export default function Index() {
             }
         }
 
-        editData
-            ? put(`/pembayaran/${editData.id}`, finalData, {
-                  onSuccess: () => {
-                      closeModal();
-                      toast.success("Pembayaran diupdate!");
-                  },
-                  onError: () => toast.error("Gagal mengupdate."),
-              })
-            : post("/pembayaran", finalData, {
-                  onSuccess: () => {
-                      closeModal();
-                      toast.success("Pembayaran ditambah!");
-                  },
-                  onError: () => toast.error("Gagal menambah."),
-              });
+        if (editData) {
+            router.put(`/pembayaran/${editData.id}`, finalData, {
+                onSuccess: () => {
+                    toast.success("Pembayaran diupdate!");
+                    setShowModal(false);
+                    setEditData(null);
+                },
+                onError: (err) => {
+                    console.error(err);
+                    toast.error("Gagal mengupdate.");
+                },
+            });
+        } else {
+            router.post("/pembayaran", finalData, {
+                onSuccess: () => {
+                    toast.success("Pembayaran ditambah!");
+                    setShowModal(false);
+                },
+                onError: (err) => {
+                    console.error(err);
+                    toast.error("Gagal menambah.");
+                },
+            });
+        }
     };
 
     const confirmDeletePembayaran = (id, nama) => setDeleteTarget({ id, nama });
@@ -342,7 +350,6 @@ export default function Index() {
                     />
                 </div>
 
-                {/* Filter Jenis */}
                 <div className="flex gap-2 mb-2">
                     {[{ nama: "semua" }, ...jenisPembayaran].map((j) => (
                         <Link
@@ -356,7 +363,6 @@ export default function Index() {
                     ))}
                 </div>
 
-                {/* Filter Status */}
                 <div className="grid grid-cols-3 gap-2 mb-4">
                     {["semua", "menunggu", "lunas"].map((f) => (
                         <button
@@ -643,6 +649,23 @@ export default function Index() {
                                 {generateForm.data.jenis === "Kas" && (
                                     <>
                                         <select
+                                            value={generateForm.data.target}
+                                            onChange={(e) =>
+                                                generateForm.setData(
+                                                    "target",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        >
+                                            <option value="putra">
+                                                Putra (PA)
+                                            </option>
+                                            <option value="putri">
+                                                Putri (PI)
+                                            </option>
+                                        </select>
+                                        <select
                                             value={generateForm.data.bulan}
                                             onChange={(e) =>
                                                 generateForm.setData(
@@ -680,7 +703,7 @@ export default function Index() {
                                 {generateForm.data.jenis === "Kitab" && (
                                     <input
                                         type="text"
-                                        placeholder="Nama Pembayaran"
+                                        placeholder="Nama Kitab"
                                         value={
                                             generateForm.data.nama_pembayaran
                                         }
@@ -807,14 +830,7 @@ export default function Index() {
                                     )}
                                 </div>
                                 <h3 className="font-semibold text-sm truncate mb-2">
-                                    {p.nama_pembayaran
-                                        ?.replace("Kas Bulanan - ", "")
-                                        .replace("SPP - ", "")
-                                        .replace(
-                                            ` - ${p.santri?.nama_lengkap}`,
-                                            "",
-                                        )
-                                        .trim()}
+                                    {p.nama_pembayaran}
                                 </h3>
                                 <div className="text-[11px] text-slate-500 space-y-0.5 mb-2">
                                     <Row label="NIS" value={p.nis} />

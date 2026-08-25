@@ -122,13 +122,14 @@ export default function Kas() {
                             key={s.nis}
                             className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-sm hover:shadow-md transition-all"
                         >
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
+                            {/* Header card - perbaikan nama panjang */}
+                            <div className="flex items-start justify-between mb-3 gap-2">
+                                <div className="flex items-start gap-2 flex-1 min-w-0">
                                     <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">
                                         {s.nama?.charAt(0)}
                                     </div>
-                                    <div className="min-w-0">
-                                        <p className="font-semibold text-sm truncate">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-sm break-words leading-snug">
                                             {s.nama}
                                         </p>
                                         <p className="text-xs text-slate-400">
@@ -137,7 +138,7 @@ export default function Kas() {
                                     </div>
                                 </div>
                                 <span
-                                    className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${s.total_belum === 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+                                    className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${s.total_belum === 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
                                 >
                                     {s.total_belum === 0
                                         ? "Lunas"
@@ -150,7 +151,7 @@ export default function Kas() {
                                     key={bulan.id}
                                     className="flex justify-between text-[11px] bg-slate-50 rounded-lg px-3 py-1.5 mb-1"
                                 >
-                                    <span className="text-slate-500 truncate mr-2">
+                                    <span className="text-slate-500 break-words mr-2">
                                         {bulan.nama_pembayaran
                                             ?.replace("Kas Bulanan - ", "")
                                             .replace(` - ${s.nama}`, "")}

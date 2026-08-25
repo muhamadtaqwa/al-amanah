@@ -87,7 +87,6 @@ self.addEventListener("push", (event) => {
         body: "Notifikasi baru",
         icon: "/icon-amanah.png",
         badge: "/icon-amanah.png",
-        image: "/icon-amanah.png",
         url: "/",
         tag: "al-amanah",
         requireInteraction: true,
@@ -106,7 +105,6 @@ self.addEventListener("push", (event) => {
         body: data.body,
         icon: data.icon,
         badge: data.badge,
-        image: data.image,
         vibrate: data.vibrate,
         requireInteraction: data.requireInteraction,
         tag: data.tag,
@@ -139,11 +137,13 @@ self.addEventListener("notificationclick", (event) => {
         clients
             .matchAll({ type: "window", includeUncontrolled: true })
             .then((clientList) => {
+                // Cek apakah sudah ada window yang terbuka
                 for (const client of clientList) {
                     if (client.url.includes(url) && "focus" in client) {
                         return client.focus();
                     }
                 }
+                // Buka window baru
                 if (clients.openWindow) {
                     return clients.openWindow(url);
                 }

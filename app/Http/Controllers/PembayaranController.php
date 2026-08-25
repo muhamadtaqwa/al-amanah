@@ -54,7 +54,7 @@ class PembayaranController extends Controller
         // Kirim notifikasi ke santri
         $this->kirimNotifKeSantri(
             $pembayaran->nis,
-            '📄 Tagihan Baru',
+            'Tagihan',
             $pembayaran->nama_pembayaran . ' - Rp ' . number_format($pembayaran->nominal, 0, ',', '.'),
             '/tagihan'
         );
@@ -92,10 +92,9 @@ class PembayaranController extends Controller
         if ($p->sisa <= 0) {
             $p->update(['status_verifikasi' => 'lunas', 'tgl_bayar' => now()]);
 
-            // Kirim notifikasi lunas
             $this->kirimNotifKeSantri(
                 $p->nis,
-                '✅ Pembayaran Diterima',
+                'Lunas',
                 $p->nama_pembayaran . ' - LUNAS',
                 '/tagihan'
             );
@@ -113,6 +112,7 @@ class PembayaranController extends Controller
             'bulan' => 'nullable',
             'tahun' => 'nullable',
             'nama_pembayaran' => 'nullable',
+            'target' => 'nullable|in:putra,putri',
             'kecualikan' => 'nullable',
         ]);
 
@@ -120,30 +120,38 @@ class PembayaranController extends Controller
             ? array_map('trim', explode(',', $request->kecualikan))
             : [];
 
-        $santris = Santri::when(!empty($kecualikan), function ($q) use ($kecualikan) {
-            $q->whereNotIn('nis', $kecualikan);
-        })->get();
-
-        // Format nama pembayaran sesuai jenis
+        // Format nama pembayaran sesuai jenis (tanpa prefix)
         if ($request->jenis === 'SPP') {
-            $namaPembayaran = "SPP - {$request->semester} {$request->tahun}";
+            $namaPembayaran = "{$request->semester} {$request->tahun}";
         } elseif ($request->jenis === 'Kas') {
-            $namaPembayaran = "Kas Bulanan - {$request->bulan} {$request->tahun}";
+            $namaPembayaran = "{$request->bulan} {$request->tahun}";
         } else {
             $namaPembayaran = $request->nama_pembayaran;
         }
+
+        // Filter santri berdasarkan jenis & target
+        $santris = Santri::query()
+            ->when($request->jenis === 'Kas' && $request->target === 'putra', function ($q) {
+                $q->where('nis', 'like', 'PA%');
+            })
+            ->when($request->jenis === 'Kas' && $request->target === 'putri', function ($q) {
+                $q->where('nis', 'like', 'PI%');
+            })
+            ->when(!empty($kecualikan), function ($q) use ($kecualikan) {
+                $q->whereNotIn('nis', $kecualikan);
+            })
+            ->get();
 
         $count = 0;
         foreach ($santris as $s) {
             $pembayaran = Pembayaran::create([
                 'nis' => $s->nis,
                 'jenis' => $request->jenis,
-                'nama_pembayaran' => $namaPembayaran . ' - ' . $s->nama_lengkap,
+                'nama_pembayaran' => $namaPembayaran,
                 'nominal' => $request->nominal,
                 'tgl_jatuh_tempo' => $request->tgl_jatuh_tempo,
             ]);
 
-            // Kirim notifikasi
             $this->kirimNotifKeSantri(
                 $pembayaran->nis,
                 'Tagihan',
@@ -190,10 +198,9 @@ class PembayaranController extends Controller
                     'tgl_bayar' => now(),
                 ]);
 
-                // Kirim notifikasi lunas
                 $this->kirimNotifKeSantri(
                     $p->nis,
-                    '✅ Pembayaran Diterima',
+                    'Lunas',
                     $p->nama_pembayaran . ' - LUNAS',
                     '/tagihan'
                 );
@@ -204,10 +211,9 @@ class PembayaranController extends Controller
             $request->validate(['status_verifikasi' => 'required|in:ditolak']);
             $p->update(['status_verifikasi' => 'ditolak']);
 
-            // Kirim notifikasi ditolak
             $this->kirimNotifKeSantri(
                 $p->nis,
-                '❌ Pembayaran Ditolak',
+                'Ditolak',
                 $p->nama_pembayaran . ' - pembayaran ditolak',
                 '/tagihan'
             );

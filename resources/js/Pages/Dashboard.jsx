@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import { usePage } from "@inertiajs/react";
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+} from "recharts";
 
 export default function Dashboard() {
-    const { auth, stats, aktivitas, presensiSantri } = usePage().props;
+    const { auth, stats, aktivitas, presensiSantri, grafikPresensi } =
+        usePage().props;
     const user = auth.user;
     const [time, setTime] = useState(new Date());
     const [hijri, setHijri] = useState("");
@@ -186,6 +196,7 @@ export default function Dashboard() {
                 {/* ========== USTADZ ========== */}
                 {user.role === "ustadz" && (
                     <>
+                        {/* Info pribadi */}
                         <div className="grid grid-cols-2 gap-2">
                             <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
                                 <p className="text-[11px] text-slate-400">
@@ -207,6 +218,75 @@ export default function Dashboard() {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Statistik - sama seperti admin */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
+                                <p className="text-[11px] text-slate-400">
+                                    Total Santri
+                                </p>
+                                <p className="mt-1 text-lg font-bold text-[#3D7ABA]">
+                                    {stats?.totalSantri || 0}
+                                </p>
+                            </div>
+                            <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
+                                <p className="text-[11px] text-slate-400">
+                                    Total Ustadz
+                                </p>
+                                <p className="mt-1 text-lg font-bold text-[#20B5E8]">
+                                    {stats?.totalUstadz || 0}
+                                </p>
+                            </div>
+                            <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
+                                <p className="text-[11px] text-slate-400">
+                                    Santri Putra
+                                </p>
+                                <p className="mt-1 text-lg font-bold text-blue-500">
+                                    {stats?.santriPutra || 0}
+                                </p>
+                            </div>
+                            <div className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
+                                <p className="text-[11px] text-slate-400">
+                                    Santri Putri
+                                </p>
+                                <p className="mt-1 text-lg font-bold text-pink-500">
+                                    {stats?.santriPutri || 0}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Grafik Presensi Minggu Ini */}
+                        <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                            <h2 className="text-sm font-bold text-slate-700 mb-2">
+                                Presensi Santri Minggu Ini
+                            </h2>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={grafikPresensi}>
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="#e2e8f0"
+                                    />
+                                    <XAxis
+                                        dataKey="hari"
+                                        tick={{ fontSize: 11 }}
+                                    />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Bar
+                                        dataKey="hadir"
+                                        fill="#10b981"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                    <Bar
+                                        dataKey="tidak"
+                                        fill="#ef4444"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* Menu cepat */}
                         <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
                             <h2 className="text-sm font-bold text-slate-700 mb-2">
                                 Menu Cepat
@@ -216,7 +296,13 @@ export default function Dashboard() {
                                     href="/presensi"
                                     className="rounded-xl bg-[#3D7ABA]/10 p-3 text-center text-xs font-medium text-[#3D7ABA]"
                                 >
-                                    Presensi
+                                    Presensi Ustadz
+                                </a>
+                                <a
+                                    href="/presensi-santri"
+                                    className="rounded-xl bg-emerald-50 p-3 text-center text-xs font-medium text-emerald-600"
+                                >
+                                    Presensi Santri
                                 </a>
                                 <a
                                     href="/timeline"
@@ -229,12 +315,6 @@ export default function Dashboard() {
                                     className="rounded-xl bg-[#20B5E8]/10 p-3 text-center text-xs font-medium text-[#20B5E8]"
                                 >
                                     QR Code
-                                </a>
-                                <a
-                                    href="/profil"
-                                    className="rounded-xl bg-slate-100 p-3 text-center text-xs font-medium text-slate-600"
-                                >
-                                    Profil
                                 </a>
                             </div>
                         </div>

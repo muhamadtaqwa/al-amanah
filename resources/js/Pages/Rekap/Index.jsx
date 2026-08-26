@@ -40,6 +40,12 @@ export default function Index() {
             bg: "bg-pink-50",
             text: "text-pink-600",
         },
+        {
+            label: "Anjem",
+            path: "/rekap/anjem",
+            bg: "bg-purple-50",
+            text: "text-purple-600",
+        },
     ];
 
     const COLORS = ["#3D7ABA", "#20B5E8", "#f97316", "#ec4899"];
@@ -87,7 +93,7 @@ export default function Index() {
                 <p className="text-sm font-bold text-slate-400 uppercase mb-3">
                     Pilih jenis rekap
                 </p>
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-5 gap-2 mb-4">
                     {menu.map((m) => (
                         <Link
                             key={m.path}

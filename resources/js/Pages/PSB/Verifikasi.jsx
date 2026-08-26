@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usePage, useForm } from "@inertiajs/react";
+import { usePage, useForm, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
@@ -7,7 +7,9 @@ export default function Verifikasi() {
     const { pendaftar } = usePage().props;
     const [filter, setFilter] = useState("semua");
     const [detail, setDetail] = useState(null);
-    const [showTolak, setShowTolak] = useState(null);
+    const [confirmTerima, setConfirmTerima] = useState(null);
+    const [confirmTolak, setConfirmTolak] = useState(null);
+    const [confirmBatal, setConfirmBatal] = useState(null);
 
     const { data, setData, put, processing } = useForm({
         status: "diterima",
@@ -32,7 +34,8 @@ export default function Verifikasi() {
         setData("status", status);
         put(`/psb/${id}/verifikasi`, {
             onSuccess: () => {
-                setShowTolak(null);
+                setConfirmTerima(null);
+                setConfirmTolak(null);
                 setDetail(null);
                 toast.success(
                     status === "diterima"
@@ -42,6 +45,21 @@ export default function Verifikasi() {
             },
             onError: () => toast.error("Gagal memverifikasi."),
         });
+    };
+
+    const handleBatalkan = (id) => {
+        router.put(
+            `/psb/${id}/batalkan`,
+            {},
+            {
+                onSuccess: () => {
+                    setConfirmBatal(null);
+                    setDetail(null);
+                    toast.success("Status dikembalikan ke menunggu.");
+                },
+                onError: () => toast.error("Gagal membatalkan."),
+            },
+        );
     };
 
     const countMenunggu = pendaftar.filter(
@@ -189,17 +207,14 @@ export default function Verifikasi() {
                                         />
                                     )}
 
+                                    {/* Tombol untuk status menunggu */}
                                     {p.status === "menunggu" && (
                                         <div className="flex gap-2 pt-3">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleVerifikasi(
-                                                        p.id,
-                                                        "diterima",
-                                                    );
+                                                    setConfirmTerima(p);
                                                 }}
-                                                disabled={processing}
                                                 className="flex-1 bg-emerald-500 text-white py-2 rounded-2xl text-xs font-semibold hover:bg-emerald-600 transition"
                                             >
                                                 Terima
@@ -207,7 +222,7 @@ export default function Verifikasi() {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setShowTolak(p.id);
+                                                    setConfirmTolak(p);
                                                 }}
                                                 className="flex-1 bg-red-500 text-white py-2 rounded-2xl text-xs font-semibold hover:bg-red-600 transition"
                                             >
@@ -216,45 +231,19 @@ export default function Verifikasi() {
                                         </div>
                                     )}
 
-                                    {showTolak === p.id && (
-                                        <div
-                                            className="pt-2 space-y-2"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <textarea
-                                                placeholder="Alasan penolakan..."
-                                                value={data.catatan}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "catatan",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full border border-slate-200 rounded-2xl px-4 py-2 text-xs outline-none"
-                                                rows={2}
-                                            ></textarea>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() =>
-                                                        setShowTolak(null)
-                                                    }
-                                                    className="flex-1 border border-slate-200 py-2 rounded-2xl text-xs"
-                                                >
-                                                    Batal
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleVerifikasi(
-                                                            p.id,
-                                                            "ditolak",
-                                                        )
-                                                    }
-                                                    disabled={processing}
-                                                    className="flex-1 bg-red-500 text-white py-2 rounded-2xl text-xs font-semibold"
-                                                >
-                                                    Konfirmasi Tolak
-                                                </button>
-                                            </div>
+                                    {/* Tombol batalkan untuk sudah diterima/ditolak */}
+                                    {(p.status === "diterima" ||
+                                        p.status === "ditolak") && (
+                                        <div className="flex gap-2 pt-3">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setConfirmBatal(p);
+                                                }}
+                                                className="w-full bg-slate-500 text-white py-2 rounded-2xl text-xs font-semibold hover:bg-slate-600 transition"
+                                            >
+                                                Batalkan Verifikasi
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -262,6 +251,129 @@ export default function Verifikasi() {
                         </div>
                     ))}
                 </div>
+
+                {/* Popup Konfirmasi Terima */}
+                {confirmTerima && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50"
+                            onClick={() => setConfirmTerima(null)}
+                        ></div>
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-6 border border-sky-100 text-center">
+                            <h3 className="font-semibold text-lg">
+                                Terima Pendaftar?
+                            </h3>
+                            <p className="text-sm text-slate-500 mt-2">
+                                <strong>{confirmTerima.nama_lengkap}</strong>{" "}
+                                akan diterima sebagai santri.
+                            </p>
+                            <div className="flex gap-2 pt-4">
+                                <button
+                                    onClick={() => setConfirmTerima(null)}
+                                    className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        handleVerifikasi(
+                                            confirmTerima.id,
+                                            "diterima",
+                                        )
+                                    }
+                                    disabled={processing}
+                                    className="flex-1 bg-emerald-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
+                                >
+                                    {processing ? "..." : "Ya, Terima"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Popup Konfirmasi Tolak */}
+                {confirmTolak && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50"
+                            onClick={() => setConfirmTolak(null)}
+                        ></div>
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-6 border border-sky-100">
+                            <h3 className="font-semibold text-lg">
+                                Tolak Pendaftar?
+                            </h3>
+                            <p className="text-sm text-slate-500 mt-2">
+                                <strong>{confirmTolak.nama_lengkap}</strong>{" "}
+                                akan ditolak.
+                            </p>
+                            <textarea
+                                placeholder="Alasan penolakan (opsional)..."
+                                value={data.catatan}
+                                onChange={(e) =>
+                                    setData("catatan", e.target.value)
+                                }
+                                className="w-full border border-slate-200 rounded-2xl px-4 py-2 text-xs outline-none mt-3"
+                                rows={2}
+                            ></textarea>
+                            <div className="flex gap-2 pt-3">
+                                <button
+                                    onClick={() => setConfirmTolak(null)}
+                                    className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        handleVerifikasi(
+                                            confirmTolak.id,
+                                            "ditolak",
+                                        )
+                                    }
+                                    disabled={processing}
+                                    className="flex-1 bg-red-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
+                                >
+                                    {processing ? "..." : "Ya, Tolak"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Popup Konfirmasi Batalkan */}
+                {confirmBatal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50"
+                            onClick={() => setConfirmBatal(null)}
+                        ></div>
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-6 border border-sky-100 text-center">
+                            <h3 className="font-semibold text-lg">
+                                Batalkan Verifikasi?
+                            </h3>
+                            <p className="text-sm text-slate-500 mt-2">
+                                Status{" "}
+                                <strong>{confirmBatal.nama_lengkap}</strong>{" "}
+                                akan kembali ke <strong>menunggu</strong>.
+                            </p>
+                            <div className="flex gap-2 pt-4">
+                                <button
+                                    onClick={() => setConfirmBatal(null)}
+                                    className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        handleBatalkan(confirmBatal.id)
+                                    }
+                                    className="flex-1 bg-slate-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
+                                >
+                                    Ya, Batalkan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

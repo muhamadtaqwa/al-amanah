@@ -190,7 +190,7 @@ export default function AppLayout({ children }) {
             label: "Presensi Santri",
             path: "/presensi-santri",
             icon: ClipboardCheck,
-            roles: ["admin"],
+            roles: ["admin", "ustadz"],
         },
         {
             label: "Pinjam Gedung",

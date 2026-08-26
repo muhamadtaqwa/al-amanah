@@ -135,4 +135,12 @@ class PsbController extends Controller
 
         return back()->with('success', 'Pendaftar berhasil di' . ($request->status === 'diterima' ? 'terima' : 'tolak') . '.');
     }
+
+    public function batalkan($id)
+    {
+        $psb = Psb::findOrFail($id);
+        $psb->update(['status' => 'menunggu', 'catatan' => null]);
+
+        return back()->with('success', 'Status dikembalikan ke menunggu.');
+    }
 }

@@ -69,14 +69,9 @@ export default function Index() {
 
     const tahunList = ["2025", "2026", "2027"];
 
-    // Auto generate nama pembayaran (tanpa prefix)
     const getNamaOtomatis = (jenis, semester, bulan, tahun) => {
-        if (jenis === "SPP") {
-            return `${semester} ${tahun}`;
-        }
-        if (jenis === "Kas") {
-            return `${bulan} ${tahun}`;
-        }
+        if (jenis === "SPP") return `${semester} ${tahun}`;
+        if (jenis === "Kas") return `${bulan} ${tahun}`;
         return "";
     };
 
@@ -269,11 +264,14 @@ export default function Index() {
         if (!deleteKategoriTarget) return;
         setDeletingKategoriId(deleteKategoriTarget.id);
         router.delete(`/jenis-pembayaran/${deleteKategoriTarget.id}`, {
-            onSuccess: () => toast.success("Kategori dihapus!"),
+            onSuccess: () => {
+                toast.success("Kategori dihapus!");
+                setDeleteKategoriTarget(null);
+                setShowKategori(false);
+            },
             onError: () => toast.error("Gagal menghapus kategori."),
             onFinish: () => {
                 setDeletingKategoriId(null);
-                setDeleteKategoriTarget(null);
             },
         });
     };
@@ -296,7 +294,12 @@ export default function Index() {
                 : "Menunggu";
 
     const filtered = pembayaran
-        .filter((p) => statusFilter === "semua" || p.status === statusFilter)
+        .filter((p) => {
+            if (statusFilter === "semua") return true;
+            if (statusFilter === "belum")
+                return p.status === "menunggu" || p.status === "dicicil";
+            return p.status === statusFilter;
+        })
         .filter(
             (p) =>
                 p.nama_pembayaran
@@ -356,25 +359,27 @@ export default function Index() {
                             key={j.nama}
                             href={`/pembayaran?jenis=${j.nama === "semua" ? "" : j.nama}`}
                             preserveScroll
-                            className={`flex-1 py-1.5 rounded-full text-xs text-center ${filters.jenis === j.nama || (!filters.jenis && j.nama === "semua") ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white" : "bg-white border text-slate-500"}`}
+                            className={`flex-1 py-1.5 rounded-full text-xs text-center ${filters.jenis === j.nama || (!filters.jenis && j.nama === "semua") ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white" : "bg-white border border-slate-200 text-slate-500"}`}
                         >
                             {j.nama === "semua" ? "Semua" : j.nama}
                         </Link>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                    {["semua", "menunggu", "lunas"].map((f) => (
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                    {["semua", "belum", "dicicil", "lunas"].map((f) => (
                         <button
                             key={f}
                             onClick={() => setStatusFilter(f)}
-                            className={`py-1.5 rounded-full text-xs font-medium transition ${statusFilter === f ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border text-slate-500"}`}
+                            className={`py-1.5 rounded-full text-xs font-medium transition ${statusFilter === f ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500"}`}
                         >
                             {f === "semua"
                                 ? "Semua"
-                                : f === "menunggu"
+                                : f === "belum"
                                   ? "Belum"
-                                  : "Lunas"}
+                                  : f === "dicicil"
+                                    ? "Dicicil"
+                                    : "Lunas"}
                         </button>
                     ))}
                 </div>
@@ -540,6 +545,7 @@ export default function Index() {
                                                 toast.success(
                                                     "Kategori ditambah!",
                                                 );
+                                                setShowKategori(false);
                                             },
                                             onError: () =>
                                                 toast.error(
@@ -700,10 +706,12 @@ export default function Index() {
                                     </>
                                 )}
 
-                                {generateForm.data.jenis === "Kitab" && (
+                                {!["SPP", "Kas"].includes(
+                                    generateForm.data.jenis,
+                                ) && (
                                     <input
                                         type="text"
-                                        placeholder="Nama Kitab"
+                                        placeholder="Nama Pembayaran"
                                         value={
                                             generateForm.data.nama_pembayaran
                                         }
@@ -961,7 +969,7 @@ export default function Index() {
                                         onChange={(e) =>
                                             setData("nis", e.target.value)
                                         }
-                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
                                         required
                                     >
                                         <option value="">Pilih Santri</option>
@@ -976,7 +984,7 @@ export default function Index() {
                                         type="text"
                                         value={data.nis}
                                         disabled
-                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50"
+                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm disabled:bg-slate-50"
                                     />
                                 )}
 
@@ -985,7 +993,7 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("jenis", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm bg-white"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white"
                                 >
                                     {jenisPembayaran?.map((j) => (
                                         <option key={j.id} value={j.nama}>
@@ -1060,7 +1068,7 @@ export default function Index() {
                                     </>
                                 )}
 
-                                {data.jenis === "Kitab" && (
+                                {!["SPP", "Kas"].includes(data.jenis) && (
                                     <input
                                         type="text"
                                         placeholder="Nama Pembayaran"
@@ -1071,7 +1079,7 @@ export default function Index() {
                                                 e.target.value,
                                             )
                                         }
-                                        className="w-full border rounded-2xl px-4 py-2.5 text-sm"
+                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                         required
                                     />
                                 )}
@@ -1083,7 +1091,7 @@ export default function Index() {
                                     onChange={(e) =>
                                         setData("nominal", e.target.value)
                                     }
-                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                     required
                                 />
                                 <input
@@ -1095,7 +1103,7 @@ export default function Index() {
                                             e.target.value,
                                         )
                                     }
-                                    className="w-full border rounded-2xl px-4 py-2.5 text-sm"
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm"
                                 />
                                 <div className="flex gap-2 pt-2">
                                     <button
@@ -1118,7 +1126,7 @@ export default function Index() {
                     </div>
                 )}
 
-                {/* Delete Confirmation Modal */}
+                {/* Delete Pembayaran Modal */}
                 {deleteTarget && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <div
@@ -1145,6 +1153,45 @@ export default function Index() {
                                     className="flex-1 bg-red-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
                                 >
                                     {deletingId ? "Menghapus..." : "Hapus"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Kategori Modal */}
+                {deleteKategoriTarget && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50"
+                            onClick={() => setDeleteKategoriTarget(null)}
+                        ></div>
+                        <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-6 border border-sky-100 text-center">
+                            <h3 className="font-semibold text-lg">
+                                Hapus Kategori?
+                            </h3>
+                            <p className="text-sm text-slate-500 mt-2">
+                                Kategori{" "}
+                                <strong>{deleteKategoriTarget.nama}</strong>{" "}
+                                akan dihapus permanen.
+                            </p>
+                            <div className="flex gap-2 pt-4">
+                                <button
+                                    onClick={() =>
+                                        setDeleteKategoriTarget(null)
+                                    }
+                                    className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleDeleteKategori}
+                                    disabled={!!deletingKategoriId}
+                                    className="flex-1 bg-red-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
+                                >
+                                    {deletingKategoriId
+                                        ? "Menghapus..."
+                                        : "Hapus"}
                                 </button>
                             </div>
                         </div>

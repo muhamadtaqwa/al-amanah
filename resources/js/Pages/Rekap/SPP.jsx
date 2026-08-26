@@ -29,6 +29,12 @@ export default function SPP() {
             bg: "bg-pink-50",
             text: "text-pink-600",
         },
+        {
+            label: "Anjem",
+            path: "/rekap/anjem",
+            bg: "bg-purple-50",
+            text: "text-purple-600",
+        },
     ];
 
     const sorted = [...rekap].sort((a, b) => a.nis.localeCompare(b.nis));
@@ -68,7 +74,7 @@ export default function SPP() {
                 <p className="text-sm font-bold text-slate-400 uppercase mb-3">
                     Pilih jenis rekap
                 </p>
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-5 gap-2 mb-4">
                     {menu.map((m) => (
                         <Link
                             key={m.path}

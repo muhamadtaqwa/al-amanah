@@ -205,4 +205,43 @@ class RekapController extends Controller
             'totalBelum' => $data->sum('nominal_belum'),
         ]);
     }
+    public function anjem()
+    {
+        $data = Pembayaran::where('jenis', 'Anjem')->get()
+            ->groupBy('nis')
+            ->map(function ($items) {
+                $santri = Santri::where('nis', $items->first()->nis)->first();
+                $total = $items->sum('nominal');
+                $dibayar = $items->sum('total_dibayar');
+                $lunas = $items->filter(fn($i) => $i->status === 'lunas');
+
+                $perAnjem = $items->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'nama_pembayaran' => $item->nama_pembayaran,
+                        'nominal' => $item->nominal,
+                        'status' => $item->status,
+                    ];
+                })->values();
+
+                return [
+                    'nis' => $items->first()->nis,
+                    'nama' => $santri->nama_lengkap ?? '-',
+                    'total_tagihan' => $items->count(),
+                    'total_lunas' => $lunas->count(),
+                    'total_belum' => $items->count() - $lunas->count(),
+                    'total_nominal' => $total,
+                    'nominal_lunas' => $dibayar,
+                    'nominal_belum' => $total - $dibayar,
+                    'per_anjem' => $perAnjem,
+                ];
+            })->sortBy('nis')->values();
+
+        return Inertia::render('Rekap/Anjem', [
+            'rekap' => $data,
+            'totalSemua' => $data->sum('total_nominal'),
+            'totalLunas' => $data->sum('nominal_lunas'),
+            'totalBelum' => $data->sum('nominal_belum'),
+        ]);
+    }
 }

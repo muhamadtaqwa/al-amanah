@@ -1,7 +1,7 @@
 import { usePage, Link } from "@inertiajs/react";
 import AppLayout from "@/Layouts/AppLayout";
 
-export default function Kas() {
+export default function Anjem() {
     const { rekap, totalSemua, totalLunas, totalBelum } = usePage().props;
 
     const menu = [
@@ -37,39 +37,11 @@ export default function Kas() {
         },
     ];
 
-    const urutBulan = (bulan) => {
-        const urutan = [
-            "Januari",
-            "Februari",
-            "Maret",
-            "April",
-            "Mei",
-            "Juni",
-            "Juli",
-            "Agustus",
-            "September",
-            "Oktober",
-            "November",
-            "Desember",
-        ];
-        return [...bulan].sort((a, b) => {
-            const namaA =
-                a.nama_pembayaran
-                    ?.replace("Kas Bulanan - ", "")
-                    .replace(` - ${a.nama}`, "") || "";
-            const namaB =
-                b.nama_pembayaran
-                    ?.replace("Kas Bulanan - ", "")
-                    .replace(` - ${b.nama}`, "") || "";
-            return urutan.indexOf(namaA) - urutan.indexOf(namaB);
-        });
-    };
-
     return (
         <AppLayout>
             <div>
                 <h2 className="text-lg font-bold text-slate-800 mb-4">
-                    Rekap Kas
+                    Rekap Anjem
                 </h2>
 
                 <div className="space-y-2 mb-4">
@@ -77,7 +49,7 @@ export default function Kas() {
                         <span className="text-sm text-slate-500">
                             Total Semua
                         </span>
-                        <span className="text-base font-extrabold text-pink-600 font-mono tracking-tight">
+                        <span className="text-base font-extrabold text-purple-600 font-mono tracking-tight">
                             Rp {totalSemua.toLocaleString()}
                         </span>
                     </div>
@@ -116,11 +88,10 @@ export default function Kas() {
                     ))}
                 </div>
 
-                {/* 2 Kolom di desktop */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {rekap.length === 0 && (
                         <p className="text-center text-slate-400 py-10 md:col-span-2">
-                            Tidak ada data Kas
+                            Tidak ada data Anjem
                         </p>
                     )}
                     {rekap.map((s) => (
@@ -128,10 +99,9 @@ export default function Kas() {
                             key={s.nis}
                             className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-sm hover:shadow-md transition-all"
                         >
-                            {/* Header card - perbaikan nama panjang */}
                             <div className="flex items-start justify-between mb-3 gap-2">
                                 <div className="flex items-start gap-2 flex-1 min-w-0">
-                                    <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0">
                                         {s.nama?.charAt(0)}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -152,25 +122,26 @@ export default function Kas() {
                                 </span>
                             </div>
 
-                            {urutBulan(s.per_bulan || []).map((bulan) => (
-                                <div
-                                    key={bulan.id}
-                                    className="flex justify-between text-[11px] bg-slate-50 rounded-lg px-3 py-1.5 mb-1"
-                                >
-                                    <span className="text-slate-500 break-words mr-2">
-                                        {bulan.nama_pembayaran
-                                            ?.replace("Kas Bulanan - ", "")
-                                            .replace(` - ${s.nama}`, "")}
-                                    </span>
-                                    <span
-                                        className={`font-medium shrink-0 ${bulan.status === "lunas" ? "text-emerald-600" : "text-red-500"}`}
-                                    >
-                                        {bulan.status === "lunas"
-                                            ? "Lunas"
-                                            : "Belum"}
-                                    </span>
+                            {/* Badge Anjem - 4 kolom */}
+                            {s.per_anjem && s.per_anjem.length > 0 && (
+                                <div className="grid grid-cols-4 gap-1 mb-2">
+                                    {s.per_anjem.map((k) => (
+                                        <span
+                                            key={k.id}
+                                            className={`text-center text-[10px] px-1 py-1.5 rounded-full font-medium ${
+                                                k.status === "lunas"
+                                                    ? "bg-emerald-50 text-emerald-600"
+                                                    : "bg-red-50 text-red-500"
+                                            }`}
+                                        >
+                                            {k.nama_pembayaran?.replace(
+                                                "Anjem ",
+                                                "",
+                                            )}
+                                        </span>
+                                    ))}
                                 </div>
-                            ))}
+                            )}
 
                             <div className="text-[11px] text-slate-500 space-y-0.5 border-t pt-2 mt-2">
                                 <Row

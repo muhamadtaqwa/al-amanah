@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     // PSB Verifikasi (admin)
     Route::get('/psb/verifikasi', [PsbController::class, 'index']);
     Route::put('/psb/{id}/verifikasi', [PsbController::class, 'verifikasi']);
+    Route::put('/psb/{id}/batalkan', [PsbController::class, 'batalkan']);
 
     // Export
     Route::get('/export', fn() => inertia('Export/Emis'));
@@ -87,7 +88,6 @@ Route::middleware('auth')->group(function () {
     // Presensi Santri
     Route::get('/presensi-santri', [PresensiSantriController::class, 'index']);
     Route::post('/presensi-santri', [PresensiSantriController::class, 'store']);
-    Route::get('/presensi-santri/rekap', [PresensiSantriController::class, 'rekap']);
 
     // Rekap
     Route::get('/rekap', [RekapController::class, 'index']);
@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/rekap/spp', [RekapController::class, 'spp']);
     Route::get('/rekap/kitab', [RekapController::class, 'kitab']);
     Route::get('/rekap/kas', [RekapController::class, 'kas']);
+    Route::get('/rekap/anjem', [RekapController::class, 'anjem']);
 
     // Profil
     Route::get('/profil', [ProfileController::class, 'edit']);

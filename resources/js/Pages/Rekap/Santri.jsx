@@ -35,6 +35,12 @@ export default function Santri() {
             bg: "bg-pink-50",
             text: "text-pink-600",
         },
+        {
+            label: "Anjem",
+            path: "/rekap/anjem",
+            bg: "bg-purple-50",
+            text: "text-purple-600",
+        },
     ];
 
     const sortedSantris = [...santris].sort((a, b) =>
@@ -70,7 +76,7 @@ export default function Santri() {
                     Rekap Per Santri
                 </h2>
 
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-5 gap-2 mb-4">
                     {menu.map((m) => (
                         <Link
                             key={m.path}
@@ -85,7 +91,6 @@ export default function Santri() {
                         </Link>
                     ))}
                 </div>
-
                 <input
                     type="text"
                     placeholder="Cari nama atau NIS..."

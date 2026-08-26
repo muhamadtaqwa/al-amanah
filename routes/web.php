@@ -16,6 +16,7 @@ use App\Http\Controllers\PsbController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LetterController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\CashflowController;
 use Illuminate\Support\Facades\Route;
 
 // Auth
@@ -136,4 +137,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/surat', [LetterController::class, 'store']);
     Route::put('/surat/{id}', [LetterController::class, 'update']);
     Route::delete('/surat/{id}', [LetterController::class, 'destroy']);
+
+    // Cashflow
+    Route::get('/cashflow', [CashflowController::class, 'index']);
+    Route::post('/cashflow', [CashflowController::class, 'store']);
+    Route::put('/cashflow/{id}', [CashflowController::class, 'update']);
+    Route::delete('/cashflow/{id}', [CashflowController::class, 'destroy']);
 });

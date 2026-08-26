@@ -26,6 +26,7 @@ import {
     X,
     PanelLeftClose,
     PanelLeftOpen,
+    TrendingUp,
 } from "lucide-react";
 
 function urlBase64ToUint8Array(base64String) {
@@ -177,6 +178,12 @@ export default function AppLayout({ children }) {
             icon: FileText,
             roles: ["santri"],
         },
+        {
+            label: "Cashflow",
+            path: "/cashflow",
+            icon: TrendingUp,
+            roles: ["admin"],
+        },
     ];
 
     const menuKegiatan = [
@@ -293,7 +300,7 @@ export default function AppLayout({ children }) {
                             <X className="w-5 h-5" />
                         </button>
                     </div>
-                    <nav className="p-2 flex-1 overflow-y-auto">
+                    <nav className="p-1.8 flex-1 overflow-y-auto">
                         <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
                             Utama
                         </p>
@@ -407,7 +414,7 @@ export default function AppLayout({ children }) {
                         <PanelLeftClose className="w-3.5 h-3.5" />
                     )}
                 </button>
-                <nav className="px-2 flex-1 space-y-0.5 overflow-y-auto">
+                <nav className="px-2 flex-1 space-y-0.4 overflow-y-auto">
                     {!sidebarCollapsed && (
                         <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
                             Utama

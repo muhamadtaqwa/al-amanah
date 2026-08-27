@@ -25,6 +25,15 @@ export default function Index() {
         penyimak: "",
     });
 
+    const formatTanggal = (tgl) => {
+        if (!tgl) return "-";
+        return new Date(tgl + "T12:00:00").toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+    };
+
     const handleJuzChange = (juz) => {
         setForm({ ...form, juz: juz, surat: "" });
         setSuratList(suratPerJuz[juz] || []);
@@ -134,11 +143,7 @@ export default function Index() {
                     return (
                         <div
                             key={i}
-                            className={`h-7 rounded-md flex items-center justify-center text-[10px] font-medium ${
-                                isSetoran
-                                    ? "bg-emerald-500 text-white"
-                                    : "bg-slate-100 text-slate-400"
-                            }`}
+                            className={`h-7 rounded-md flex items-center justify-center text-[10px] font-medium ${isSetoran ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400"}`}
                         >
                             {day}
                         </div>
@@ -177,7 +182,7 @@ export default function Index() {
                         onClick={() => handleTabChange("rekap")}
                         className={`py-2 rounded-full text-xs font-semibold transition ${activeTab === "rekap" ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500"}`}
                     >
-                        Rekap Per Bulan
+                        Rekap Bulanan
                     </button>
                 </div>
 
@@ -253,8 +258,28 @@ export default function Index() {
                                         />
                                         <Row
                                             label="Tanggal"
-                                            value={r.setoran_terakhir.tanggal}
+                                            value={formatTanggal(
+                                                r.setoran_terakhir.tanggal,
+                                            )}
                                         />
+                                        <div className="flex justify-between">
+                                            <span className="text-[11px] text-slate-400">
+                                                Keterangan
+                                            </span>
+                                            <span
+                                                className={`text-[11px] font-semibold ${
+                                                    r.setoran_terakhir
+                                                        .keterangan === "lanjut"
+                                                        ? "text-emerald-600"
+                                                        : "text-red-500"
+                                                }`}
+                                            >
+                                                {r.setoran_terakhir
+                                                    .keterangan === "lanjut"
+                                                    ? "Lanjut"
+                                                    : "Ulang"}
+                                            </span>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -486,8 +511,8 @@ export default function Index() {
 
 const Row = ({ label, value }) => (
     <div className="flex justify-between">
-        <span className="text-slate-400">{label}</span>
-        <span className="font-medium text-slate-600 text-right ml-4">
+        <span className="text-[11px] text-slate-400">{label}</span>
+        <span className="text-[11px] font-medium text-slate-600 text-right ml-4">
             {value || "-"}
         </span>
     </div>

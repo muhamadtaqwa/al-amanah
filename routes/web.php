@@ -17,6 +17,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LetterController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\CashflowController;
+use App\Http\Controllers\TahfidzController;
 use Illuminate\Support\Facades\Route;
 
 // Auth
@@ -143,4 +144,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/cashflow', [CashflowController::class, 'store']);
     Route::put('/cashflow/{id}', [CashflowController::class, 'update']);
     Route::delete('/cashflow/{id}', [CashflowController::class, 'destroy']);
+
+    // Tahfidz
+    Route::get('/tahfidz', [TahfidzController::class, 'index']);
+    Route::post('/tahfidz', [TahfidzController::class, 'store']);
+    Route::get('/tahfidz/{nis}/detail', [TahfidzController::class, 'detail']);
 });

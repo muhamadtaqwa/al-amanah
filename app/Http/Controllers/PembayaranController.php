@@ -28,7 +28,7 @@ class PembayaranController extends Controller
             $pembayaran = $pembayaran->filter(fn($p) => $p->status === $request->status)->values();
         }
 
-        $santris = Santri::all();
+        $santris = Santri::where('status', 'aktif')->orderBy('nis')->get();
         $jenisPembayaran = JenisPembayaran::all();
 
         return Inertia::render('Pembayaran/Index', [
@@ -51,7 +51,6 @@ class PembayaranController extends Controller
 
         $pembayaran = Pembayaran::create($request->all() + ['status_verifikasi' => 'menunggu']);
 
-        // Kirim notifikasi ke santri
         $this->kirimNotifKeSantri(
             $pembayaran->nis,
             'Tagihan',
@@ -120,7 +119,6 @@ class PembayaranController extends Controller
             ? array_map('trim', explode(',', $request->kecualikan))
             : [];
 
-        // Format nama pembayaran sesuai jenis (tanpa prefix)
         if ($request->jenis === 'SPP') {
             $namaPembayaran = "{$request->semester} {$request->tahun}";
         } elseif ($request->jenis === 'Kas') {
@@ -129,8 +127,7 @@ class PembayaranController extends Controller
             $namaPembayaran = $request->nama_pembayaran;
         }
 
-        // Filter santri berdasarkan jenis & target
-        $santris = Santri::query()
+        $santris = Santri::where('status', 'aktif')
             ->when($request->jenis === 'Kas' && $request->target === 'putra', function ($q) {
                 $q->where('nis', 'like', 'PA%');
             })

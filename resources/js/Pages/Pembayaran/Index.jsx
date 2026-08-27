@@ -24,7 +24,7 @@ export default function Index() {
     const [deletingKategoriId, setDeletingKategoriId] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [deleteKategoriTarget, setDeleteKategoriTarget] = useState(null);
-    const [statusFilter, setStatusFilter] = useState(filters.status || "semua");
+    const [statusFilter, setStatusFilter] = useState("semua");
     const [showBukti, setShowBukti] = useState(null);
     const [verifikasiTarget, setVerifikasiTarget] = useState(null);
     const [nominalVerifikasi, setNominalVerifikasi] = useState("");
@@ -133,10 +133,7 @@ export default function Index() {
                     setShowModal(false);
                     setEditData(null);
                 },
-                onError: (err) => {
-                    console.error(err);
-                    toast.error("Gagal mengupdate.");
-                },
+                onError: () => toast.error("Gagal mengupdate."),
             });
         } else {
             router.post("/pembayaran", finalData, {
@@ -144,10 +141,7 @@ export default function Index() {
                     toast.success("Pembayaran ditambah!");
                     setShowModal(false);
                 },
-                onError: (err) => {
-                    console.error(err);
-                    toast.error("Gagal menambah.");
-                },
+                onError: () => toast.error("Gagal menambah."),
             });
         }
     };
@@ -270,9 +264,7 @@ export default function Index() {
                 setShowKategori(false);
             },
             onError: () => toast.error("Gagal menghapus kategori."),
-            onFinish: () => {
-                setDeletingKategoriId(null);
-            },
+            onFinish: () => setDeletingKategoriId(null),
         });
     };
 
@@ -353,35 +345,39 @@ export default function Index() {
                     />
                 </div>
 
-                <div className="flex gap-2 mb-2">
-                    {[{ nama: "semua" }, ...jenisPembayaran].map((j) => (
-                        <Link
-                            key={j.nama}
-                            href={`/pembayaran?jenis=${j.nama === "semua" ? "" : j.nama}`}
-                            preserveScroll
-                            className={`flex-1 py-1.5 rounded-full text-xs text-center ${filters.jenis === j.nama || (!filters.jenis && j.nama === "semua") ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white" : "bg-white border border-slate-200 text-slate-500"}`}
-                        >
-                            {j.nama === "semua" ? "Semua" : j.nama}
-                        </Link>
-                    ))}
-                </div>
+                {/* Filter Kategori & Status Dropdown */}
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                    <select
+                        value={filters.jenis || "semua"}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            router.get(
+                                "/pembayaran",
+                                { jenis: val === "semua" ? "" : val },
+                                { preserveState: true },
+                            );
+                        }}
+                        className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                    >
+                        <option value="semua">Semua Kategori</option>
+                        {jenisPembayaran?.map((j) => (
+                            <option key={j.id} value={j.nama}>
+                                {j.nama}
+                            </option>
+                        ))}
+                    </select>
 
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                    {["semua", "belum", "dicicil", "lunas"].map((f) => (
-                        <button
-                            key={f}
-                            onClick={() => setStatusFilter(f)}
-                            className={`py-1.5 rounded-full text-xs font-medium transition ${statusFilter === f ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500"}`}
-                        >
-                            {f === "semua"
-                                ? "Semua"
-                                : f === "belum"
-                                  ? "Belum"
-                                  : f === "dicicil"
-                                    ? "Dicicil"
-                                    : "Lunas"}
-                        </button>
-                    ))}
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                    >
+                        <option value="semua">Semua Status</option>
+                        <option value="belum">Belum</option>
+                        <option value="dicicil">Dicicil</option>
+                        <option value="lunas">Lunas</option>
+                        <option value="ditolak">Ditolak</option>
+                    </select>
                 </div>
 
                 {/* Modal Lihat Bukti */}
@@ -755,7 +751,7 @@ export default function Index() {
                                     <button
                                         type="button"
                                         onClick={() => setShowGenerate(false)}
-                                        className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                        className="flex-1 border border-slate-200 py-2.5 rounded-2xl text-sm"
                                     >
                                         Batal
                                     </button>
@@ -921,7 +917,7 @@ export default function Index() {
                                                 );
                                                 setCicilanError("");
                                             }}
-                                            className="flex-1 border rounded-2xl px-4 py-2 text-sm"
+                                            className="flex-1 border border-slate-200 rounded-2xl px-4 py-2 text-sm"
                                         />
                                         <button
                                             onClick={() => handleCicilan(p)}
@@ -1109,7 +1105,7 @@ export default function Index() {
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                        className="flex-1 border border-slate-200 py-2.5 rounded-2xl text-sm"
                                     >
                                         Batal
                                     </button>
@@ -1143,7 +1139,7 @@ export default function Index() {
                             <div className="flex gap-2 pt-4">
                                 <button
                                     onClick={() => setDeleteTarget(null)}
-                                    className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                    className="flex-1 border border-slate-200 py-2.5 rounded-2xl text-sm"
                                 >
                                     Batal
                                 </button>
@@ -1180,7 +1176,7 @@ export default function Index() {
                                     onClick={() =>
                                         setDeleteKategoriTarget(null)
                                     }
-                                    className="flex-1 border py-2.5 rounded-2xl text-sm"
+                                    className="flex-1 border border-slate-200 py-2.5 rounded-2xl text-sm"
                                 >
                                     Batal
                                 </button>

@@ -286,7 +286,11 @@ export default function Index() {
                                         {santri.nis}
                                     </span>
                                     <span
-                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${santri.status === "aktif" ? "bg-emerald-50 text-emerald-600" : santri.status === "lulus" ? "bg-[#20B5E8]/10 text-[#20B5E8]" : "bg-red-50 text-red-500"}`}
+                                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                                            santri.status === "aktif"
+                                                ? "bg-emerald-50 text-emerald-600"
+                                                : "bg-red-50 text-red-500"
+                                        }`}
                                     >
                                         {santri.status
                                             ?.charAt(0)
@@ -690,9 +694,8 @@ export default function Index() {
                                             className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
                                         >
                                             <option value="aktif">Aktif</option>
-                                            <option value="lulus">Lulus</option>
-                                            <option value="keluar">
-                                                Keluar
+                                            <option value="tidak aktif">
+                                                Tidak Aktif
                                             </option>
                                         </select>
                                         <input

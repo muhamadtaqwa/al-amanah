@@ -39,7 +39,6 @@ class DashboardController extends Controller
                 ->toArray();
         }
 
-        // Grafik presensi mingguan untuk ustadz
         $grafikPresensi = [];
         if (auth()->user()->role === 'ustadz') {
             $startOfWeek = now()->startOfWeek();
@@ -67,9 +66,9 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'stats' => [
-                'totalSantri'       => Santri::count(),
-                'santriPutra'       => Santri::where('jenis_kelamin', 'laki-laki')->count(),
-                'santriPutri'       => Santri::where('jenis_kelamin', 'perempuan')->count(),
+                'totalSantri'       => Santri::where('status', 'aktif')->count(),
+                'santriPutra'       => Santri::where('status', 'aktif')->where('jenis_kelamin', 'laki-laki')->count(),
+                'santriPutri'       => Santri::where('status', 'aktif')->where('jenis_kelamin', 'perempuan')->count(),
                 'totalUstadz'       => Ustadz::count(),
                 'totalBelumBayar'   => $totalBelumBayar,
                 'totalSudahBayar'   => $totalSudahBayar,

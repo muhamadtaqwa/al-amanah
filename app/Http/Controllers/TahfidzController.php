@@ -135,11 +135,23 @@ class TahfidzController extends Controller
     {
         $bulan = $request->bulan ?? now()->month;
         $tahun = $request->tahun ?? now()->year;
+        $user = auth()->user();
+
+        $nisSantri = null;
+        $isSantriBiasa = false;
+
+        if ($user->role === 'santri') {
+            $nisSantri = $user->santri->nis;
+            $isSantriBiasa = !in_array($nisSantri, ['PA04', 'PI08', 'PI10', 'PI11']);
+        }
 
         $santris = Santri::where('status', 'aktif')->orderBy('nis')->get();
         $penyimak = Santri::whereIn('nis', ['PA04', 'PI08', 'PI10', 'PI11'])->get();
 
         $rekap = Santri::where('status', 'aktif')
+            ->when($nisSantri, function ($q) use ($nisSantri) {
+                $q->where('nis', $nisSantri);
+            })
             ->orderBy('nis')
             ->get()
             ->map(function ($s) {
@@ -158,10 +170,13 @@ class TahfidzController extends Controller
                     'juz_terakhir' => $totalJuz,
                     'progress' => round(($totalJuz / 30) * 100, 1),
                     'setoran_terakhir' => $setoran ? [
+                        'id' => $setoran->id,
                         'juz' => $setoran->juz,
+                        'surat_id' => $setoran->surat,
                         'surat' => $this->getNamaSurat($setoran->surat),
                         'sampai_ayat' => $setoran->sampai_ayat,
                         'tanggal' => $setoran->tanggal,
+                        'penyimak_nis' => $setoran->penyimak,
                         'penyimak' => $penyimakNama ?? $setoran->penyimak,
                         'keterangan' => $setoran->keterangan,
                     ] : null,
@@ -169,6 +184,9 @@ class TahfidzController extends Controller
             });
 
         $rekapBulanan = Santri::where('status', 'aktif')
+            ->when($nisSantri, function ($q) use ($nisSantri) {
+                $q->where('nis', $nisSantri);
+            })
             ->orderBy('nis')
             ->get()
             ->map(function ($s) use ($bulan, $tahun) {
@@ -187,12 +205,13 @@ class TahfidzController extends Controller
             });
 
         return Inertia::render('Tahfidz/Index', [
-            'santris' => $santris,
+            'santris' => $isSantriBiasa ? Santri::where('nis', $nisSantri)->get() : $santris,
             'penyimak' => $penyimak,
             'rekap' => $rekap,
             'rekapBulanan' => $rekapBulanan,
             'bulan' => (int) $bulan,
             'tahun' => (int) $tahun,
+            'isSantriBiasa' => $isSantriBiasa,
         ]);
     }
 
@@ -211,6 +230,23 @@ class TahfidzController extends Controller
         Tahfidz::create($request->all());
 
         return back()->with('success', 'Setoran tahfidz berhasil dicatat.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'juz' => 'required|integer|min:1|max:30',
+            'surat' => 'required|integer|min:1|max:114',
+            'sampai_ayat' => 'required|integer|min:1',
+            'tanggal' => 'required|date',
+            'keterangan' => 'required|in:lanjut,ulang',
+            'penyimak' => 'required|exists:santris,nis',
+        ]);
+
+        $tahfidz = Tahfidz::findOrFail($id);
+        $tahfidz->update($request->only('juz', 'surat', 'sampai_ayat', 'tanggal', 'keterangan', 'penyimak'));
+
+        return back()->with('success', 'Setoran tahfidz diupdate.');
     }
 
     public function detail($nis)

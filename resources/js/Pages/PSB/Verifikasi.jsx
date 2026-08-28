@@ -4,8 +4,9 @@ import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Verifikasi() {
-    const { pendaftar } = usePage().props;
-    const [filter, setFilter] = useState("semua");
+    const { pendaftar, filters } = usePage().props;
+    const [filter, setFilter] = useState(filters.status || "semua");
+    const [search, setSearch] = useState(filters.search || "");
     const [detail, setDetail] = useState(null);
     const [confirmTerima, setConfirmTerima] = useState(null);
     const [confirmTolak, setConfirmTolak] = useState(null);
@@ -16,10 +17,29 @@ export default function Verifikasi() {
         catatan: "",
     });
 
-    const filtered =
-        filter === "semua"
-            ? pendaftar
-            : pendaftar.filter((p) => p.status === filter);
+    const handleFilter = (value) => {
+        setFilter(value);
+        router.get(
+            "/psb/verifikasi",
+            {
+                status: value,
+                search: search,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const handleSearch = (value) => {
+        setSearch(value);
+        router.get(
+            "/psb/verifikasi",
+            {
+                status: filter,
+                search: value,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
 
     const formatTgl = (tgl) => {
         if (!tgl) return "-";
@@ -62,9 +82,10 @@ export default function Verifikasi() {
         );
     };
 
-    const countMenunggu = pendaftar.filter(
-        (p) => p.status === "menunggu",
-    ).length;
+    const countMenunggu =
+        pendaftar.total > 0
+            ? pendaftar.data.filter((p) => p.status === "menunggu").length
+            : 0;
 
     return (
         <AppLayout>
@@ -72,11 +93,6 @@ export default function Verifikasi() {
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-slate-800">
                         Verifikasi PSB
-                        {countMenunggu > 0 && (
-                            <span className="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
-                                {countMenunggu}
-                            </span>
-                        )}
                     </h2>
                     <div className="flex gap-2">
                         <a
@@ -96,11 +112,21 @@ export default function Verifikasi() {
                     </div>
                 </div>
 
+                <div className="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Cari nama, NIK, atau NISN..."
+                        value={search}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none"
+                    />
+                </div>
+
                 <div className="grid grid-cols-4 gap-2 mb-4">
                     {["semua", "menunggu", "diterima", "ditolak"].map((f) => (
                         <button
                             key={f}
-                            onClick={() => setFilter(f)}
+                            onClick={() => handleFilter(f)}
                             className={`py-2 rounded-full text-xs font-medium transition ${filter === f ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500"}`}
                         >
                             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -109,12 +135,12 @@ export default function Verifikasi() {
                 </div>
 
                 <div className="space-y-3">
-                    {filtered.length === 0 && (
+                    {pendaftar.data.length === 0 && (
                         <p className="text-center text-slate-400 py-10">
                             Tidak ada data
                         </p>
                     )}
-                    {filtered.map((p) => (
+                    {pendaftar.data.map((p) => (
                         <div
                             key={p.id}
                             onClick={() =>
@@ -207,7 +233,6 @@ export default function Verifikasi() {
                                         />
                                     )}
 
-                                    {/* Tombol untuk status menunggu */}
                                     {p.status === "menunggu" && (
                                         <div className="flex gap-2 pt-3">
                                             <button
@@ -231,7 +256,6 @@ export default function Verifikasi() {
                                         </div>
                                     )}
 
-                                    {/* Tombol batalkan untuk sudah diterima/ditolak */}
                                     {(p.status === "diterima" ||
                                         p.status === "ditolak") && (
                                         <div className="flex gap-2 pt-3">
@@ -251,6 +275,42 @@ export default function Verifikasi() {
                         </div>
                     ))}
                 </div>
+
+                {/* Pagination */}
+                {pendaftar.last_page > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    pendaftar.prev_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!pendaftar.prev_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Prev
+                        </button>
+                        <span className="text-xs text-slate-400">
+                            Halaman {pendaftar.current_page} dari{" "}
+                            {pendaftar.last_page}
+                        </span>
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    pendaftar.next_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!pendaftar.next_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
 
                 {/* Popup Konfirmasi Terima */}
                 {confirmTerima && (

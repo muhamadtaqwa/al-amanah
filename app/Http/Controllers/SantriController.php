@@ -10,11 +10,25 @@ use Inertia\Inertia;
 
 class SantriController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $santris = Santri::with('user')->orderBy('nis')->get();
+        $query = Santri::with('user')->orderBy('nis');
+
+        // Search
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%");
+            });
+        }
+
+        $santris = $query->paginate(20)->withQueryString();
+
         return Inertia::render('Santri/Index', [
             'santris' => $santris,
+            'filters' => $request->only('search'),
         ]);
     }
 

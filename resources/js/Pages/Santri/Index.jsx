@@ -10,11 +10,11 @@ import {
 } from "@/Services/Wilayah";
 
 export default function Index() {
-    const { santris, auth } = usePage().props;
+    const { santris, filters, auth } = usePage().props;
     const isAdmin = auth.user.role === "admin";
     const [showModal, setShowModal] = useState(false);
     const [editData, setEditData] = useState(null);
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(filters.search || "");
 
     const [provinsiList, setProvinsiList] = useState([]);
     const [kabupatenList, setKabupatenList] = useState([]);
@@ -160,6 +160,15 @@ export default function Index() {
         }
     };
 
+    const handleSearch = (value) => {
+        setSearch(value);
+        router.get(
+            "/santri",
+            { search: value },
+            { preserveState: true, replace: true },
+        );
+    };
+
     const openCreate = () => {
         reset();
         setEditData(null);
@@ -227,12 +236,6 @@ export default function Index() {
         }
     };
 
-    const filtered = santris.filter(
-        (s) =>
-            s.nama_lengkap?.toLowerCase().includes(search.toLowerCase()) ||
-            s.nis?.toLowerCase().includes(search.toLowerCase()),
-    );
-
     const formatTgl = (tgl) => {
         if (!tgl) return null;
         return new Date(tgl).toLocaleDateString("id-ID", {
@@ -264,18 +267,18 @@ export default function Index() {
                         type="text"
                         placeholder="Cari nama atau NIS..."
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => handleSearch(e.target.value)}
                         className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none"
                     />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {filtered.length === 0 && (
+                    {santris.data.length === 0 && (
                         <p className="text-center text-slate-400 py-10 sm:col-span-2">
                             Tidak ada data santri
                         </p>
                     )}
-                    {filtered.map((santri) => (
+                    {santris.data.map((santri) => (
                         <div
                             key={santri.id}
                             className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl hover:shadow-xl transition-shadow"
@@ -411,6 +414,42 @@ export default function Index() {
                         </div>
                     ))}
                 </div>
+
+                {/* Pagination */}
+                {santris.last_page > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    santris.prev_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!santris.prev_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Prev
+                        </button>
+                        <span className="text-xs text-slate-400">
+                            Halaman {santris.current_page} dari{" "}
+                            {santris.last_page}
+                        </span>
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    santris.next_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!santris.next_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
 
                 {showModal && isAdmin && (
                     <div className="fixed inset-0 z-50 overflow-y-auto">

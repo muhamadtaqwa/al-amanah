@@ -148,5 +148,6 @@ Route::middleware('auth')->group(function () {
     // Tahfidz
     Route::get('/tahfidz', [TahfidzController::class, 'index']);
     Route::post('/tahfidz', [TahfidzController::class, 'store']);
+    Route::put('/tahfidz/{id}', [TahfidzController::class, 'update']);
     Route::get('/tahfidz/{nis}/detail', [TahfidzController::class, 'detail']);
 });

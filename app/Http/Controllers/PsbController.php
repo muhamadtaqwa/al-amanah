@@ -74,10 +74,31 @@ class PsbController extends Controller
         return Inertia::render('PSB/Cek', ['hasil' => $psb]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $pendaftar = Psb::orderBy('created_at', 'desc')->get();
-        return Inertia::render('PSB/Verifikasi', ['pendaftar' => $pendaftar]);
+        $query = Psb::orderBy('created_at', 'desc');
+
+        // Filter status
+        if ($request->status && $request->status !== 'semua') {
+            $query->where('status', $request->status);
+        }
+
+        // Search
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
+            });
+        }
+
+        $pendaftar = $query->paginate(20)->withQueryString();
+
+        return Inertia::render('PSB/Verifikasi', [
+            'pendaftar' => $pendaftar,
+            'filters' => $request->only('status', 'search'),
+        ]);
     }
 
     public function verifikasi(Request $request, $id)
@@ -87,7 +108,6 @@ class PsbController extends Controller
         $psb->update(['status' => $request->status, 'catatan' => $request->catatan]);
 
         if ($request->status === 'diterima') {
-            // Cek apakah santri dengan NIK ini sudah ada
             $santriExist = Santri::where('nik', $psb->nik)->first();
 
             if (!$santriExist) {
@@ -145,7 +165,6 @@ class PsbController extends Controller
     {
         $psb = Psb::findOrFail($id);
 
-        // Hapus santri & user yang dibuat saat verifikasi diterima
         if ($psb->status === 'diterima') {
             $santri = Santri::where('nik', $psb->nik)->first();
             if ($santri) {

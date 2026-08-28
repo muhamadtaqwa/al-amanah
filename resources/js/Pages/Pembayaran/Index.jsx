@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { usePage, useForm, router, Link } from "@inertiajs/react";
+import { usePage, useForm, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
@@ -15,8 +15,7 @@ export default function Index() {
     const [nominalCicilan, setNominalCicilan] = useState("");
     const [cicilanError, setCicilanError] = useState("");
     const [editData, setEditData] = useState(null);
-    const [search, setSearch] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [search, setSearch] = useState(filters.search || "");
     const [verifyingId, setVerifyingId] = useState(null);
     const [cicilanSubmitting, setCicilanSubmitting] = useState(false);
     const [lunasiSubmitting, setLunasiSubmitting] = useState(false);
@@ -24,7 +23,7 @@ export default function Index() {
     const [deletingKategoriId, setDeletingKategoriId] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [deleteKategoriTarget, setDeleteKategoriTarget] = useState(null);
-    const [statusFilter, setStatusFilter] = useState("semua");
+    const [statusFilter, setStatusFilter] = useState(filters.status || "semua");
     const [showBukti, setShowBukti] = useState(null);
     const [verifikasiTarget, setVerifikasiTarget] = useState(null);
     const [nominalVerifikasi, setNominalVerifikasi] = useState("");
@@ -76,10 +75,6 @@ export default function Index() {
     };
 
     useEffect(() => {
-        const t = setTimeout(() => setDebouncedSearch(search), 250);
-        return () => clearTimeout(t);
-    }, [search]);
-    useEffect(() => {
         if (showModal) firstFieldRef.current?.focus();
     }, [showModal]);
 
@@ -89,6 +84,7 @@ export default function Index() {
         setEditData(null);
         setShowModal(true);
     };
+
     const openEdit = (p) => {
         setEditData(p);
         clearErrors();
@@ -104,6 +100,7 @@ export default function Index() {
         });
         setShowModal(true);
     };
+
     const closeModal = () => {
         setShowModal(false);
         setEditData(null);
@@ -112,7 +109,6 @@ export default function Index() {
 
     const submit = (e) => {
         e.preventDefault();
-
         let finalData = { ...data };
         if (!editData) {
             const namaOtomatis = getNamaOtomatis(
@@ -146,6 +142,32 @@ export default function Index() {
         }
     };
 
+    const handleSearch = (value) => {
+        setSearch(value);
+        router.get(
+            "/pembayaran",
+            {
+                search: value,
+                jenis: filters.jenis || "",
+                status: statusFilter,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const handleStatusFilter = (value) => {
+        setStatusFilter(value);
+        router.get(
+            "/pembayaran",
+            {
+                status: value,
+                jenis: filters.jenis || "",
+                search: search,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
     const confirmDeletePembayaran = (id, nama) => setDeleteTarget({ id, nama });
     const handleDelete = () => {
         if (!deleteTarget) return;
@@ -165,6 +187,7 @@ export default function Index() {
         setNominalCicilan("");
         setCicilanError("");
     };
+
     const handleCicilan = (p) => {
         const value = Number(nominalCicilan);
         if (!nominalCicilan || value <= 0) {
@@ -276,6 +299,7 @@ export default function Index() {
               : s === "dicicil"
                 ? "bg-amber-50 text-amber-600"
                 : "bg-slate-100 text-slate-500";
+
     const statusLabel = (s) =>
         s === "lunas"
             ? "Lunas"
@@ -284,24 +308,6 @@ export default function Index() {
               : s === "dicicil"
                 ? "Dicicil"
                 : "Menunggu";
-
-    const filtered = pembayaran
-        .filter((p) => {
-            if (statusFilter === "semua") return true;
-            if (statusFilter === "belum")
-                return p.status === "menunggu" || p.status === "dicicil";
-            return p.status === statusFilter;
-        })
-        .filter(
-            (p) =>
-                p.nama_pembayaran
-                    ?.toLowerCase()
-                    .includes(debouncedSearch.toLowerCase()) ||
-                p.nis?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-                p.santri?.nama_lengkap
-                    ?.toLowerCase()
-                    .includes(debouncedSearch.toLowerCase()),
-        );
 
     return (
         <AppLayout>
@@ -340,12 +346,12 @@ export default function Index() {
                         type="text"
                         placeholder="Cari NIS, nama santri, atau pembayaran..."
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => handleSearch(e.target.value)}
                         className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none"
                     />
                 </div>
 
-                {/* Filter Kategori & Status Dropdown */}
+                {/* Filter */}
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <select
                         value={filters.jenis || "semua"}
@@ -353,8 +359,12 @@ export default function Index() {
                             const val = e.target.value;
                             router.get(
                                 "/pembayaran",
-                                { jenis: val === "semua" ? "" : val },
-                                { preserveState: true },
+                                {
+                                    jenis: val === "semua" ? "" : val,
+                                    status: statusFilter,
+                                    search: search,
+                                },
+                                { preserveState: true, replace: true },
                             );
                         }}
                         className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
@@ -369,7 +379,7 @@ export default function Index() {
 
                     <select
                         value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
+                        onChange={(e) => handleStatusFilter(e.target.value)}
                         className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
                     >
                         <option value="semua">Semua Status</option>
@@ -770,12 +780,12 @@ export default function Index() {
 
                 {/* Card List */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {filtered.length === 0 && (
+                    {pembayaran.data.length === 0 && (
                         <p className="text-center text-slate-400 py-10 sm:col-span-2">
                             Tidak ada data
                         </p>
                     )}
-                    {filtered.map((p) => {
+                    {pembayaran.data.map((p) => {
                         const nominal = Number(p.nominal) || 0;
                         const dibayar = Number(p.total_dibayar) || 0;
                         const percent =
@@ -938,6 +948,42 @@ export default function Index() {
                         );
                     })}
                 </div>
+
+                {/* Pagination */}
+                {pembayaran.last_page > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    pembayaran.prev_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!pembayaran.prev_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Prev
+                        </button>
+                        <span className="text-xs text-slate-400">
+                            Halaman {pembayaran.current_page} dari{" "}
+                            {pembayaran.last_page}
+                        </span>
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    pembayaran.next_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!pembayaran.next_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
 
                 {/* Tambah/Edit Modal */}
                 {showModal && isAdmin && (

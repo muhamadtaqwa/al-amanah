@@ -178,8 +178,7 @@ export default function AppLayout({ children }) {
             label: "Program Tahfidz",
             path: "/tahfidz",
             icon: BookMarked,
-            roles: ["admin", "ustadz"],
-            nis: ["PA04", "PI08", "PI10", "PI11"],
+            roles: ["admin", "ustadz", "santri"],
         },
         {
             label: "Presensi Ustadz",

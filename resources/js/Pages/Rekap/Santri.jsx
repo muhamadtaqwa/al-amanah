@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { usePage, Link } from "@inertiajs/react";
+import { usePage, Link, router } from "@inertiajs/react";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Santri() {
-    const { santris } = usePage().props;
-    const [search, setSearch] = useState("");
+    const { santris, filters } = usePage().props;
+    const [search, setSearch] = useState(filters.search || "");
     const [selected, setSelected] = useState(null);
     const [detail, setDetail] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
@@ -43,9 +43,14 @@ export default function Santri() {
         },
     ];
 
-    const sortedSantris = [...santris].sort((a, b) =>
-        a.nis.localeCompare(b.nis),
-    );
+    const handleSearch = (value) => {
+        setSearch(value);
+        router.get(
+            "/rekap/santri",
+            { search: value },
+            { preserveState: true, replace: true },
+        );
+    };
 
     const handleLihat = async (nis) => {
         setShowPopup(true);
@@ -62,12 +67,6 @@ export default function Santri() {
         }
         setLoading(false);
     };
-
-    const filtered = sortedSantris.filter(
-        (s) =>
-            s.nama_lengkap?.toLowerCase().includes(search.toLowerCase()) ||
-            s.nis?.toLowerCase().includes(search.toLowerCase()),
-    );
 
     return (
         <AppLayout>
@@ -91,17 +90,23 @@ export default function Santri() {
                         </Link>
                     ))}
                 </div>
+
                 <input
                     type="text"
                     placeholder="Cari nama atau NIS..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => handleSearch(e.target.value)}
                     className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none mb-4"
                 />
 
                 {/* 2 Kolom di desktop */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {filtered.map((s) => (
+                    {santris.data.length === 0 && (
+                        <p className="text-center text-slate-400 py-10 md:col-span-2">
+                            Tidak ada data
+                        </p>
+                    )}
+                    {santris.data.map((s) => (
                         <div
                             key={s.nis}
                             className="rounded-2xl p-4 flex items-center gap-3 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all"
@@ -126,6 +131,42 @@ export default function Santri() {
                         </div>
                     ))}
                 </div>
+
+                {/* Pagination */}
+                {santris.last_page > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    santris.prev_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!santris.prev_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Prev
+                        </button>
+                        <span className="text-xs text-slate-400">
+                            Halaman {santris.current_page} dari{" "}
+                            {santris.last_page}
+                        </span>
+                        <button
+                            onClick={() =>
+                                router.get(
+                                    santris.next_page_url,
+                                    {},
+                                    { preserveState: true },
+                                )
+                            }
+                            disabled={!santris.next_page_url}
+                            className="px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
 
                 {showPopup && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

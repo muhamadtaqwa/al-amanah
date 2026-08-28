@@ -2,16 +2,32 @@ import { useState } from "react";
 import { usePage, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
-import { Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, X, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { suratPerJuz } from "@/Services/DataTahfidz";
 
 export default function Index() {
-    const { santris, penyimak, rekap, rekapBulanan, bulan, tahun, auth } =
-        usePage().props;
-    const isAdmin = auth.user.role === "admin";
+    const {
+        santris,
+        penyimak,
+        rekap,
+        rekapBulanan,
+        bulan,
+        tahun,
+        auth,
+        isSantriBiasa,
+    } = usePage().props;
+
+    const nisPenyimak = ["PA04", "PI08", "PI10", "PI11"];
+    const isSantri = auth.user.role === "santri";
+    const canInput =
+        auth.user.role === "admin" ||
+        auth.user.role === "ustadz" ||
+        (isSantri && nisPenyimak.includes(auth.user.santri?.nis));
 
     const [activeTab, setActiveTab] = useState("riwayat");
     const [showPopup, setShowPopup] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editId, setEditId] = useState(null);
     const [search, setSearch] = useState("");
     const [suratList, setSuratList] = useState(suratPerJuz[1] || []);
 
@@ -39,25 +55,60 @@ export default function Index() {
         setSuratList(suratPerJuz[juz] || []);
     };
 
+    const openInput = () => {
+        setEditMode(false);
+        setEditId(null);
+        setForm({
+            nis: "",
+            juz: "1",
+            surat: "",
+            sampai_ayat: "",
+            tanggal: new Date().toISOString().slice(0, 10),
+            keterangan: "lanjut",
+            penyimak: "",
+        });
+        setSuratList(suratPerJuz[1] || []);
+        setShowPopup(true);
+    };
+
+    const openEdit = (r) => {
+        const s = r.setoran_terakhir;
+        if (!s) return;
+        setEditMode(true);
+        setEditId(s.id);
+        setForm({
+            nis: r.nis,
+            juz: String(s.juz),
+            surat: String(s.surat_id),
+            sampai_ayat: String(s.sampai_ayat),
+            tanggal: s.tanggal,
+            keterangan: s.keterangan,
+            penyimak: s.penyimak_nis,
+        });
+        setSuratList(suratPerJuz[s.juz] || []);
+        setShowPopup(true);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        router.post("/tahfidz", form, {
-            onSuccess: () => {
-                toast.success("Setoran tahfidz dicatat!");
-                setShowPopup(false);
-                setForm({
-                    nis: "",
-                    juz: "1",
-                    surat: "",
-                    sampai_ayat: "",
-                    tanggal: new Date().toISOString().slice(0, 10),
-                    keterangan: "lanjut",
-                    penyimak: "",
-                });
-                setSuratList(suratPerJuz[1] || []);
-            },
-            onError: () => toast.error("Gagal mencatat setoran."),
-        });
+
+        if (editMode) {
+            router.put(`/tahfidz/${editId}`, form, {
+                onSuccess: () => {
+                    toast.success("Setoran tahfidz diupdate!");
+                    setShowPopup(false);
+                },
+                onError: () => toast.error("Gagal mengupdate setoran."),
+            });
+        } else {
+            router.post("/tahfidz", form, {
+                onSuccess: () => {
+                    toast.success("Setoran tahfidz dicatat!");
+                    setShowPopup(false);
+                },
+                onError: () => toast.error("Gagal mencatat setoran."),
+            });
+        }
     };
 
     const bulanSebelumnya = () => {
@@ -160,9 +211,9 @@ export default function Index() {
                     <h2 className="text-lg font-bold text-slate-800">
                         Program Tahfidz
                     </h2>
-                    {isAdmin && (
+                    {canInput && (
                         <button
-                            onClick={() => setShowPopup(true)}
+                            onClick={openInput}
                             className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-4 py-2 rounded-2xl text-sm font-semibold shadow-lg"
                         >
                             + Input
@@ -186,15 +237,17 @@ export default function Index() {
                     </button>
                 </div>
 
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Cari nama atau NIS..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none"
-                    />
-                </div>
+                {!isSantriBiasa && (
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder="Cari nama atau NIS..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none"
+                        />
+                    </div>
+                )}
 
                 {/* TAB RIWAYAT */}
                 {activeTab === "riwayat" && (
@@ -223,13 +276,23 @@ export default function Index() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="text-right shrink-0">
-                                        <p className="text-sm font-bold text-emerald-600">
-                                            Juz {r.juz_terakhir}/30
-                                        </p>
-                                        <p className="text-[10px] text-slate-400">
-                                            {r.progress}%
-                                        </p>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {canInput && r.setoran_terakhir && (
+                                            <button
+                                                onClick={() => openEdit(r)}
+                                                className="w-7 h-7 rounded-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] flex items-center justify-center text-white shadow-md hover:scale-110 transition"
+                                            >
+                                                <Pencil className="w-3 h-3" />
+                                            </button>
+                                        )}
+                                        <div className="text-right">
+                                            <p className="text-sm font-bold text-emerald-600">
+                                                Juz {r.juz_terakhir}/30
+                                            </p>
+                                            <p className="text-[10px] text-slate-400">
+                                                {r.progress}%
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -267,12 +330,7 @@ export default function Index() {
                                                 Keterangan
                                             </span>
                                             <span
-                                                className={`text-[11px] font-semibold ${
-                                                    r.setoran_terakhir
-                                                        .keterangan === "lanjut"
-                                                        ? "text-emerald-600"
-                                                        : "text-red-500"
-                                                }`}
+                                                className={`text-[11px] font-semibold ${r.setoran_terakhir.keterangan === "lanjut" ? "text-emerald-600" : "text-red-500"}`}
                                             >
                                                 {r.setoran_terakhir
                                                     .keterangan === "lanjut"
@@ -345,8 +403,8 @@ export default function Index() {
                     </>
                 )}
 
-                {/* Popup Input */}
-                {showPopup && isAdmin && (
+                {/* Popup Input/Edit */}
+                {showPopup && canInput && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <div
                             className="absolute inset-0 bg-black/50"
@@ -355,7 +413,8 @@ export default function Index() {
                         <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-6 border border-sky-100">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-lg">
-                                    Input Setoran Tahfidz
+                                    {editMode ? "Edit" : "Input"} Setoran
+                                    Tahfidz
                                 </h3>
                                 <button
                                     onClick={() => setShowPopup(false)}
@@ -365,24 +424,26 @@ export default function Index() {
                                 </button>
                             </div>
                             <form onSubmit={handleSubmit} className="space-y-3">
-                                <select
-                                    value={form.nis}
-                                    onChange={(e) =>
-                                        setForm({
-                                            ...form,
-                                            nis: e.target.value,
-                                        })
-                                    }
-                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
-                                    required
-                                >
-                                    <option value="">Pilih Santri</option>
-                                    {santris.map((s) => (
-                                        <option key={s.nis} value={s.nis}>
-                                            {s.nama_lengkap} ({s.nis})
-                                        </option>
-                                    ))}
-                                </select>
+                                {!editMode && (
+                                    <select
+                                        value={form.nis}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                nis: e.target.value,
+                                            })
+                                        }
+                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                        required
+                                    >
+                                        <option value="">Pilih Santri</option>
+                                        {santris.map((s) => (
+                                            <option key={s.nis} value={s.nis}>
+                                                {s.nama_lengkap} ({s.nis})
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
 
                                 <select
                                     value={form.juz}
@@ -497,7 +558,7 @@ export default function Index() {
                                         type="submit"
                                         className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold"
                                     >
-                                        Simpan
+                                        {editMode ? "Update" : "Simpan"}
                                     </button>
                                 </div>
                             </form>

@@ -8,6 +8,7 @@ use App\Models\RekeningYayasan;
 use App\Models\Santri;
 use App\Models\JenisPembayaran;
 use App\Models\PushSubscription;
+use App\Models\Cashflow;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Minishlink\WebPush\WebPush;
@@ -17,16 +18,41 @@ class PembayaranController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pembayaran::with(['santri', 'details'])->orderBy('created_at', 'desc');
+        $query = Pembayaran::with(['santri', 'details'])
+            ->orderBy('created_at', 'desc');
 
-        if ($request->jenis) $query->where('jenis', $request->jenis);
-        if ($request->nis) $query->where('nis', $request->nis);
-
-        $pembayaran = $query->get();
-
-        if ($request->status && $request->status !== 'semua') {
-            $pembayaran = $pembayaran->filter(fn($p) => $p->status === $request->status)->values();
+        // Filter jenis
+        if ($request->jenis) {
+            $query->where('jenis', $request->jenis);
         }
+
+        // Filter NIS
+        if ($request->nis) {
+            $query->where('nis', $request->nis);
+        }
+
+        // Filter status
+        if ($request->status && $request->status !== 'semua') {
+            if ($request->status === 'belum') {
+                $query->whereIn('status', ['menunggu', 'dicicil']);
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        // Search
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_pembayaran', 'like', "%{$search}%")
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhereHas('santri', function ($q2) use ($search) {
+                        $q2->where('nama_lengkap', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $pembayaran = $query->paginate(20)->withQueryString();
 
         $santris = Santri::where('status', 'aktif')->orderBy('nis')->get();
         $jenisPembayaran = JenisPembayaran::all();
@@ -35,7 +61,7 @@ class PembayaranController extends Controller
             'pembayaran' => $pembayaran,
             'santris' => $santris,
             'jenisPembayaran' => $jenisPembayaran,
-            'filters' => $request->only('jenis', 'status'),
+            'filters' => $request->only('jenis', 'status', 'search'),
         ]);
     }
 
@@ -90,6 +116,9 @@ class PembayaranController extends Controller
 
         if ($p->sisa <= 0) {
             $p->update(['status_verifikasi' => 'lunas', 'tgl_bayar' => now()]);
+
+            // Otomatis masuk cashflow
+            $this->catatCashflow($p);
 
             $this->kirimNotifKeSantri(
                 $p->nis,
@@ -195,6 +224,9 @@ class PembayaranController extends Controller
                     'tgl_bayar' => now(),
                 ]);
 
+                // Otomatis masuk cashflow
+                $this->catatCashflow($p);
+
                 $this->kirimNotifKeSantri(
                     $p->nis,
                     'Lunas',
@@ -254,6 +286,32 @@ class PembayaranController extends Controller
     {
         JenisPembayaran::findOrFail($id)->delete();
         return back()->with('success', 'Kategori dihapus.');
+    }
+
+    /**
+     * Catat pemasukan cashflow saat pembayaran lunas.
+     */
+    private function catatCashflow($pembayaran)
+    {
+        $kategoriCashflow = null;
+
+        if ($pembayaran->jenis === 'Kas') {
+            $kategoriCashflow = str_starts_with($pembayaran->nis, 'PA') ? 'kas_putra' : 'kas_putri';
+        } elseif ($pembayaran->jenis === 'Anjem') {
+            $kategoriCashflow = 'anjem';
+        }
+
+        if (!$kategoriCashflow) return;
+
+        $santriNama = $pembayaran->santri->nama_lengkap ?? $pembayaran->nis;
+
+        Cashflow::create([
+            'kategori' => $kategoriCashflow,
+            'tipe' => 'pemasukan',
+            'tanggal' => now()->format('Y-m-d'),
+            'nominal' => $pembayaran->nominal,
+            'keterangan' => $santriNama . ' - ' . $pembayaran->nama_pembayaran,
+        ]);
     }
 
     private function kirimNotifKeSantri($nis, $title, $body, $url)

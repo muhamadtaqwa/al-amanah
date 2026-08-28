@@ -34,10 +34,25 @@ class RekapController extends Controller
         ]);
     }
 
-    public function santri()
+    public function santri(Request $request)
     {
-        $santris = Santri::orderBy('nis')->get();
-        return Inertia::render('Rekap/Santri', ['santris' => $santris]);
+        $query = Santri::orderBy('nis');
+
+        // Search
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nis', 'like', "%{$search}%");
+            });
+        }
+
+        $santris = $query->paginate(20)->withQueryString();
+
+        return Inertia::render('Rekap/Santri', [
+            'santris' => $santris,
+            'filters' => $request->only('search'),
+        ]);
     }
 
     public function santriDetailJson($nis)
@@ -205,6 +220,7 @@ class RekapController extends Controller
             'totalBelum' => $data->sum('nominal_belum'),
         ]);
     }
+
     public function anjem()
     {
         $data = Pembayaran::where('jenis', 'Anjem')->get()

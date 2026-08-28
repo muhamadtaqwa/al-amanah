@@ -212,7 +212,7 @@ export default function Login() {
                         </p>
                         <button
                             onClick={() => setShowLupa(false)}
-                            className="mt-6 w-full border border-slate-200 py-2.5 rounded-2xl text-sm hover:bg-slate-50"
+                            className="mt-6 w-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold shadow-lg hover:scale-[1.02] transition"
                         >
                             Tutup
                         </button>

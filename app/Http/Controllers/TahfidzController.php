@@ -149,7 +149,7 @@ class TahfidzController extends Controller
         $penyimak = Santri::whereIn('nis', ['PA04', 'PI08', 'PI10', 'PI11'])->get();
 
         $rekap = Santri::where('status', 'aktif')
-            ->when($nisSantri, function ($q) use ($nisSantri) {
+            ->when($isSantriBiasa, function ($q) use ($nisSantri) {
                 $q->where('nis', $nisSantri);
             })
             ->orderBy('nis')
@@ -184,7 +184,7 @@ class TahfidzController extends Controller
             });
 
         $rekapBulanan = Santri::where('status', 'aktif')
-            ->when($nisSantri, function ($q) use ($nisSantri) {
+            ->when($isSantriBiasa, function ($q) use ($nisSantri) {
                 $q->where('nis', $nisSantri);
             })
             ->orderBy('nis')

@@ -14,5 +14,6 @@ class Cashflow extends Model
         'tanggal',
         'nominal',
         'keterangan',
+        'pembayaran_id',
     ];
 }

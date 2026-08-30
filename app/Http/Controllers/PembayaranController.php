@@ -34,9 +34,13 @@ class PembayaranController extends Controller
         // Filter status
         if ($request->status && $request->status !== 'semua') {
             if ($request->status === 'belum') {
-                $query->whereIn('status', ['menunggu', 'dicicil']);
+                $query->where('status_verifikasi', 'menunggu')
+                    ->whereDoesntHave('details');
+            } elseif ($request->status === 'dicicil') {
+                $query->where('status_verifikasi', 'menunggu')
+                    ->whereHas('details');
             } else {
-                $query->where('status', $request->status);
+                $query->where('status_verifikasi', $request->status);
             }
         }
 
@@ -96,7 +100,12 @@ class PembayaranController extends Controller
 
     public function destroy($id)
     {
-        Pembayaran::findOrFail($id)->delete();
+        $p = Pembayaran::findOrFail($id);
+
+        // Hapus cashflow terkait
+        Cashflow::where('pembayaran_id', $p->id)->delete();
+
+        $p->delete();
         return back()->with('success', 'Dihapus.');
     }
 
@@ -311,6 +320,7 @@ class PembayaranController extends Controller
             'tanggal' => now()->format('Y-m-d'),
             'nominal' => $pembayaran->nominal,
             'keterangan' => $santriNama . ' - ' . $pembayaran->nama_pembayaran,
+            'pembayaran_id' => $pembayaran->id,
         ]);
     }
 

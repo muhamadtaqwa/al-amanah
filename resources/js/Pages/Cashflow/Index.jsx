@@ -220,15 +220,19 @@ export default function Index() {
                     )}
                     {cashflow.map((item) => (
                         <div
-                            key={item.id}
+                            key={
+                                item.id === 0
+                                    ? "saldo-bulan-lalu"
+                                    : `cashflow-${item.id}`
+                            }
                             className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
                         >
-                            <div className="flex items-center justify-between mb-1">
-                                <p className="text-xs text-slate-400">
+                            <div className="flex items-center justify-between mb-1 gap-2">
+                                <p className="text-xs text-slate-400 shrink-0">
                                     {formatTanggal(item.tanggal)}
                                 </p>
                                 {item.id !== 0 && (
-                                    <div className="flex gap-1">
+                                    <div className="flex gap-1 shrink-0">
                                         <button
                                             onClick={() => bukaEdit(item)}
                                             className="p-1.5 rounded-lg text-slate-400 hover:text-[#3D7ABA] hover:bg-[#3D7ABA]/10 transition"
@@ -246,12 +250,12 @@ export default function Index() {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm text-slate-600">
+                            <div className="flex items-start justify-between gap-3">
+                                <p className="text-sm text-slate-600 break-words flex-1 min-w-0">
                                     {item.keterangan}
                                 </p>
                                 <p
-                                    className={`text-sm font-bold font-mono ${item.tipe === "pemasukan" ? "text-emerald-600" : "text-red-500"}`}
+                                    className={`text-sm font-bold font-mono whitespace-nowrap shrink-0 ${item.tipe === "pemasukan" ? "text-emerald-600" : "text-red-500"}`}
                                 >
                                     {item.tipe === "pemasukan" ? "+" : "-"}{" "}
                                     {formatRupiah(item.nominal)}

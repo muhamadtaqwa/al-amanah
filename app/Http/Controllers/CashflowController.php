@@ -32,7 +32,6 @@ class CashflowController extends Controller
         $cashflow = Cashflow::where('kategori', $kategori)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
             ->get();
 
         // Tambah item "Saldo Bulan Lalu" di riwayat
@@ -45,14 +44,22 @@ class CashflowController extends Controller
                 'nominal' => abs($saldoAwal),
                 'keterangan' => 'Saldo Bulan Lalu',
             ]);
-            $cashflow->prepend($saldoItem);
+            $cashflow->push($saldoItem);
         }
+
+        // Urutkan: tanggal terbaru di atas, jika tanggal sama → id terbesar di atas
+        $cashflow = $cashflow->sort(function ($a, $b) {
+            if ($a->tanggal === $b->tanggal) {
+                return $b->id - $a->id;
+            }
+            return strcmp($b->tanggal, $a->tanggal);
+        })->values();
 
         $pemasukan = $cashflow->where('tipe', 'pemasukan')->sum('nominal');
         $pengeluaran = $cashflow->where('tipe', 'pengeluaran')->sum('nominal');
 
-        // Total saldo akhir
-        $total = $saldoAwal + $pemasukan - $pengeluaran;
+        // Total = pemasukan - pengeluaran
+        $total = $pemasukan - $pengeluaran;
 
         return Inertia::render('Cashflow/Index', [
             'cashflow' => $cashflow,

@@ -316,10 +316,6 @@ export default function Index() {
                                 Download QR Code
                             </button>
                         </div>
-
-                        <p className="text-xs text-white/60 mt-4">
-                            Tunjukkan kode ini untuk presensi
-                        </p>
                     </div>
                 )}
 

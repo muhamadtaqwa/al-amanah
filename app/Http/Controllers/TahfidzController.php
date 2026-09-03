@@ -142,11 +142,11 @@ class TahfidzController extends Controller
 
         if ($user->role === 'santri') {
             $nisSantri = $user->santri->nis;
-            $isSantriBiasa = !in_array($nisSantri, ['PA04', 'PI08', 'PI10', 'PI11']);
+            $isSantriBiasa = !in_array($nisSantri, ['PA04', 'PI04', 'PI10', 'PI11']);
         }
 
         $santris = Santri::where('status', 'aktif')->orderBy('nis')->get();
-        $penyimak = Santri::whereIn('nis', ['PA04', 'PI08', 'PI10', 'PI11'])->get();
+        $penyimak = Santri::whereIn('nis', ['PA04', 'PI04', 'PI10', 'PI11'])->get();
 
         $rekap = Santri::where('status', 'aktif')
             ->when($isSantriBiasa, function ($q) use ($nisSantri) {

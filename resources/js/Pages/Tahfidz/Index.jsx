@@ -17,7 +17,7 @@ export default function Index() {
         isSantriBiasa,
     } = usePage().props;
 
-    const nisPenyimak = ["PA04", "PI08", "PI10", "PI11"];
+    const nisPenyimak = ["PA04", "PI04", "PI10", "PI11"];
     const isSantri = auth.user.role === "santri";
     const canInput =
         auth.user.role === "admin" ||
@@ -334,8 +334,8 @@ export default function Index() {
                                             >
                                                 {r.setoran_terakhir
                                                     .keterangan === "lanjut"
-                                                    ? "Lanjut"
-                                                    : "Ulang"}
+                                                    ? "Ziyadah"
+                                                    : "Muraja'ah"}
                                             </span>
                                         </div>
                                     </div>
@@ -523,8 +523,8 @@ export default function Index() {
                                     className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
                                     required
                                 >
-                                    <option value="lanjut">Lanjut</option>
-                                    <option value="ulang">Ulang</option>
+                                    <option value="lanjut">Ziyadah</option>
+                                    <option value="ulang">Muraja'ah</option>
                                 </select>
 
                                 <select

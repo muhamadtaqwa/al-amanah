@@ -15,6 +15,7 @@ export default function Index() {
     const [sending, setSending] = useState(false);
     const scannerRef = useRef(null);
     const inputRef = useRef(null);
+    const qrRef = useRef(null); // Tambahan ref untuk QR code
 
     const isAdmin = user.role === "admin";
     const profil = user.ustadz || user.santri;
@@ -138,11 +139,71 @@ export default function Index() {
         }
     };
 
+    // Fungsi untuk download QR code
+    const downloadQRCode = () => {
+        const svg = qrRef.current?.querySelector("svg");
+        if (!svg) {
+            toast.error("QR Code tidak ditemukan");
+            return;
+        }
+
+        try {
+            // Clone SVG untuk dimodifikasi
+            const cloneSvg = svg.cloneNode(true);
+
+            // Buat canvas dengan ukuran yang sama
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            // Set ukuran canvas (2x untuk kualitas lebih baik)
+            const size = 180 * 2; // 360px
+            canvas.width = size;
+            canvas.height = size;
+
+            // Convert SVG to data URL
+            const svgData = new XMLSerializer().serializeToString(cloneSvg);
+            const svgBlob = new Blob([svgData], {
+                type: "image/svg+xml;charset=utf-8",
+            });
+            const url = URL.createObjectURL(svgBlob);
+
+            const img = new Image();
+            img.onload = () => {
+                // Background putih
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, size, size);
+
+                // Draw image
+                ctx.drawImage(img, 0, 0, size, size);
+
+                // Download
+                const link = document.createElement("a");
+                link.download = `QR-${nama}-${qrValue}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+
+                // Cleanup
+                URL.revokeObjectURL(url);
+                toast.success("QR Code berhasil didownload!");
+            };
+
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                toast.error("Gagal membuat QR Code");
+            };
+
+            img.src = url;
+        } catch (error) {
+            console.error("Error downloading QR:", error);
+            toast.error("Gagal mendownload QR Code");
+        }
+    };
+
     return (
         <AppLayout>
             <div className="max-w-md mx-auto text-center">
                 <h2 className="text-lg font-bold text-slate-800 mb-6">
-                    {isAdmin ? "Presensi Santri" : "Kode Saya"}
+                    {isAdmin ? "Presensi Santri" : "QR Code Saya"}
                 </h2>
 
                 {isAdmin ? (
@@ -234,7 +295,10 @@ export default function Index() {
                         <p className="text-sm text-white/70">
                             {user.role.toUpperCase()} • {qrValue}
                         </p>
-                        <div className="mt-6 bg-white rounded-2xl p-4 inline-block shadow-lg">
+                        <div
+                            ref={qrRef}
+                            className="mt-6 bg-white rounded-2xl p-4 inline-block shadow-lg"
+                        >
                             <QRCodeSVG
                                 value={qrValue}
                                 size={180}
@@ -242,6 +306,17 @@ export default function Index() {
                                 includeMargin
                             />
                         </div>
+
+                        {/* Tombol Download tanpa icon */}
+                        <div className="mt-4">
+                            <button
+                                onClick={downloadQRCode}
+                                className="bg-white text-[#3D7ABA] px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg hover:scale-105 active:scale-95 transition-all mx-auto"
+                            >
+                                Download QR Code
+                            </button>
+                        </div>
+
                         <p className="text-xs text-white/60 mt-4">
                             Tunjukkan kode ini untuk presensi
                         </p>

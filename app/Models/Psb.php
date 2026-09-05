@@ -31,6 +31,7 @@ class Psb extends Model
         'nik_ibu',
         'pekerjaan_ibu',
         'no_hp_orang_tua',
+        'bukti_pembayaran',
         'status',
         'catatan',
     ];

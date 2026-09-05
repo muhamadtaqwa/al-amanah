@@ -23,6 +23,11 @@ class HandleInertiaRequests extends Middleware
                 'roles' => $request->user() ? $request->user()->getRoleNames() : [],
                 'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
             ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'psb_id' => fn () => $request->session()->get('psb_id'),
+            ],
         ];
     }
 }

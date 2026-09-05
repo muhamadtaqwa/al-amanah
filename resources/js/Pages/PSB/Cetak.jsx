@@ -118,22 +118,47 @@ export default function Cetak() {
                 </div>
 
                 {/* ORANG TUA */}
-                <div className="mb-8">
+                <div className="mb-6">
                     <h3 className="text-xs font-bold text-slate-700 uppercase border-b border-slate-300 pb-1 mb-3">
                         D. Data Orang Tua
                     </h3>
                     <div className="space-y-2 text-sm print:text-xs">
                         <Row label="Nama Ayah" value={data.nama_ayah} />
+                        <Row label="NIK Ayah" value={data.nik_ayah} />
                         <Row
                             label="Pekerjaan Ayah"
                             value={data.pekerjaan_ayah}
                         />
                         <Row label="Nama Ibu" value={data.nama_ibu} />
+                        <Row label="NIK Ibu" value={data.nik_ibu} />
                         <Row label="Pekerjaan Ibu" value={data.pekerjaan_ibu} />
                         <Row
                             label="No HP Orang Tua"
                             value={data.no_hp_orang_tua}
                         />
+                    </div>
+                </div>
+
+                {/* PEMBAYARAN */}
+                <div className="mb-8">
+                    <h3 className="text-xs font-bold text-slate-700 uppercase border-b border-slate-300 pb-1 mb-3">
+                        E. Pembayaran
+                    </h3>
+                    <div className="space-y-2 text-sm print:text-xs">
+                        <Row
+                            label="Status Bukti"
+                            value={
+                                data.bukti_pembayaran
+                                    ? "Sudah Upload"
+                                    : "Belum Upload"
+                            }
+                        />
+                        {data.bukti_pembayaran && (
+                            <Row
+                                label="File"
+                                value={data.bukti_pembayaran.split("/").pop()}
+                            />
+                        )}
                     </div>
                 </div>
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "@inertiajs/react";
 
 export default function Cek() {
-    const { data, setData, post, processing } = useForm({ nik: "" });
+    const { data, setData, post, processing, errors } = useForm({ nik: "" });
     const [hasil, setHasil] = useState(null);
 
     const submit = (e) => {
@@ -10,6 +10,9 @@ export default function Cek() {
         post("/psb/cek", {
             onSuccess: (response) => {
                 setHasil(response.props.hasil);
+            },
+            onError: () => {
+                setHasil(null);
             },
         });
     };
@@ -39,20 +42,27 @@ export default function Cek() {
                 </div>
 
                 <form onSubmit={submit} className="space-y-3">
-                    <input
-                        type="text"
-                        placeholder="Masukkan NIK"
-                        value={data.nik}
-                        onChange={(e) => setData("nik", e.target.value)}
-                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                        required
-                    />
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Masukkan NIK"
+                            value={data.nik}
+                            onChange={(e) => setData("nik", e.target.value)}
+                            className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
+                            required
+                        />
+                        {errors.nik && (
+                            <p className="text-xs text-red-500 mt-1.5 ml-2 font-medium">
+                                {errors.nik}
+                            </p>
+                        )}
+                    </div>
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-3 rounded-2xl text-sm font-semibold shadow-lg"
+                        className="w-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-3 rounded-2xl text-sm font-semibold shadow-lg disabled:opacity-50"
                     >
-                        Cek Status
+                        {processing ? "Memeriksa..." : "Cek Status"}
                     </button>
                 </form>
 

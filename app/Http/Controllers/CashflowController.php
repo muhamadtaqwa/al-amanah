@@ -40,7 +40,7 @@ class CashflowController extends Controller
                 'id' => 0,
                 'kategori' => $kategori,
                 'tipe' => $saldoAwal > 0 ? 'pemasukan' : 'pengeluaran',
-                'tanggal' => now()->startOfMonth()->format('Y-m-d'),
+                'tanggal' => \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->format('Y-m-d'),
                 'nominal' => abs($saldoAwal),
                 'keterangan' => 'Saldo Bulan Lalu',
             ]);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usePage, useForm, router } from "@inertiajs/react";
+import { usePage, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
 
@@ -11,11 +11,8 @@ export default function Verifikasi() {
     const [confirmTerima, setConfirmTerima] = useState(null);
     const [confirmTolak, setConfirmTolak] = useState(null);
     const [confirmBatal, setConfirmBatal] = useState(null);
-
-    const { data, setData, put, processing } = useForm({
-        status: "diterima",
-        catatan: "",
-    });
+    const [catatan, setCatatan] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     const handleFilter = (value) => {
         setFilter(value);
@@ -51,20 +48,29 @@ export default function Verifikasi() {
     };
 
     const handleVerifikasi = (id, status) => {
-        setData("status", status);
-        put(`/psb/${id}/verifikasi`, {
-            onSuccess: () => {
-                setConfirmTerima(null);
-                setConfirmTolak(null);
-                setDetail(null);
-                toast.success(
-                    status === "diterima"
-                        ? "Pendaftar diterima!"
-                        : "Pendaftar ditolak!",
-                );
+        setSubmitting(true);
+        router.put(
+            `/psb/${id}/verifikasi`,
+            {
+                status: status,
+                catatan: status === "ditolak" ? catatan : null,
             },
-            onError: () => toast.error("Gagal memverifikasi."),
-        });
+            {
+                onSuccess: () => {
+                    setConfirmTerima(null);
+                    setConfirmTolak(null);
+                    setDetail(null);
+                    setCatatan("");
+                    toast.success(
+                        status === "diterima"
+                            ? "Pendaftar diterima!"
+                            : "Pendaftar ditolak!",
+                    );
+                },
+                onError: () => toast.error("Gagal memverifikasi."),
+                onFinish: () => setSubmitting(false),
+            },
+        );
     };
 
     const handleBatalkan = (id) => {
@@ -226,6 +232,32 @@ export default function Verifikasi() {
                                         label="No HP Orang Tua"
                                         value={p.no_hp_orang_tua}
                                     />
+
+                                    {/* Bukti Pembayaran */}
+                                    {p.bukti_pembayaran && (
+                                        <>
+                                            <hr className="border-slate-100" />
+                                            <p className="font-semibold text-slate-600">
+                                                Bukti Pembayaran
+                                            </p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-slate-400">
+                                                    File
+                                                </span>
+                                                <a
+                                                    href={`/storage/${p.bukti_pembayaran}`}
+                                                    target="_blank"
+                                                    className="text-[#3D7ABA] hover:underline font-medium"
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
+                                                >
+                                                    Lihat Bukti
+                                                </a>
+                                            </div>
+                                        </>
+                                    )}
+
                                     {p.catatan && (
                                         <Row
                                             label="Catatan"
@@ -341,10 +373,10 @@ export default function Verifikasi() {
                                             "diterima",
                                         )
                                     }
-                                    disabled={processing}
+                                    disabled={submitting}
                                     className="flex-1 bg-emerald-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
                                 >
-                                    {processing ? "..." : "Ya, Terima"}
+                                    {submitting ? "..." : "Ya, Terima"}
                                 </button>
                             </div>
                         </div>
@@ -356,7 +388,10 @@ export default function Verifikasi() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <div
                             className="absolute inset-0 bg-black/50"
-                            onClick={() => setConfirmTolak(null)}
+                            onClick={() => {
+                                setConfirmTolak(null);
+                                setCatatan("");
+                            }}
                         ></div>
                         <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-sm p-6 border border-sky-100">
                             <h3 className="font-semibold text-lg">
@@ -368,16 +403,17 @@ export default function Verifikasi() {
                             </p>
                             <textarea
                                 placeholder="Alasan penolakan (opsional)..."
-                                value={data.catatan}
-                                onChange={(e) =>
-                                    setData("catatan", e.target.value)
-                                }
+                                value={catatan}
+                                onChange={(e) => setCatatan(e.target.value)}
                                 className="w-full border border-slate-200 rounded-2xl px-4 py-2 text-xs outline-none mt-3"
                                 rows={2}
                             ></textarea>
                             <div className="flex gap-2 pt-3">
                                 <button
-                                    onClick={() => setConfirmTolak(null)}
+                                    onClick={() => {
+                                        setConfirmTolak(null);
+                                        setCatatan("");
+                                    }}
                                     className="flex-1 border py-2.5 rounded-2xl text-sm"
                                 >
                                     Batal
@@ -389,10 +425,10 @@ export default function Verifikasi() {
                                             "ditolak",
                                         )
                                     }
-                                    disabled={processing}
+                                    disabled={submitting}
                                     className="flex-1 bg-red-500 text-white py-2.5 rounded-2xl text-sm font-semibold"
                                 >
-                                    {processing ? "..." : "Ya, Tolak"}
+                                    {submitting ? "..." : "Ya, Tolak"}
                                 </button>
                             </div>
                         </div>

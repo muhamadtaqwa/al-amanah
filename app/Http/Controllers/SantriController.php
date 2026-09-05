@@ -63,7 +63,9 @@ class SantriController extends Controller
         ]);
 
         $prefix = $request->jenis_kelamin === 'laki-laki' ? 'PA' : 'PI';
-        $last = Santri::where('nis', 'like', $prefix . '%')->orderBy('nis', 'desc')->first();
+        $last = Santri::where('nis', 'like', $prefix . '%')
+            ->orderByRaw('LENGTH(nis) DESC, nis DESC')
+            ->first();
         if ($last) {
             $num = (int) substr($last->nis, 2) + 1;
         } else {

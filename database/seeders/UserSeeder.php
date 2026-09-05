@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Santri;
 use App\Models\User;
 use App\Models\Ustadz;
-use App\Models\Walisantri;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -46,44 +45,17 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // ========== WALISANTRI ==========
-        $waliData = [
-            ['niw' => '401', 'nama_lengkap' => 'Arifin', 'no_whatsapp' => '081201'],
-            ['niw' => '402', 'nama_lengkap' => 'Mukhlis', 'no_whatsapp' => '081202'],
-            ['niw' => '403', 'nama_lengkap' => 'Agus', 'no_whatsapp' => '081203'],
-            ['niw' => '404', 'nama_lengkap' => 'Hasan', 'no_whatsapp' => '081204'],
-            ['niw' => '405', 'nama_lengkap' => 'Muslim', 'no_whatsapp' => '081205'],
-            ['niw' => '406', 'nama_lengkap' => 'Rudi', 'no_whatsapp' => '081206'],
-        ];
-
-        $waliMap = [];
-        foreach ($waliData as $w) {
-            $user = User::create([
-                'username' => $w['niw'],
-                'password' => Hash::make('password'),
-                'role' => 'walisantri',
-            ]);
-            $user->assignRole('walisantri');
-            $wali = Walisantri::create([
-                'user_id' => $user->id,
-                'niw' => $w['niw'],
-                'nama_lengkap' => $w['nama_lengkap'],
-                'no_whatsapp' => $w['no_whatsapp'],
-            ]);
-            $waliMap[$w['niw']] = $wali->id;
-        }
-
         // ========== SANTRI ==========
         $santriData = [
-            ['nis' => '301', 'nama_lengkap' => 'Farich', 'niw' => '401'],
-            ['nis' => '302', 'nama_lengkap' => 'Labib', 'niw' => '402'],
-            ['nis' => '303', 'nama_lengkap' => 'Ave', 'niw' => '403'],
-            ['nis' => '304', 'nama_lengkap' => 'Faza', 'niw' => '404'],
-            ['nis' => '305', 'nama_lengkap' => 'Daffa', 'niw' => '405'],
-            ['nis' => '306', 'nama_lengkap' => 'Hamid', 'niw' => '406'],
-            ['nis' => '307', 'nama_lengkap' => 'Fedrix', 'niw' => '401'],
-            ['nis' => '308', 'nama_lengkap' => 'Taqwa', 'niw' => '402'],
-            ['nis' => '309', 'nama_lengkap' => 'Sakin', 'niw' => '403'],
+            ['nis' => 'PA01', 'nama_lengkap' => 'Farich', 'jk' => 'laki-laki'],
+            ['nis' => 'PA02', 'nama_lengkap' => 'Labib', 'jk' => 'laki-laki'],
+            ['nis' => 'PA03', 'nama_lengkap' => 'Ave', 'jk' => 'laki-laki'],
+            ['nis' => 'PA04', 'nama_lengkap' => 'Faza', 'jk' => 'laki-laki'],
+            ['nis' => 'PA05', 'nama_lengkap' => 'Daffa', 'jk' => 'laki-laki'],
+            ['nis' => 'PA06', 'nama_lengkap' => 'Hamid', 'jk' => 'laki-laki'],
+            ['nis' => 'PA07', 'nama_lengkap' => 'Fedrix', 'jk' => 'laki-laki'],
+            ['nis' => 'PA08', 'nama_lengkap' => 'Taqwa', 'jk' => 'laki-laki'],
+            ['nis' => 'PI01', 'nama_lengkap' => 'Sakin', 'jk' => 'perempuan'],
         ];
 
         foreach ($santriData as $s) {
@@ -95,9 +67,10 @@ class UserSeeder extends Seeder
             $user->assignRole('santri');
             Santri::create([
                 'user_id' => $user->id,
-                'walisantri_id' => $waliMap[$s['niw']],
                 'nis' => $s['nis'],
                 'nama_lengkap' => $s['nama_lengkap'],
+                'jenis_kelamin' => $s['jk'],
+                'status' => 'aktif',
                 'poin_kedisiplinan' => 100,
             ]);
         }

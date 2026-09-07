@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { usePage, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
-    const { jadwal, hari, tanggal: tgl, rekap, auth } = usePage().props;
+    const { jadwal, hari, tanggal: tgl, rekap, auth, errors } = usePage().props;
     const isAdmin = auth.user.role === "admin";
     const [tanggal, setTanggal] = useState(
         tgl || new Date().toISOString().split("T")[0],
     );
+    const [loadingNiu, setLoadingNiu] = useState(null);
     const dateRef = useRef(null);
 
     useEffect(() => {
@@ -23,6 +25,9 @@ export default function Index() {
     }, []);
 
     const handleSimpan = (niu, status, honorDefault) => {
+        if (loadingNiu === niu) return;
+        setLoadingNiu(niu);
+
         router.post(
             "/presensi",
             {
@@ -32,8 +37,14 @@ export default function Index() {
                 honor: status === "hadir" ? honorDefault : 0,
             },
             {
-                onSuccess: () => toast.success("Presensi tersimpan!"),
-                onError: () => toast.error("Gagal menyimpan presensi."),
+                onSuccess: () => {
+                    toast.success("Presensi tersimpan!");
+                    setLoadingNiu(null);
+                },
+                onError: (err) => {
+                    toast.error(err?.error || "Gagal menyimpan presensi.");
+                    setLoadingNiu(null);
+                },
             },
         );
     };
@@ -74,6 +85,12 @@ export default function Index() {
                         className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none"
                     />
                 </div>
+
+                {errors?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 text-xs rounded-2xl px-4 py-3 mb-3">
+                        {errors.error}
+                    </div>
+                )}
 
                 <p className="text-sm text-slate-500 mb-4">
                     {hari},{" "}
@@ -129,9 +146,16 @@ export default function Index() {
                                                         item.honor_default,
                                                     )
                                                 }
-                                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg"
+                                                disabled={
+                                                    loadingNiu === item.niu
+                                                }
+                                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 min-w-[60px] justify-center"
                                             >
-                                                Hadir
+                                                {loadingNiu === item.niu ? (
+                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                ) : (
+                                                    "Hadir"
+                                                )}
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -141,9 +165,16 @@ export default function Index() {
                                                         item.honor_default,
                                                     )
                                                 }
-                                                className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs font-semibold"
+                                                disabled={
+                                                    loadingNiu === item.niu
+                                                }
+                                                className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 min-w-[60px] justify-center"
                                             >
-                                                Tidak
+                                                {loadingNiu === item.niu ? (
+                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                ) : (
+                                                    "Tidak"
+                                                )}
                                             </button>
                                         </div>
                                     ))}

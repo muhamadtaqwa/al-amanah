@@ -72,6 +72,17 @@ class PresensiController extends Controller
             'honor' => 'required|integer|min:0',
         ]);
 
+        // Cek anti double: 1 ustadz 1 kali per tanggal
+        $sudahPresensi = PresensiUstadz::where('niu', $request->niu)
+            ->where('tanggal', $request->tanggal)
+            ->exists();
+
+        if ($sudahPresensi) {
+            return back()->withErrors([
+                'error' => 'Ustadz ini sudah presensi pada tanggal tersebut!',
+            ]);
+        }
+
         PresensiUstadz::create($request->all() + ['nip' => 'admin']);
         return back()->with('success', 'Presensi disimpan.');
     }

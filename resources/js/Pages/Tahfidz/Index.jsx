@@ -17,7 +17,7 @@ export default function Index() {
         isSantriBiasa,
     } = usePage().props;
 
-    const nisPenyimak = ["PA04", "PI04", "PI10", "PI11"];
+    const nisPenyimak = ["PA04", "PI04", "PI10", "PI11", "PA06"];
     const isSantri = auth.user.role === "santri";
     const canInput =
         auth.user.role === "admin" ||

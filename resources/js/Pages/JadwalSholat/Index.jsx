@@ -276,18 +276,10 @@ export default function Index() {
                             ))}
                         </div>
 
-                        {/* Keterangan Notifikasi */}
-                        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 mb-4">
-                            <p className="text-xs text-amber-700 flex items-center gap-2">
-                                <Bell className="w-3.5 h-3.5" />
-                                Toggle hijau = notifikasi adzan aktif
-                            </p>
-                        </div>
-
                         <p className="text-center text-[10px] text-slate-400 flex items-center justify-center gap-1">
                             <MapPin className="w-3 h-3" />
                             {lokasi
-                                ? `Lokasi: ${lokasi.latitude}, ${lokasi.longitude}`
+                                ? `Lokasi : ${lokasi.latitude}, ${lokasi.longitude}`
                                 : "Lokasi default: Kedungpane, Mijen, Semarang"}
                         </p>
                     </>

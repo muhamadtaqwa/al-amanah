@@ -15,7 +15,7 @@ export default function Index() {
     const [sending, setSending] = useState(false);
     const scannerRef = useRef(null);
     const inputRef = useRef(null);
-    const qrRef = useRef(null); // Tambahan ref untuk QR code
+    const qrRef = useRef(null);
 
     const isAdmin = user.role === "admin";
     const profil = user.ustadz || user.santri;
@@ -148,19 +148,14 @@ export default function Index() {
         }
 
         try {
-            // Clone SVG untuk dimodifikasi
             const cloneSvg = svg.cloneNode(true);
-
-            // Buat canvas dengan ukuran yang sama
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
 
-            // Set ukuran canvas (2x untuk kualitas lebih baik)
-            const size = 180 * 2; // 360px
+            const size = 180 * 2;
             canvas.width = size;
             canvas.height = size;
 
-            // Convert SVG to data URL
             const svgData = new XMLSerializer().serializeToString(cloneSvg);
             const svgBlob = new Blob([svgData], {
                 type: "image/svg+xml;charset=utf-8",
@@ -169,20 +164,15 @@ export default function Index() {
 
             const img = new Image();
             img.onload = () => {
-                // Background putih
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fillRect(0, 0, size, size);
-
-                // Draw image
                 ctx.drawImage(img, 0, 0, size, size);
 
-                // Download
                 const link = document.createElement("a");
                 link.download = `QR-${nama}-${qrValue}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
 
-                // Cleanup
                 URL.revokeObjectURL(url);
                 toast.success("QR Code berhasil didownload!");
             };
@@ -264,11 +254,14 @@ export default function Index() {
                                     type="text"
                                     value={manualInput}
                                     onChange={(e) =>
-                                        setManualInput(e.target.value)
+                                        setManualInput(
+                                            e.target.value.toUpperCase(),
+                                        )
                                     }
                                     placeholder="Scan barcode atau input manual..."
                                     className="w-full border border-slate-200 rounded-2xl px-5 py-3 text-xs text-center font-mono tracking-widest focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none"
                                     autoFocus
+                                    autoCapitalize="characters"
                                 />
                                 <button
                                     type="submit"
@@ -307,7 +300,6 @@ export default function Index() {
                             />
                         </div>
 
-                        {/* Tombol Download tanpa icon */}
                         <div className="mt-4">
                             <button
                                 onClick={downloadQRCode}

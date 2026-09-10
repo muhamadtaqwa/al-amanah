@@ -10,6 +10,7 @@ export default function Santri() {
         tanggal,
         mode,
         hadir,
+        izin,
         tidakHadir,
         rekap,
         bulan,
@@ -19,53 +20,6 @@ export default function Santri() {
     const [selectedDate, setSelectedDate] = useState(tanggal);
     const [activeMode, setActiveMode] = useState(mode || "harian");
     const [activeTab, setActiveTab] = useState("hadir");
-    const [nis, setNis] = useState("");
-    const [sending, setSending] = useState(false);
-
-    const playBeep = () => {
-        try {
-            const ctx = new (
-                window.AudioContext || window.webkitAudioContext
-            )();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.value = 1200;
-            gain.gain.value = 0.1;
-            osc.start();
-            setTimeout(() => {
-                osc.stop();
-                ctx.close();
-            }, 300);
-        } catch (e) {
-            console.log("Audio tidak didukung");
-        }
-    };
-
-    const handleScan = (nisTerbaca) => {
-        setSending(true);
-        router.post(
-            "/presensi-santri",
-            { nis: nisTerbaca },
-            {
-                onSuccess: () => {
-                    playBeep();
-                    toast.success("Presensi berhasil!");
-                    setNis("");
-                    setSending(false);
-                },
-                onError: (errors) => {
-                    toast.error(
-                        errors?.error ||
-                            "Santri sudah presensi atau data tidak ditemukan.",
-                    );
-                    setNis("");
-                    setSending(false);
-                },
-            },
-        );
-    };
 
     const handleDateChange = (e) => {
         setSelectedDate(e.target.value);
@@ -118,43 +72,6 @@ export default function Santri() {
                     Presensi Santri
                 </h2>
 
-                {/* Input manual NIS - hanya admin & harian */}
-                {isAdmin && activeMode === "harian" && (
-                    <div className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-2xl mb-4">
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="Masukkan NIS santri"
-                                value={nis}
-                                onChange={(e) =>
-                                    setNis(e.target.value.toUpperCase())
-                                }
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && nis) {
-                                        e.preventDefault();
-                                        handleScan(nis);
-                                    }
-                                }}
-                                className="flex-1 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                autoFocus
-                            />
-                            <button
-                                onClick={() => handleScan(nis)}
-                                disabled={!nis || sending}
-                                className="bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white px-5 py-2.5 rounded-2xl text-sm font-semibold shadow-lg disabled:opacity-50"
-                            >
-                                Simpan
-                            </button>
-                        </div>
-
-                        {sending && (
-                            <p className="text-xs text-slate-400 mt-2">
-                                Menyimpan...
-                            </p>
-                        )}
-                    </div>
-                )}
-
                 {/* Tab Mode */}
                 <div className="grid grid-cols-3 gap-2 mb-3">
                     {["harian", "mingguan", "bulanan"].map((m) => (
@@ -183,13 +100,19 @@ export default function Santri() {
                 {/* HARIAN */}
                 {activeMode === "harian" && (
                     <>
-                        {/* Sub Tab Hadir / Tidak */}
-                        <div className="grid grid-cols-2 gap-2 mb-3">
+                        {/* Sub Tab Hadir / Izin / Tidak */}
+                        <div className="grid grid-cols-3 gap-2 mb-3">
                             <button
                                 onClick={() => setActiveTab("hadir")}
                                 className={`py-2 rounded-full text-xs font-semibold transition ${activeTab === "hadir" ? "bg-emerald-500 text-white" : "bg-white text-slate-500"}`}
                             >
                                 Hadir ({hadir.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("izin")}
+                                className={`py-2 rounded-full text-xs font-semibold transition ${activeTab === "izin" ? "bg-amber-500 text-white" : "bg-white text-slate-500"}`}
+                            >
+                                Izin ({izin?.length || 0})
                             </button>
                             <button
                                 onClick={() => setActiveTab("tidak")}
@@ -203,6 +126,7 @@ export default function Santri() {
                             {formatTgl(selectedDate)}
                         </p>
 
+                        {/* Tab Hadir */}
                         {activeTab === "hadir" && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {hadir.length === 0 && (
@@ -238,11 +162,46 @@ export default function Santri() {
                             </div>
                         )}
 
+                        {/* Tab Izin */}
+                        {activeTab === "izin" && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {(!izin || izin.length === 0) && (
+                                    <p className="text-center text-slate-400 py-10">
+                                        Tidak ada santri izin
+                                    </p>
+                                )}
+                                {izin?.map((p) => (
+                                    <div
+                                        key={p.nis}
+                                        className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                                {p.nama?.charAt(0)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-sm">
+                                                    {p.nama}
+                                                </p>
+                                                <p className="text-xs text-slate-400">
+                                                    {p.nis}
+                                                </p>
+                                                <p className="text-[11px] text-amber-600 mt-1 italic">
+                                                    {p.keterangan}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Tab Tidak Hadir */}
                         {activeTab === "tidak" && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {tidakHadir.length === 0 && (
                                     <p className="text-center text-slate-400 py-10">
-                                        Semua santri hadir 🎉
+                                        Semua santri hadir
                                     </p>
                                 )}
                                 {tidakHadir.map((p) => (
@@ -307,6 +266,14 @@ export default function Santri() {
                                             </p>
                                             <p className="text-[10px] text-slate-400">
                                                 Hadir
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-amber-500">
+                                                {r.total_izin || 0}
+                                            </p>
+                                            <p className="text-[10px] text-slate-400">
+                                                Izin
                                             </p>
                                         </div>
                                         <div>
@@ -395,6 +362,14 @@ export default function Santri() {
                                                 </p>
                                                 <p className="text-[10px] text-slate-400">
                                                     Hadir
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-amber-500">
+                                                    {r.total_izin || 0}
+                                                </p>
+                                                <p className="text-[10px] text-slate-400">
+                                                    Izin
                                                 </p>
                                             </div>
                                             <div>

@@ -40,6 +40,8 @@ export default function Dashboard() {
             .catch(() => setHijri(""));
     }, []);
 
+    const showGrafik = user.role === "admin" || user.role === "ustadz";
+
     return (
         <AppLayout>
             <div className="space-y-4">
@@ -162,34 +164,6 @@ export default function Dashboard() {
                                 </p>
                             </div>
                         </div>
-
-                        <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
-                            <h2 className="text-sm font-bold text-slate-700 mb-2">
-                                Aktivitas Terbaru
-                            </h2>
-                            <div className="space-y-2">
-                                {(!aktivitas || aktivitas.length === 0) && (
-                                    <p className="text-xs text-slate-400">
-                                        Belum ada aktivitas
-                                    </p>
-                                )}
-                                {aktivitas &&
-                                    aktivitas.map((item, i) => (
-                                        <div
-                                            key={i}
-                                            className="flex items-center justify-between text-xs text-slate-600"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-[#3D7ABA] shrink-0"></div>
-                                                {item.teks}
-                                            </div>
-                                            <span className="text-slate-400 text-[10px] shrink-0 ml-2">
-                                                {item.waktu}
-                                            </span>
-                                        </div>
-                                    ))}
-                            </div>
-                        </div>
                     </>
                 )}
 
@@ -254,71 +228,111 @@ export default function Dashboard() {
                                 </p>
                             </div>
                         </div>
-
-                        {/* Grafik Presensi Minggu Ini */}
-                        <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
-                            <h2 className="text-sm font-bold text-slate-700 mb-2">
-                                Presensi Santri Minggu Ini
-                            </h2>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <BarChart data={grafikPresensi}>
-                                    <CartesianGrid
-                                        strokeDasharray="3 3"
-                                        stroke="#e2e8f0"
-                                    />
-                                    <XAxis
-                                        dataKey="hari"
-                                        tick={{ fontSize: 11 }}
-                                    />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar
-                                        dataKey="hadir"
-                                        fill="#10b981"
-                                        radius={[4, 4, 0, 0]}
-                                    />
-                                    <Bar
-                                        dataKey="tidak"
-                                        fill="#ef4444"
-                                        radius={[4, 4, 0, 0]}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-
-                        {/* Menu cepat */}
-                        <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
-                            <h2 className="text-sm font-bold text-slate-700 mb-2">
-                                Menu Cepat
-                            </h2>
-                            <div className="grid grid-cols-2 gap-2">
-                                <a
-                                    href="/presensi"
-                                    className="rounded-xl bg-[#3D7ABA]/10 p-3 text-center text-xs font-medium text-[#3D7ABA]"
-                                >
-                                    Presensi Ustadz
-                                </a>
-                                <a
-                                    href="/presensi-santri"
-                                    className="rounded-xl bg-emerald-50 p-3 text-center text-xs font-medium text-emerald-600"
-                                >
-                                    Presensi Santri
-                                </a>
-                                <a
-                                    href="/timeline"
-                                    className="rounded-xl bg-blue-50 p-3 text-center text-xs font-medium text-blue-500"
-                                >
-                                    Timeline
-                                </a>
-                                <a
-                                    href="/qr"
-                                    className="rounded-xl bg-[#20B5E8]/10 p-3 text-center text-xs font-medium text-[#20B5E8]"
-                                >
-                                    QR Code
-                                </a>
-                            </div>
-                        </div>
                     </>
+                )}
+
+                {/* ========== GRAFIK PRESENSI (ADMIN & USTADZ) ========== */}
+                {showGrafik && (
+                    <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                        <h2 className="text-sm font-bold text-slate-700 mb-2">
+                            Presensi Santri Minggu Ini
+                        </h2>
+                        <ResponsiveContainer width="100%" height={200}>
+                            <BarChart data={grafikPresensi}>
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#e2e8f0"
+                                />
+                                <XAxis dataKey="hari" tick={{ fontSize: 11 }} />
+                                <Tooltip contentStyle={{ fontSize: 11 }} />
+                                <Legend wrapperStyle={{ fontSize: 10 }} />
+                                <Bar
+                                    dataKey="hadir"
+                                    name="Hadir"
+                                    fill="#10b981"
+                                    radius={[4, 4, 0, 0]}
+                                />
+                                <Bar
+                                    dataKey="izin"
+                                    name="Izin"
+                                    fill="#f59e0b"
+                                    radius={[4, 4, 0, 0]}
+                                />
+                                <Bar
+                                    dataKey="tidak"
+                                    name="Tidak Hadir"
+                                    fill="#ef4444"
+                                    radius={[4, 4, 0, 0]}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                )}
+
+                {/* ========== ADMIN: Aktivitas Terbaru ========== */}
+                {user.role === "admin" && (
+                    <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                        <h2 className="text-sm font-bold text-slate-700 mb-2">
+                            Aktivitas Terbaru
+                        </h2>
+                        <div className="space-y-2">
+                            {(!aktivitas || aktivitas.length === 0) && (
+                                <p className="text-xs text-slate-400">
+                                    Belum ada aktivitas
+                                </p>
+                            )}
+                            {aktivitas &&
+                                aktivitas.map((item, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex items-center justify-between text-xs text-slate-600"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[#3D7ABA] shrink-0"></div>
+                                            {item.teks}
+                                        </div>
+                                        <span className="text-slate-400 text-[10px] shrink-0 ml-2">
+                                            {item.waktu}
+                                        </span>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ========== USTADZ: Menu Cepat ========== */}
+                {user.role === "ustadz" && (
+                    <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                        <h2 className="text-sm font-bold text-slate-700 mb-2">
+                            Menu Cepat
+                        </h2>
+                        <div className="grid grid-cols-2 gap-2">
+                            <a
+                                href="/presensi"
+                                className="rounded-xl bg-[#3D7ABA]/10 p-3 text-center text-xs font-medium text-[#3D7ABA]"
+                            >
+                                Presensi Ustadz
+                            </a>
+                            <a
+                                href="/presensi-santri"
+                                className="rounded-xl bg-emerald-50 p-3 text-center text-xs font-medium text-emerald-600"
+                            >
+                                Presensi Santri
+                            </a>
+                            <a
+                                href="/timeline"
+                                className="rounded-xl bg-blue-50 p-3 text-center text-xs font-medium text-blue-500"
+                            >
+                                Timeline
+                            </a>
+                            <a
+                                href="/qr"
+                                className="rounded-xl bg-[#20B5E8]/10 p-3 text-center text-xs font-medium text-[#20B5E8]"
+                            >
+                                QR Code
+                            </a>
+                        </div>
+                    </div>
                 )}
 
                 {/* ========== SANTRI ========== */}

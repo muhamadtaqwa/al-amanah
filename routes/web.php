@@ -7,6 +7,7 @@ use App\Http\Controllers\UstadzController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PresensiSantriController;
+use App\Http\Controllers\IzinSantriController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PinjamGedungController;
@@ -90,6 +91,11 @@ Route::middleware('auth')->group(function () {
     // Presensi Santri
     Route::get('/presensi-santri', [PresensiSantriController::class, 'index']);
     Route::post('/presensi-santri', [PresensiSantriController::class, 'store']);
+
+    // Izin Santri
+    Route::get('/izin-santri', [IzinSantriController::class, 'index']);
+    Route::post('/izin-santri', [IzinSantriController::class, 'store']);
+    Route::delete('/izin-santri/{id}', [IzinSantriController::class, 'destroy']);
 
     // Rekap
     Route::get('/rekap', [RekapController::class, 'index']);

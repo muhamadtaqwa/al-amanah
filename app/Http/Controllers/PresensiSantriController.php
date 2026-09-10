@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PresensiSantri;
+use App\Models\IzinSantri;
 use App\Models\Santri;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,10 +25,12 @@ class PresensiSantriController extends Controller
         $semuaSantri = Santri::where('status', 'aktif')->orderBy('nama_lengkap')->get();
 
         $hadir = [];
+        $izin = [];
         $tidakHadir = [];
         $rekap = [];
 
         if ($mode === 'harian') {
+            // Data hadir
             $hadir = $presensi->map(function ($p) {
                 return [
                     'nis' => $p->nis,
@@ -38,8 +41,26 @@ class PresensiSantriController extends Controller
 
             $hadirNis = $hadir->pluck('nis');
 
+            // Data izin
+            $izinHariIni = IzinSantri::with('santri')
+                ->whereDate('tanggal', $tanggal)
+                ->get();
+
+            $izin = $izinHariIni->map(function ($i) {
+                return [
+                    'id' => $i->id,
+                    'nis' => $i->nis,
+                    'nama' => $i->santri->nama_lengkap ?? '-',
+                    'keterangan' => $i->keterangan,
+                ];
+            });
+
+            $izinNis = $izin->pluck('nis');
+
+            // Tidak hadir = santri aktif yang tidak hadir & tidak izin
             $tidakHadir = $semuaSantri
                 ->whereNotIn('nis', $hadirNis)
+                ->whereNotIn('nis', $izinNis)
                 ->map(function ($s) {
                     return [
                         'nis' => $s->nis,
@@ -58,16 +79,26 @@ class PresensiSantriController extends Controller
                 ->get()
                 ->groupBy('nis');
 
+            $izinMingguan = IzinSantri::with('santri')
+                ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
+                ->get()
+                ->groupBy('nis');
+
             $totalHariEfektif = 7;
 
-            $rekap = $semuaSantri->map(function ($s) use ($presensiMingguan, $totalHariEfektif) {
-                $items = $presensiMingguan->get($s->nis, collect());
-                $hadir = $items->count();
-                $tidak = $totalHariEfektif - $hadir;
+            $rekap = $semuaSantri->map(function ($s) use ($presensiMingguan, $izinMingguan, $totalHariEfektif) {
+                $itemsHadir = $presensiMingguan->get($s->nis, collect());
+                $itemsIzin = $izinMingguan->get($s->nis, collect());
+
+                $hadir = $itemsHadir->count();
+                $izin = $itemsIzin->count();
+                $tidak = $totalHariEfektif - $hadir - $izin;
+
                 return [
                     'nis' => $s->nis,
                     'nama' => $s->nama_lengkap,
                     'total_hadir' => $hadir,
+                    'total_izin' => $izin,
                     'total_tidak' => max(0, $tidak),
                 ];
             })->sortBy('nama')->values();
@@ -82,16 +113,27 @@ class PresensiSantriController extends Controller
                 ->get()
                 ->groupBy('nis');
 
-            $rekap = $semuaSantri->map(function ($s) use ($presensiBulanan, $totalHari) {
-                $items = $presensiBulanan->get($s->nis, collect());
-                $hadir = $items->count();
-                $tidak = $totalHari - $hadir;
+            $izinBulanan = IzinSantri::with('santri')
+                ->whereMonth('tanggal', $bulan)
+                ->whereYear('tanggal', $tahun)
+                ->get()
+                ->groupBy('nis');
+
+            $rekap = $semuaSantri->map(function ($s) use ($presensiBulanan, $izinBulanan, $totalHari) {
+                $itemsHadir = $presensiBulanan->get($s->nis, collect());
+                $itemsIzin = $izinBulanan->get($s->nis, collect());
+
+                $hadir = $itemsHadir->count();
+                $izin = $itemsIzin->count();
+                $tidak = $totalHari - $hadir - $izin;
+
                 return [
                     'nis' => $s->nis,
                     'nama' => $s->nama_lengkap,
                     'total_hadir' => $hadir,
+                    'total_izin' => $izin,
                     'total_tidak' => max(0, $tidak),
-                    'terakhir_hadir' => $items->max('tanggal'),
+                    'terakhir_hadir' => $itemsHadir->max('tanggal'),
                 ];
             })->sortBy('nama')->values();
         }
@@ -103,6 +145,7 @@ class PresensiSantriController extends Controller
             'bulan' => $bulan,
             'tahun' => $tahun,
             'hadir' => $hadir,
+            'izin' => $izin,
             'tidakHadir' => $tidakHadir,
             'rekap' => $rekap,
         ]);
@@ -117,6 +160,16 @@ class PresensiSantriController extends Controller
         $tanggal = now()->format('Y-m-d');
         $jam = now()->format('H:i:s');
 
+        // Cek apakah santri sedang izin hari ini
+        $sudahIzin = IzinSantri::where('nis', $request->nis)
+            ->whereDate('tanggal', $tanggal)
+            ->exists();
+
+        if ($sudahIzin) {
+            return back()->with('error', 'Santri sedang izin. Batalkan izin dulu untuk presensi.');
+        }
+
+        // Cek apakah sudah presensi
         $sudah = PresensiSantri::where('nis', $request->nis)
             ->whereDate('tanggal', $tanggal)
             ->exists();

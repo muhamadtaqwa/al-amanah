@@ -9,6 +9,7 @@ use App\Models\Pembayaran;
 use App\Models\Login;
 use App\Models\Psb;
 use App\Models\PresensiSantri;
+use App\Models\IzinSantri;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -40,7 +41,7 @@ class DashboardController extends Controller
         }
 
         $grafikPresensi = [];
-        if (auth()->user()->role === 'ustadz') {
+        if (in_array(auth()->user()->role, ['admin', 'ustadz'])) {
             $startOfWeek = now()->startOfWeek();
             $endOfWeek = now()->endOfWeek();
             $totalSantriAktif = Santri::where('status', 'aktif')->count();
@@ -50,15 +51,29 @@ class DashboardController extends Controller
                 $endOfWeek->format('Y-m-d'),
             ])->get();
 
+            $izinMingguan = IzinSantri::whereBetween('tanggal', [
+                $startOfWeek->format('Y-m-d'),
+                $endOfWeek->format('Y-m-d'),
+            ])->get();
+
             for ($i = 0; $i < 7; $i++) {
                 $tanggal = $startOfWeek->copy()->addDays($i);
+                $tglStr = $tanggal->format('Y-m-d');
+
                 $hadir = $presensiMingguan
-                    ->where('tanggal', $tanggal->format('Y-m-d'))
+                    ->where('tanggal', $tglStr)
                     ->count();
-                $tidak = max(0, $totalSantriAktif - $hadir);
+
+                $izin = $izinMingguan
+                    ->where('tanggal', $tglStr)
+                    ->count();
+
+                $tidak = max(0, $totalSantriAktif - $hadir - $izin);
+
                 $grafikPresensi[] = [
                     'hari' => $tanggal->locale('id')->dayName,
                     'hadir' => $hadir,
+                    'izin' => $izin,
                     'tidak' => $tidak,
                 ];
             }

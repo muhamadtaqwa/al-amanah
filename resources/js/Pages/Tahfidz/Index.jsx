@@ -2,7 +2,7 @@ import { useState } from "react";
 import { usePage, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
-import { Plus, X, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { suratPerJuz } from "@/Services/DataTahfidz";
 
 export default function Index() {
@@ -26,8 +26,6 @@ export default function Index() {
 
     const [activeTab, setActiveTab] = useState("riwayat");
     const [showPopup, setShowPopup] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [editId, setEditId] = useState(null);
     const [search, setSearch] = useState("");
     const [suratList, setSuratList] = useState(suratPerJuz[1] || []);
 
@@ -56,8 +54,6 @@ export default function Index() {
     };
 
     const openInput = () => {
-        setEditMode(false);
-        setEditId(null);
         setForm({
             nis: "",
             juz: "1",
@@ -71,44 +67,16 @@ export default function Index() {
         setShowPopup(true);
     };
 
-    const openEdit = (r) => {
-        const s = r.setoran_terakhir;
-        if (!s) return;
-        setEditMode(true);
-        setEditId(s.id);
-        setForm({
-            nis: r.nis,
-            juz: String(s.juz),
-            surat: String(s.surat_id),
-            sampai_ayat: String(s.sampai_ayat),
-            tanggal: s.tanggal,
-            keterangan: s.keterangan,
-            penyimak: s.penyimak_nis,
-        });
-        setSuratList(suratPerJuz[s.juz] || []);
-        setShowPopup(true);
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (editMode) {
-            router.put(`/tahfidz/${editId}`, form, {
-                onSuccess: () => {
-                    toast.success("Setoran tahfidz diupdate!");
-                    setShowPopup(false);
-                },
-                onError: () => toast.error("Gagal mengupdate setoran."),
-            });
-        } else {
-            router.post("/tahfidz", form, {
-                onSuccess: () => {
-                    toast.success("Setoran tahfidz dicatat!");
-                    setShowPopup(false);
-                },
-                onError: () => toast.error("Gagal mencatat setoran."),
-            });
-        }
+        router.post("/tahfidz", form, {
+            onSuccess: () => {
+                toast.success("Setoran tahfidz dicatat!");
+                setShowPopup(false);
+            },
+            onError: () => toast.error("Gagal mencatat setoran."),
+        });
     };
 
     const bulanSebelumnya = () => {
@@ -277,14 +245,6 @@ export default function Index() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
-                                        {canInput && r.setoran_terakhir && (
-                                            <button
-                                                onClick={() => openEdit(r)}
-                                                className="w-7 h-7 rounded-full bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] flex items-center justify-center text-white shadow-md hover:scale-110 transition"
-                                            >
-                                                <Pencil className="w-3 h-3" />
-                                            </button>
-                                        )}
                                         <div className="text-right">
                                             <p className="text-sm font-bold text-emerald-600">
                                                 Juz {r.juz_terakhir}/30
@@ -403,7 +363,7 @@ export default function Index() {
                     </>
                 )}
 
-                {/* Popup Input/Edit */}
+                {/* Popup Input */}
                 {showPopup && canInput && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <div
@@ -413,8 +373,7 @@ export default function Index() {
                         <div className="relative bg-white rounded-[30px] shadow-2xl w-full max-w-md p-6 border border-sky-100">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-lg">
-                                    {editMode ? "Edit" : "Input"} Setoran
-                                    Tahfidz
+                                    Input Setoran Tahfidz
                                 </h3>
                                 <button
                                     onClick={() => setShowPopup(false)}
@@ -424,26 +383,24 @@ export default function Index() {
                                 </button>
                             </div>
                             <form onSubmit={handleSubmit} className="space-y-3">
-                                {!editMode && (
-                                    <select
-                                        value={form.nis}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                nis: e.target.value,
-                                            })
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
-                                        required
-                                    >
-                                        <option value="">Pilih Santri</option>
-                                        {santris.map((s) => (
-                                            <option key={s.nis} value={s.nis}>
-                                                {s.nama_lengkap} ({s.nis})
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
+                                <select
+                                    value={form.nis}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            nis: e.target.value,
+                                        })
+                                    }
+                                    className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm bg-white outline-none"
+                                    required
+                                >
+                                    <option value="">Pilih Santri</option>
+                                    {santris.map((s) => (
+                                        <option key={s.nis} value={s.nis}>
+                                            {s.nama_lengkap} ({s.nis})
+                                        </option>
+                                    ))}
+                                </select>
 
                                 <select
                                     value={form.juz}
@@ -558,7 +515,7 @@ export default function Index() {
                                         type="submit"
                                         className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold"
                                     >
-                                        {editMode ? "Update" : "Simpan"}
+                                        Simpan
                                     </button>
                                 </div>
                             </form>

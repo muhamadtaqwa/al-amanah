@@ -296,9 +296,13 @@ export default function Index() {
                                         }`}
                                     >
                                         {santri.status
-                                            ?.charAt(0)
-                                            .toUpperCase() +
-                                            santri.status?.slice(1)}
+                                            ?.split(" ")
+                                            .map(
+                                                (k) =>
+                                                    k.charAt(0).toUpperCase() +
+                                                    k.slice(1),
+                                            )
+                                            .join(" ")}
                                     </span>
                                 </div>
                                 {isAdmin && (

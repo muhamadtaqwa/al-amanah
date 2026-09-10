@@ -28,6 +28,7 @@ import {
     PanelLeftOpen,
     TrendingUp,
     BookMarked,
+    FileCheck,
 } from "lucide-react";
 
 function urlBase64ToUint8Array(base64String) {
@@ -191,6 +192,12 @@ export default function AppLayout({ children }) {
             path: "/presensi-santri",
             icon: ClipboardCheck,
             roles: ["admin", "ustadz"],
+        },
+        {
+            label: "Izin",
+            path: "/izin-santri",
+            icon: FileCheck,
+            roles: ["santri"],
         },
         {
             label: "Pinjam Gedung",

@@ -10,6 +10,8 @@ use App\Models\Login;
 use App\Models\Psb;
 use App\Models\PresensiSantri;
 use App\Models\IzinSantri;
+use App\Models\Tahfidz;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -41,9 +43,13 @@ class DashboardController extends Controller
         }
 
         $grafikPresensi = [];
+        $grafikTahfidz = [];
+
         if (in_array(auth()->user()->role, ['admin', 'ustadz'])) {
-            $startOfWeek = now()->startOfWeek();
-            $endOfWeek = now()->endOfWeek();
+            // Mulai dari hari Minggu (Ahad)
+            $startOfWeek = now()->startOfWeek(Carbon::SUNDAY);
+            $endOfWeek = now()->endOfWeek(Carbon::SATURDAY);
+
             $totalSantriAktif = Santri::where('status', 'aktif')->count();
 
             $presensiMingguan = PresensiSantri::whereBetween('tanggal', [
@@ -56,10 +62,16 @@ class DashboardController extends Controller
                 $endOfWeek->format('Y-m-d'),
             ])->get();
 
+            $tahfidzMingguan = Tahfidz::whereBetween('tanggal', [
+                $startOfWeek->format('Y-m-d'),
+                $endOfWeek->format('Y-m-d'),
+            ])->get();
+
             for ($i = 0; $i < 7; $i++) {
                 $tanggal = $startOfWeek->copy()->addDays($i);
                 $tglStr = $tanggal->format('Y-m-d');
 
+                // Grafik Presensi
                 $hadir = $presensiMingguan
                     ->where('tanggal', $tglStr)
                     ->count();
@@ -75,6 +87,16 @@ class DashboardController extends Controller
                     'hadir' => $hadir,
                     'izin' => $izin,
                     'tidak' => $tidak,
+                ];
+
+                // Grafik Tahfidz (jumlah setoran)
+                $setoran = $tahfidzMingguan
+                    ->where('tanggal', $tglStr)
+                    ->count();
+
+                $grafikTahfidz[] = [
+                    'hari' => $tanggal->locale('id')->dayName,
+                    'setoran' => $setoran,
                 ];
             }
         }
@@ -98,6 +120,7 @@ class DashboardController extends Controller
             'aktivitas' => $aktivitas,
             'presensiSantri' => $presensiSantri,
             'grafikPresensi' => $grafikPresensi,
+            'grafikTahfidz' => $grafikTahfidz,
         ]);
     }
 

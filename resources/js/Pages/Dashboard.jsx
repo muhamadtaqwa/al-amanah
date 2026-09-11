@@ -4,7 +4,10 @@ import { usePage } from "@inertiajs/react";
 import {
     BarChart,
     Bar,
+    AreaChart,
+    Area,
     XAxis,
+    YAxis,
     CartesianGrid,
     Tooltip,
     Legend,
@@ -12,8 +15,14 @@ import {
 } from "recharts";
 
 export default function Dashboard() {
-    const { auth, stats, aktivitas, presensiSantri, grafikPresensi } =
-        usePage().props;
+    const {
+        auth,
+        stats,
+        aktivitas,
+        presensiSantri,
+        grafikPresensi,
+        grafikTahfidz,
+    } = usePage().props;
     const user = auth.user;
     const [time, setTime] = useState(new Date());
     const [hijri, setHijri] = useState("");
@@ -231,41 +240,121 @@ export default function Dashboard() {
                     </>
                 )}
 
-                {/* ========== GRAFIK PRESENSI (ADMIN & USTADZ) ========== */}
+                {/* ========== GRAFIK (ADMIN & USTADZ) - SEJAJAR DI DESKTOP ========== */}
                 {showGrafik && (
-                    <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
-                        <h2 className="text-sm font-bold text-slate-700 mb-2">
-                            Presensi Santri Minggu Ini
-                        </h2>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <BarChart data={grafikPresensi}>
-                                <CartesianGrid
-                                    strokeDasharray="3 3"
-                                    stroke="#e2e8f0"
-                                />
-                                <XAxis dataKey="hari" tick={{ fontSize: 11 }} />
-                                <Tooltip contentStyle={{ fontSize: 11 }} />
-                                <Legend wrapperStyle={{ fontSize: 10 }} />
-                                <Bar
-                                    dataKey="hadir"
-                                    name="Hadir"
-                                    fill="#10b981"
-                                    radius={[4, 4, 0, 0]}
-                                />
-                                <Bar
-                                    dataKey="izin"
-                                    name="Izin"
-                                    fill="#f59e0b"
-                                    radius={[4, 4, 0, 0]}
-                                />
-                                <Bar
-                                    dataKey="tidak"
-                                    name="Tidak Hadir"
-                                    fill="#ef4444"
-                                    radius={[4, 4, 0, 0]}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Grafik Presensi - Bar Chart */}
+                        <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                            <h2 className="text-sm font-bold text-slate-700 mb-2">
+                                Presensi Santri Minggu Ini
+                            </h2>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart
+                                    data={grafikPresensi}
+                                    margin={{
+                                        top: 10,
+                                        right: 10,
+                                        left: 10,
+                                        bottom: 0,
+                                    }}
+                                >
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="#e2e8f0"
+                                        vertical={false}
+                                    />
+                                    <XAxis
+                                        dataKey="hari"
+                                        tick={{ fontSize: 11 }}
+                                    />
+                                    <YAxis hide />
+                                    <Tooltip contentStyle={{ fontSize: 11 }} />
+                                    <Legend wrapperStyle={{ fontSize: 10 }} />
+                                    <Bar
+                                        dataKey="hadir"
+                                        name="Hadir"
+                                        fill="#10b981"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                    <Bar
+                                        dataKey="izin"
+                                        name="Izin"
+                                        fill="#f59e0b"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                    <Bar
+                                        dataKey="tidak"
+                                        name="Tidak Hadir"
+                                        fill="#ef4444"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* Grafik Tahfidz - Area Chart Model Saham */}
+                        <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                            <h2 className="text-sm font-bold text-slate-700 mb-2">
+                                Setoran Tahfidz Minggu Ini
+                            </h2>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <AreaChart
+                                    data={grafikTahfidz}
+                                    margin={{
+                                        top: 10,
+                                        right: 10,
+                                        left: 10,
+                                        bottom: 0,
+                                    }}
+                                >
+                                    <defs>
+                                        <linearGradient
+                                            id="gradientTahfidz"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="#3D7ABA"
+                                                stopOpacity={0.5}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="#3D7ABA"
+                                                stopOpacity={0}
+                                            />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="#e2e8f0"
+                                        vertical={false}
+                                    />
+                                    <XAxis
+                                        dataKey="hari"
+                                        tick={{ fontSize: 11 }}
+                                    />
+                                    <YAxis
+                                        hide
+                                        domain={[0, (dataMax) => dataMax * 1.2]}
+                                    />
+                                    <Tooltip contentStyle={{ fontSize: 11 }} />
+                                    <Legend wrapperStyle={{ fontSize: 10 }} />
+                                    <Area
+                                        type="natural"
+                                        dataKey="setoran"
+                                        name="Setoran"
+                                        stroke="#3D7ABA"
+                                        strokeWidth={2}
+                                        fill="url(#gradientTahfidz)"
+                                        dot={false}
+                                        activeDot={{ r: 5 }}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 )}
 

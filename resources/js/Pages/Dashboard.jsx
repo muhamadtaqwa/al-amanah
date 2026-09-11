@@ -277,15 +277,15 @@ export default function Dashboard() {
                                         radius={[4, 4, 0, 0]}
                                     />
                                     <Bar
-                                        dataKey="izin"
-                                        name="Izin"
-                                        fill="#f59e0b"
-                                        radius={[4, 4, 0, 0]}
-                                    />
-                                    <Bar
                                         dataKey="tidak"
                                         name="Tidak Hadir"
                                         fill="#ef4444"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                    <Bar
+                                        dataKey="izin"
+                                        name="Izin"
+                                        fill="#f59e0b"
                                         radius={[4, 4, 0, 0]}
                                     />
                                 </BarChart>

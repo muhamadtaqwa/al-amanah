@@ -20,6 +20,7 @@ use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\TahfidzController;
 use App\Http\Controllers\HaidController;
+use App\Http\Controllers\AspirasiController;
 use Illuminate\Support\Facades\Route;
 
 // Auth
@@ -169,4 +170,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/haid/{id}/selesai', [HaidController::class, 'selesai'])->name('haid.selesai');
     Route::post('/haid', [HaidController::class, 'store'])->name('haid.store');
     Route::delete('/haid/{id}', [HaidController::class, 'destroy'])->name('haid.destroy');
+
+    // Kotak Suara Santri
+    Route::get('/aspirasi', [AspirasiController::class, 'index'])->name('aspirasi.index');
+    Route::post('/aspirasi', [AspirasiController::class, 'store'])->name('aspirasi.store');
+    Route::put('/aspirasi/{id}/tanggapi', [AspirasiController::class, 'tanggapi'])->name('aspirasi.tanggapi');
+    Route::delete('/aspirasi/{id}', [AspirasiController::class, 'destroy'])->name('aspirasi.destroy');
 });

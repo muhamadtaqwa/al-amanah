@@ -31,6 +31,7 @@ import {
     BookMarked,
     FileCheck,
     CalendarHeart,
+    MessageSquareQuote,
 } from "lucide-react";
 
 function urlBase64ToUint8Array(base64String) {
@@ -229,6 +230,12 @@ export default function AppLayout({ children }) {
     ];
 
     const menuLainnya = [
+        {
+            label: "Kotak Suara",
+            path: "/aspirasi",
+            icon: MessageSquareQuote,
+            roles: ["admin", "santri"],
+        },
         {
             label: "Profil",
             path: "/profil",

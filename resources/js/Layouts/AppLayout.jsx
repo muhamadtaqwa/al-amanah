@@ -30,6 +30,7 @@ import {
     TrendingUp,
     BookMarked,
     FileCheck,
+    CalendarHeart,
 } from "lucide-react";
 
 function urlBase64ToUint8Array(base64String) {
@@ -189,6 +190,13 @@ export default function AppLayout({ children }) {
             roles: ["admin", "ustadz", "santri"],
         },
         {
+            label: "Buku Haid",
+            path: "/haid",
+            icon: CalendarHeart,
+            roles: ["admin", "santri"],
+            khususPutri: true,
+        },
+        {
             label: "Presensi Ustadz",
             path: "/presensi",
             icon: ClipboardList,
@@ -231,6 +239,13 @@ export default function AppLayout({ children }) {
 
     const filterMenu = (menu) =>
         menu.filter((m) => {
+            if (m.khususPutri) {
+                const isSantriPutri =
+                    user.role === "santri" &&
+                    user.santri?.nis &&
+                    user.santri.nis.startsWith("PI");
+                return user.role === "admin" || isSantriPutri;
+            }
             if (m.roles.includes(user.role)) return true;
             if (
                 user.role === "santri" &&

@@ -19,6 +19,7 @@ use App\Http\Controllers\LetterController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\TahfidzController;
+use App\Http\Controllers\HaidController;
 use Illuminate\Support\Facades\Route;
 
 // Auth
@@ -161,4 +162,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/tahfidz', [TahfidzController::class, 'store']);
     Route::put('/tahfidz/{id}', [TahfidzController::class, 'update']);
     Route::get('/tahfidz/{nis}/detail', [TahfidzController::class, 'detail']);
+
+    // Buku Haid (Santri Putri & Admin)
+    Route::get('/haid', [HaidController::class, 'index'])->name('haid.index');
+    Route::post('/haid/mulai', [HaidController::class, 'mulai'])->name('haid.mulai');
+    Route::put('/haid/{id}/selesai', [HaidController::class, 'selesai'])->name('haid.selesai');
+    Route::post('/haid', [HaidController::class, 'store'])->name('haid.store');
+    Route::delete('/haid/{id}', [HaidController::class, 'destroy'])->name('haid.destroy');
 });

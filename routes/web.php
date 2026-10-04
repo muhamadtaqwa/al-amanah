@@ -44,6 +44,10 @@ Route::middleware('auth')->group(function () {
     // Al-Quran
     Route::get('/al-quran', fn() => inertia('AlQuran/Index'));
 
+    // Kitab Maulid
+    Route::get('/maulid', fn() => inertia('Maulid/Index'));
+    Route::get('/maulid/{slug}', fn($slug) => inertia('Maulid/Show', ['slug' => $slug]));
+
     // PSB Verifikasi (admin)
     Route::get('/psb/verifikasi', [PsbController::class, 'index']);
     Route::put('/psb/{id}/verifikasi', [PsbController::class, 'verifikasi']);
@@ -147,6 +151,7 @@ Route::middleware('auth')->group(function () {
 
     // Cashflow
     Route::get('/cashflow', [CashflowController::class, 'index']);
+    Route::get('/cashflow/pdf', [CashflowController::class, 'exportPdf']);
     Route::post('/cashflow', [CashflowController::class, 'store']);
     Route::put('/cashflow/{id}', [CashflowController::class, 'update']);
     Route::delete('/cashflow/{id}', [CashflowController::class, 'destroy']);

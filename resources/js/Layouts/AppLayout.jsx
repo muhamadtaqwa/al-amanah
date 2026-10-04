@@ -6,6 +6,7 @@ import {
     Home,
     CloudSun,
     BookOpenText,
+    BookOpen,
     QrCode,
     CalendarDays,
     GraduationCap,
@@ -107,13 +108,19 @@ export default function AppLayout({ children }) {
             label: "Jadwal Sholat",
             path: "/jadwal-sholat",
             icon: CloudSun,
-            roles: ["admin", "ustadz", "santri"],
+            roles: ["ustadz", "santri"],
         },
         {
             label: "Al-Qur'an",
             path: "/al-quran",
             icon: BookOpenText,
-            roles: ["admin", "ustadz", "santri"],
+            roles: ["ustadz", "santri"],
+        },
+        {
+            label: "Kitab Maulid",
+            path: "/maulid",
+            icon: BookOpen,
+            roles: ["ustadz", "santri"],
         },
         {
             label: "QR Code",
@@ -261,7 +268,7 @@ export default function AppLayout({ children }) {
 
     const bottomNav = bottomNavByRole[user.role] || [];
     const currentPath = usePage().url;
-    const hideBottomNav = currentPath === "/al-quran";
+    const hideBottomNav = currentPath === "/al-quran" || currentPath.startsWith("/maulid/");
     const handleLogout = () => {
         router.post("/logout");
     };

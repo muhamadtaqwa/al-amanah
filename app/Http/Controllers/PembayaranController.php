@@ -308,6 +308,12 @@ class PembayaranController extends Controller
             $kategoriCashflow = str_starts_with($pembayaran->nis, 'PA') ? 'kas_putra' : 'kas_putri';
         } elseif ($pembayaran->jenis === 'Anjem') {
             $kategoriCashflow = 'anjem';
+        } elseif ($pembayaran->jenis === 'SPP') {
+            $kategoriCashflow = 'spp';
+        } elseif (strtolower($pembayaran->jenis) === 'tahlil') {
+            $kategoriCashflow = 'tahlil';
+        } elseif (strtolower($pembayaran->jenis) === 'operasional') {
+            $kategoriCashflow = 'operasional';
         }
 
         if (!$kategoriCashflow) return;

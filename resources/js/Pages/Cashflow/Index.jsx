@@ -2,7 +2,7 @@ import { useState } from "react";
 import { usePage, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
-import { Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, ChevronLeft, ChevronRight, FileDown } from "lucide-react";
 
 export default function Index() {
     const { cashflow, kategori, bulan, tahun, pemasukan, pengeluaran, total } =
@@ -21,6 +21,9 @@ export default function Index() {
     const kategoriList = [
         { key: "kas_putra", label: "Kas Putra" },
         { key: "kas_putri", label: "Kas Putri" },
+        { key: "spp", label: "SPP" },
+        { key: "operasional", label: "Operasional" },
+        { key: "tahlil", label: "Tahlil" },
         { key: "anjem", label: "Anjem" },
     ];
 
@@ -135,17 +138,29 @@ export default function Index() {
     return (
         <AppLayout>
             <div>
-                <h2 className="text-lg font-bold text-slate-800 mb-4">
-                    Cashflow
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-slate-800">
+                        Cashflow
+                    </h2>
+                    <a
+                        href={`/cashflow/pdf?kategori=${kategori}&bulan=${bulan}&tahun=${tahun}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-[#3D7ABA] text-xs font-semibold shadow-sm hover:bg-sky-50 active:scale-95 transition"
+                        title="Download Laporan PDF"
+                    >
+                        <FileDown className="w-4 h-4 text-[#3D7ABA]" />
+                        <span>Ekspor PDF</span>
+                    </a>
+                </div>
 
                 {/* Tab Kategori */}
-                <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                     {kategoriList.map((k) => (
                         <button
                             key={k.key}
                             onClick={() => handleKategori(k.key)}
-                            className={`py-2 rounded-full text-xs font-semibold transition ${kategori === k.key ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500"}`}
+                            className={`py-2 px-1 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-semibold text-center transition ${kategori === k.key ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500 hover:border-slate-300"}`}
                         >
                             {k.label}
                         </button>

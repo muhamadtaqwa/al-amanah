@@ -2,7 +2,7 @@ import { useState } from "react";
 import { usePage, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import AppLayout from "@/Layouts/AppLayout";
-import { Plus, X, Search, Trash2, Check } from "lucide-react";
+import { Plus, X, Search, Trash2, Check, CalendarHeart } from "lucide-react";
 
 export default function Index() {
     const {
@@ -118,13 +118,22 @@ export default function Index() {
         setShowSelesaiModal(true);
     };
 
-    // Filter riwayat berdasarkan search
+    // Filter riwayat & aktif berdasarkan search
     const filteredRiwayat = (riwayat?.data || []).filter(
         (item) =>
             item.santri?.nama_lengkap
                 ?.toLowerCase()
                 .includes(searchQuery.toLowerCase()) ||
             item.santri?.nis?.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    const filteredHaidAktif = (haidAktif || []).filter(
+        (item) =>
+            item.santri?.nama_lengkap
+                ?.toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+            item.santri?.nis?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.santri?.kamar?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     return (
@@ -426,7 +435,20 @@ export default function Index() {
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
                                     }
-                                    className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-2xl text-sm outline-none"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            router.get(
+                                                "/haid",
+                                                { search: searchQuery },
+                                                {
+                                                    preserveState: true,
+                                                    replace: true,
+                                                },
+                                            );
+                                        }
+                                    }}
+                                    className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-2xl text-sm outline-none focus:border-[#20B5E8]"
                                 />
                             </div>
                         </div>
@@ -434,12 +456,14 @@ export default function Index() {
                         {/* TAB 1: SEDANG HAID */}
                         {adminTab === "aktif" && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {haidAktif?.length === 0 && (
+                                {filteredHaidAktif?.length === 0 && (
                                     <p className="text-center text-slate-400 py-10 md:col-span-2">
-                                        Tidak ada yang haid hari ini
+                                        {searchQuery
+                                            ? "Tidak ada santri haid yang sesuai pencarian"
+                                            : "Tidak ada yang haid hari ini"}
                                     </p>
                                 )}
-                                {haidAktif?.map((item) => (
+                                {filteredHaidAktif?.map((item) => (
                                     <div
                                         key={item.id}
                                         className="rounded-[30px] border border-sky-100 bg-white p-4 shadow-sm hover:shadow-md transition-all"

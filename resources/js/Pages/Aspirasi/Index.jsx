@@ -13,7 +13,6 @@ import {
     Search,
     MessageCircle,
     Inbox,
-    Plus,
     X,
 } from "lucide-react";
 

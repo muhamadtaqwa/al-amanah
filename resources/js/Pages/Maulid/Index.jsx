@@ -10,7 +10,9 @@ export default function Index() {
     useEffect(() => {
         const reads = {};
         LIST_KITAB.forEach((kitab) => {
-            const saved = localStorage.getItem(`maulid_${kitab.slug}_last_read`);
+            const saved = localStorage.getItem(
+                `maulid_${kitab.slug}_last_read`,
+            );
             if (saved) {
                 reads[kitab.slug] = Number(saved);
             }
@@ -22,7 +24,7 @@ export default function Index() {
         <AppLayout>
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Banner Header */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#3D7ABA] via-[#2A65A5] to-[#20B5E8] p-6 text-white shadow-lg">
+                <div className="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-[#3D7ABA] via-[#2A65A5] to-[#20B5E8] p-6 text-white shadow-lg">
                     <div className="relative z-10">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-medium mb-3 border border-white/20">
                             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -40,7 +42,9 @@ export default function Index() {
 
                     {/* Hiasan Kaligrafi / Simbol */}
                     <div className="absolute -right-6 -bottom-8 opacity-15 text-white select-none pointer-events-none">
-                        <span className="text-9xl font-serif">ﷺ</span>
+                        <span className="text-9xl font-serif rotate-12 inline-block">
+                            ﷺ
+                        </span>
                     </div>
                 </div>
 
@@ -62,7 +66,7 @@ export default function Index() {
                             return (
                                 <div
                                     key={kitab.slug}
-                                    className="group rounded-3xl bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                                    className="group rounded-[30px] bg-white border border-sky-100 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                                 >
                                     <div>
                                         {/* Header Card */}
@@ -101,7 +105,7 @@ export default function Index() {
                                     <div className="mt-5 pt-4 border-t border-slate-100 space-y-2">
                                         <Link
                                             href={`/maulid/${kitab.slug}${lastFasal ? `?fasal=${lastFasal}` : ""}`}
-                                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white text-xs font-semibold shadow-sm hover:opacity-95 active:scale-95 transition"
+                                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white text-xs font-semibold shadow-lg hover:opacity-95 active:scale-95 transition"
                                         >
                                             <BookOpen className="w-3.5 h-3.5" />
                                             <span>
@@ -132,7 +136,7 @@ export default function Index() {
                 </div>
 
                 {/* Tips Membaca Maulid */}
-                <div className="rounded-2xl border border-sky-100 bg-sky-50/50 p-4 text-xs text-slate-600 flex items-start gap-3">
+                <div className="rounded-[30px] border border-sky-100 bg-sky-50/50 p-4 text-xs text-slate-600 flex items-start gap-3">
                     <div className="p-2 rounded-xl bg-white shadow-sm shrink-0 text-[#3D7ABA]">
                         <BookOpen className="w-4 h-4" />
                     </div>
@@ -141,10 +145,10 @@ export default function Index() {
                             Fitur Pembaca Majelis
                         </p>
                         <p className="mt-0.5 text-slate-500 leading-relaxed">
-                            Dilengkapi pengatur ukuran huruf (A- / A+) dan tombol
-                            pintas langsung ke <strong>Mahalul Qiyam</strong>{" "}
-                            saat jamaah berdiri. Teks otomatis tersimpan di HP
-                            untuk dibaca offline.
+                            Dilengkapi pengatur ukuran huruf (A- / A+) dan
+                            tombol pintas langsung ke{" "}
+                            <strong>Mahalul Qiyam</strong> saat jamaah berdiri.
+                            Teks otomatis tersimpan di HP untuk dibaca offline.
                         </p>
                     </div>
                 </div>

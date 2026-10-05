@@ -36,7 +36,9 @@ class HaidController extends Controller
                 ->orderBy('tgl_mulai', 'asc')
                 ->get()
                 ->map(function ($item) {
-                    $hariKe = Carbon::parse($item->tgl_mulai)->diffInDays(now()) + 1;
+                    $hariKe = Carbon::parse($item->tgl_mulai)
+                        ->startOfDay()
+                        ->diffInDays(now()->startOfDay()) + 1;
                     $item->hari_ke = $hariKe;
                     $item->is_istihadhah = $hariKe > 15;
                     return $item;
@@ -80,7 +82,9 @@ class HaidController extends Controller
             $activeHariKe = null;
             $isIstihadhah = false;
             if ($activeRecord) {
-                $activeHariKe = Carbon::parse($activeRecord->tgl_mulai)->diffInDays(now()) + 1;
+                $activeHariKe = Carbon::parse($activeRecord->tgl_mulai)
+                    ->startOfDay()
+                    ->diffInDays(now()->startOfDay()) + 1;
                 $isIstihadhah = $activeHariKe > 15;
             }
 
@@ -92,7 +96,9 @@ class HaidController extends Controller
 
             $masaSuciHari = null;
             if (!$activeRecord && $lastCompleted) {
-                $masaSuciHari = Carbon::parse($lastCompleted->tgl_selesai)->diffInDays(now());
+                $masaSuciHari = Carbon::parse($lastCompleted->tgl_selesai)
+                    ->startOfDay()
+                    ->diffInDays(now()->startOfDay());
             }
 
             // Semua riwayat santri ini

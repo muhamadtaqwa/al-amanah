@@ -152,17 +152,24 @@ class CashflowController extends Controller
         $totalPengeluaran = $transactions->where('tipe', 'pengeluaran')->sum('nominal');
         $saldoAkhir = $saldoAwal + $totalPemasukan - $totalPengeluaran;
 
-        $logoPath = public_path('images/logo-pdf.png');
-        if (!file_exists($logoPath)) {
-            $logoPath = public_path('images/icon-amanah.png');
-        }
-        $logoBase64 = '';
-        if (file_exists($logoPath)) {
-            $logoData = file_get_contents($logoPath);
-            $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
+        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->locale('id')->translatedFormat('F Y');
+
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1)->locale('id')->translatedFormat('d M Y');
+        $endDate = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->locale('id')->translatedFormat('d M Y');
+        $createdDate = Carbon::now()->locale('id')->translatedFormat('d M Y');
+        $createdTime = Carbon::now()->format('H:i');
+
+        $iconPath = public_path('icon-amanah.png');
+        $iconBase64 = '';
+        if (file_exists($iconPath)) {
+            $iconBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($iconPath));
         }
 
-        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->locale('id')->translatedFormat('F Y');
+        $logoPath = public_path('images/logo-pdf.png');
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        }
 
         $data = [
             'kategori' => $kategori,
@@ -170,18 +177,25 @@ class CashflowController extends Controller
             'bulan' => $bulan,
             'tahun' => $tahun,
             'namaBulan' => $namaBulan,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'createdDate' => $createdDate,
+            'createdTime' => $createdTime,
             'saldoAwal' => $saldoAwal,
             'transactions' => $transactions,
             'totalPemasukan' => $totalPemasukan,
             'totalPengeluaran' => $totalPengeluaran,
             'saldoAkhir' => $saldoAkhir,
-            'logoBase64' => $logoBase64,
             'tanggalCetak' => Carbon::now()->locale('id')->translatedFormat('d F Y'),
+            'logoBase64' => $logoBase64,
+            'iconBase64' => $iconBase64,
         ];
 
         $filename = 'Laporan-Cashflow-' . str_replace('_', '-', $kategori) . '-' . sprintf('%02d', $bulan) . '-' . $tahun . '.pdf';
 
-        $pdf = Pdf::loadView('pdf.cashflow', $data)->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('pdf.cashflow', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption('defaultFont', 'poppins');
 
         return $pdf->download($filename);
     }

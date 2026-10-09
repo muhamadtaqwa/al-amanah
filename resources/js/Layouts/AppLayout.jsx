@@ -125,61 +125,16 @@ export default function AppLayout({ children }) {
             roles: ["ustadz", "santri"],
         },
         {
-            label: "QR Code",
-            path: "/qr",
-            icon: QrCode,
-            roles: ["admin", "ustadz", "santri"],
-        },
-        {
             label: "Timeline",
             path: "/timeline",
             icon: CalendarDays,
             roles: ["admin", "ustadz", "santri"],
         },
-    ];
-
-    const menuData = [
         {
-            label: "Santri",
-            path: "/santri",
-            icon: GraduationCap,
-            roles: ["admin"],
-        },
-        { label: "Ustadz", path: "/ustadz", icon: Users, roles: ["admin"] },
-        {
-            label: "PSB",
-            path: "/psb/verifikasi",
-            icon: FileSignature,
-            roles: ["admin"],
-        },
-        { label: "Surat", path: "/surat", icon: Mail, roles: ["admin"] },
-        {
-            label: "Export EMIS",
-            path: "/export",
-            icon: FileDown,
-            roles: ["admin"],
-        },
-    ];
-
-    const menuKeuangan = [
-        {
-            label: "Pembayaran",
-            path: "/pembayaran",
-            icon: Wallet,
-            roles: ["admin"],
-        },
-        { label: "Rekap", path: "/rekap", icon: ChartBar, roles: ["admin"] },
-        {
-            label: "Tagihan",
-            path: "/tagihan",
-            icon: FileText,
-            roles: ["santri"],
-        },
-        {
-            label: "Cashflow",
-            path: "/cashflow",
-            icon: TrendingUp,
-            roles: ["admin"],
+            label: "QR Code",
+            path: "/qr",
+            icon: QrCode,
+            roles: ["admin", "ustadz", "santri"],
         },
     ];
 
@@ -215,6 +170,48 @@ export default function AppLayout({ children }) {
             icon: FileCheck,
             roles: ["santri"],
         },
+    ];
+
+    const menuAdministrasi = [
+        {
+            label: "Santri",
+            path: "/santri",
+            icon: GraduationCap,
+            roles: ["admin"],
+        },
+        { label: "Ustadz", path: "/ustadz", icon: Users, roles: ["admin"] },
+        {
+            label: "PSB",
+            path: "/psb/verifikasi",
+            icon: FileSignature,
+            roles: ["admin"],
+        },
+        {
+            label: "Pembayaran",
+            path: "/pembayaran",
+            icon: Wallet,
+            roles: ["admin"],
+        },
+        {
+            label: "Cashflow",
+            path: "/cashflow",
+            icon: TrendingUp,
+            roles: ["admin"],
+        },
+        { label: "Rekap", path: "/rekap", icon: ChartBar, roles: ["admin"] },
+        {
+            label: "Tagihan",
+            path: "/tagihan",
+            icon: FileText,
+            roles: ["santri"],
+        },
+        { label: "Surat", path: "/surat", icon: Mail, roles: ["admin"] },
+        {
+            label: "Export EMIS",
+            path: "/export",
+            icon: FileDown,
+            roles: ["admin"],
+        },
         {
             label: "Pinjam Gedung",
             path: "/pinjam-gedung",
@@ -227,9 +224,6 @@ export default function AppLayout({ children }) {
             icon: Box,
             roles: ["admin"],
         },
-    ];
-
-    const menuLainnya = [
         {
             label: "Kotak Suara",
             path: "/aspirasi",
@@ -242,6 +236,12 @@ export default function AppLayout({ children }) {
             icon: User,
             roles: ["admin", "ustadz", "santri"],
         },
+    ];
+
+    const menuSections = [
+        { title: "Utama", items: menuUtama },
+        { title: "Kegiatan", items: menuKegiatan },
+        { title: "Administrasi", items: menuAdministrasi },
     ];
 
     const filterMenu = (menu) =>
@@ -349,85 +349,31 @@ export default function AppLayout({ children }) {
                         </button>
                     </div>
                     <nav className="p-1.5 flex-1 overflow-y-auto">
-                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
-                            Utama
-                        </p>
-                        {filterMenu(menuUtama).map((m) => (
-                            <Link
-                                key={m.path}
-                                href={m.path}
-                                onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-1 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            >
-                                <m.icon className="w-4 h-4 shrink-0" />
-                                {m.label}
-                            </Link>
-                        ))}
-                        {filterMenu(menuData).length > 0 && (
-                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                                Data
-                            </p>
-                        )}
-                        {filterMenu(menuData).map((m) => (
-                            <Link
-                                key={m.path}
-                                href={m.path}
-                                onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-1 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            >
-                                <m.icon className="w-4 h-4 shrink-0" />
-                                {m.label}
-                            </Link>
-                        ))}
-                        {filterMenu(menuKeuangan).length > 0 && (
-                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                                Keuangan
-                            </p>
-                        )}
-                        {filterMenu(menuKeuangan).map((m) => (
-                            <Link
-                                key={m.path}
-                                href={m.path}
-                                onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-1 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            >
-                                <m.icon className="w-4 h-4 shrink-0" />
-                                {m.label}
-                            </Link>
-                        ))}
-                        {filterMenu(menuKegiatan).length > 0 && (
-                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                                Kegiatan
-                            </p>
-                        )}
-                        {filterMenu(menuKegiatan).map((m) => (
-                            <Link
-                                key={m.path}
-                                href={m.path}
-                                onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-1 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            >
-                                <m.icon className="w-4 h-4 shrink-0" />
-                                {m.label}
-                            </Link>
-                        ))}
-                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                            Lainnya
-                        </p>
-                        {filterMenu(menuLainnya).map((m) => (
-                            <Link
-                                key={m.path}
-                                href={m.path}
-                                onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-1 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            >
-                                <m.icon className="w-4 h-4 shrink-0" />
-                                {m.label}
-                            </Link>
-                        ))}
+                        {menuSections.map((sec) => {
+                            const items = filterMenu(sec.items);
+                            if (items.length === 0) return null;
+                            return (
+                                <div key={sec.title}>
+                                    <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
+                                        {sec.title}
+                                    </p>
+                                    {items.map((m) => (
+                                        <Link
+                                            key={sec.title + "-" + m.path + (m.label || "")}
+                                            href={m.path}
+                                            onClick={() => setSidebarOpen(false)}
+                                            className={`flex items-center gap-3 px-3 py-1 rounded-xl text-sm ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                        >
+                                            <m.icon className="w-4 h-4 shrink-0" />
+                                            {m.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            );
+                        })}
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-3 py-1 rounded-xl text-sm text-red-500 font-medium hover:bg-red-50"
+                            className="w-full flex items-center gap-3 px-3 py-1 rounded-xl text-sm text-red-500 font-medium hover:bg-red-50 mt-2"
                         >
                             <LogOut className="w-4 h-4 shrink-0" />
                             Logout
@@ -463,91 +409,33 @@ export default function AppLayout({ children }) {
                     )}
                 </button>
                 <nav className="px-2 flex-1 space-y-0 overflow-y-auto">
-                    {!sidebarCollapsed && (
-                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 mb-0.5">
-                            Utama
-                        </p>
-                    )}
-                    {filterMenu(menuUtama).map((m) => (
-                        <Link
-                            key={m.path}
-                            href={m.path}
-                            className={`flex items-center gap-3 px-3 py-1 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            title={sidebarCollapsed ? m.label : ""}
-                        >
-                            <m.icon className="w-4 h-4 shrink-0" />
-                            {!sidebarCollapsed && m.label}
-                        </Link>
-                    ))}
-                    {filterMenu(menuData).length > 0 && !sidebarCollapsed && (
-                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                            Data
-                        </p>
-                    )}
-                    {filterMenu(menuData).map((m) => (
-                        <Link
-                            key={m.path}
-                            href={m.path}
-                            className={`flex items-center gap-3 px-3 py-1 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            title={sidebarCollapsed ? m.label : ""}
-                        >
-                            <m.icon className="w-4 h-4 shrink-0" />
-                            {!sidebarCollapsed && m.label}
-                        </Link>
-                    ))}
-                    {filterMenu(menuKeuangan).length > 0 &&
-                        !sidebarCollapsed && (
-                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                                Keuangan
-                            </p>
-                        )}
-                    {filterMenu(menuKeuangan).map((m) => (
-                        <Link
-                            key={m.path}
-                            href={m.path}
-                            className={`flex items-center gap-3 px-3 py-1 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            title={sidebarCollapsed ? m.label : ""}
-                        >
-                            <m.icon className="w-4 h-4 shrink-0" />
-                            {!sidebarCollapsed && m.label}
-                        </Link>
-                    ))}
-                    {filterMenu(menuKegiatan).length > 0 &&
-                        !sidebarCollapsed && (
-                            <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                                Kegiatan
-                            </p>
-                        )}
-                    {filterMenu(menuKegiatan).map((m) => (
-                        <Link
-                            key={m.path}
-                            href={m.path}
-                            className={`flex items-center gap-3 px-3 py-1 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            title={sidebarCollapsed ? m.label : ""}
-                        >
-                            <m.icon className="w-4 h-4 shrink-0" />
-                            {!sidebarCollapsed && m.label}
-                        </Link>
-                    ))}
-                    {!sidebarCollapsed && (
-                        <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
-                            Lainnya
-                        </p>
-                    )}
-                    {filterMenu(menuLainnya).map((m) => (
-                        <Link
-                            key={m.path}
-                            href={m.path}
-                            className={`flex items-center gap-3 px-3 py-1 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
-                            title={sidebarCollapsed ? m.label : ""}
-                        >
-                            <m.icon className="w-4 h-4 shrink-0" />
-                            {!sidebarCollapsed && m.label}
-                        </Link>
-                    ))}
+                    {menuSections.map((sec) => {
+                        const items = filterMenu(sec.items);
+                        if (items.length === 0) return null;
+                        return (
+                            <div key={sec.title}>
+                                {!sidebarCollapsed && (
+                                    <p className="px-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 mb-0.5">
+                                        {sec.title}
+                                    </p>
+                                )}
+                                {items.map((m) => (
+                                    <Link
+                                        key={sec.title + "-" + m.path + (m.label || "")}
+                                        href={m.path}
+                                        className={`flex items-center gap-3 px-3 py-1 rounded-xl text-xs cursor-pointer transition-colors ${sidebarCollapsed ? "justify-center" : ""} ${isActive(m.path) ? activeClass : inactiveClass}`}
+                                        title={sidebarCollapsed ? m.label : ""}
+                                    >
+                                        <m.icon className="w-4 h-4 shrink-0" />
+                                        {!sidebarCollapsed && m.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        );
+                    })}
                     <button
                         onClick={handleLogout}
-                        className={`w-full text-red-500 text-xs font-medium hover:bg-red-50 rounded-xl px-3 py-1 ${sidebarCollapsed ? "justify-center flex" : "text-left flex items-center gap-3"}`}
+                        className={`w-full text-red-500 text-xs font-medium hover:bg-red-50 rounded-xl px-3 py-1 mt-2 ${sidebarCollapsed ? "justify-center flex" : "text-left flex items-center gap-3"}`}
                     >
                         <LogOut className="w-4 h-4 shrink-0" />
                         {!sidebarCollapsed && <span>Logout</span>}

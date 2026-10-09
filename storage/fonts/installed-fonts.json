@@ -1,0 +1,12 @@
+{
+    "poppins": {
+        "normal": "C:\\xampp\\htdocs\\al-amanah\\storage\\fonts\/poppins_normal_0c9121b4f94340050712c72c5f5add0c",
+        "600": "C:\\xampp\\htdocs\\al-amanah\\storage\\fonts\/poppins_600_62dfd0545b1b12da2c4b351a44de945e",
+        "bold": "C:\\xampp\\htdocs\\al-amanah\\storage\\fonts\/poppins_bold_c2a2116099c4e4c220d29111a291e014",
+        "italic": "C:\\xampp\\htdocs\\al-amanah\\storage\\fonts\/poppins_italic_4dc17d0089b5e28a16c65c87f56f6a36",
+        "500": "C:\\xampp\\htdocs\\al-amanah\\storage\\fonts\/poppins_500_5aa0706903acb0725501ab4bc3872fff",
+        "500_italic": "C:\\xampp\\htdocs\\al-amanah\\storage\\fonts\/poppins_500_italic_3d52916fb0438d36d173467380c64126",
+        "600_italic": "C:\\xampp\\htdocs\\al-amanah\\storage\\fonts\/poppins_600_italic_f4c4562650a5620400f579bd89f847e8",
+        "bold_italic": "poppins_bold_italic_189f6031f9a3e8ae8f1c58b75a1f4b24"
+    }
+}

@@ -9,6 +9,8 @@ use Inertia\Inertia;
 
 class TahfidzController extends Controller
 {
+    public const NIS_PENYIMAK = ['PA04', 'PI04', 'PI06', 'PI10', 'PI11', 'PA06'];
+
     private $namaSurat = [
         1 => "Al-Fatihah",
         2 => "Al-Baqarah",
@@ -142,11 +144,11 @@ class TahfidzController extends Controller
 
         if ($user->role === 'santri') {
             $nisSantri = $user->santri->nis;
-            $isSantriBiasa = !in_array($nisSantri, ['PA04', 'PI04', 'PI10', 'PI11', 'PA06']);
+            $isSantriBiasa = !in_array($nisSantri, self::NIS_PENYIMAK);
         }
 
         $santris = Santri::where('status', 'aktif')->orderBy('nis')->get();
-        $penyimak = Santri::whereIn('nis', ['PA04', 'PI04', 'PI10', 'PI11', 'PA06'])->get();
+        $penyimak = Santri::whereIn('nis', self::NIS_PENYIMAK)->get();
 
         $rekap = Santri::where('status', 'aktif')
             ->when($isSantriBiasa, function ($q) use ($nisSantri) {
@@ -212,11 +214,28 @@ class TahfidzController extends Controller
             'bulan' => (int) $bulan,
             'tahun' => (int) $tahun,
             'isSantriBiasa' => $isSantriBiasa,
+            'nisPenyimak' => self::NIS_PENYIMAK,
         ]);
+    }
+
+    private function authorizeInput()
+    {
+        $user = auth()->user();
+        if ($user->role === 'admin' || $user->role === 'ustadz') {
+            return;
+        }
+
+        if ($user->role === 'santri' && in_array($user->santri?->nis, self::NIS_PENYIMAK)) {
+            return;
+        }
+
+        abort(403, 'Akses terbatas untuk admin, ustadz, dan santri penyimak.');
     }
 
     public function store(Request $request)
     {
+        $this->authorizeInput();
+
         $request->validate([
             'nis' => 'required|exists:santris,nis',
             'juz' => 'required|integer|min:1|max:30',
@@ -234,6 +253,8 @@ class TahfidzController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->authorizeInput();
+
         $request->validate([
             'juz' => 'required|integer|min:1|max:30',
             'surat' => 'required|integer|min:1|max:114',

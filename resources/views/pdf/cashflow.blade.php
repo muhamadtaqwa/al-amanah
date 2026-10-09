@@ -1,316 +1,394 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Cashflow - {{ $kategoriNama }} - {{ $namaBulan }}</title>
+    <title>Laporan Kas - {{ $kategoriNama }} - {{ $namaBulan }}</title>
     <style>
         @page {
-            margin: 1.5cm 1.5cm 2cm 1.5cm;
+            size: a4 portrait;
+            margin: 1.2cm 1.2cm 1.4cm 1.2cm;
+        }
+
+        @font-face {
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: normal;
+            src: url('{{ str_replace('\\', '/', public_path('fonts/poppins/Poppins-Regular.ttf')) }}') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 500;
+            src: url('{{ str_replace('\\', '/', public_path('fonts/poppins/Poppins-Medium.ttf')) }}') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 600;
+            src: url('{{ str_replace('\\', '/', public_path('fonts/poppins/Poppins-SemiBold.ttf')) }}') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: bold;
+            src: url('{{ str_replace('\\', '/', public_path('fonts/poppins/Poppins-Bold.ttf')) }}') format('truetype');
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         }
 
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 11px;
-            color: #1e293b;
-            line-height: 1.4;
+            font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+            font-size: 8.5px;
+            color: #111827;
+            line-height: 1.35;
             margin: 0;
             padding: 0;
         }
 
-        /* Kop Surat */
-        .kop-table {
+        /* ============================================================
+           HEADER ATAS (Judul Kas & Brand)
+        ============================================================ */
+        .top-bar {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 5px;
         }
 
-        .kop-table td {
+        .top-bar td {
             vertical-align: middle;
             padding: 0;
         }
 
-        .kop-logo {
-            width: 75px;
-            text-align: left;
-        }
-
-        .kop-logo img {
-            max-height: 65px;
-            width: auto;
-        }
-
-        .kop-text {
-            text-align: center;
-            padding-right: 75px; /* Kompensasi agar teks benar-benar di tengah */
-        }
-
-        .kop-title-sub {
-            font-size: 11px;
-            font-weight: 600;
-            color: #475569;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin: 0 0 2px 0;
-        }
-
-        .kop-title-main {
-            font-size: 18px;
+        .top-title {
+            font-size: 17px;
             font-weight: bold;
-            color: #0f172a;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
+            color: #111827;
             margin: 0;
+            line-height: 1.2;
         }
 
-        .kop-subtitle {
-            font-size: 9px;
-            color: #64748b;
-            margin-top: 3px;
+        .top-brand {
+            text-align: right;
+            white-space: nowrap;
         }
 
-        .kop-line-double {
-            border-top: 2px solid #0f172a;
-            border-bottom: 1px solid #0f172a;
-            height: 3px;
-            margin-top: 8px;
-            margin-bottom: 15px;
+        .brand-icon {
+            height: 22px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 4px;
         }
 
-        /* Judul Laporan */
-        .report-header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .report-title {
-            font-size: 13px;
+        .brand-name {
+            font-size: 15px;
             font-weight: bold;
-            color: #0f172a;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            color: #111827;
+            vertical-align: middle;
+            letter-spacing: -0.2px;
         }
 
-        .report-meta {
-            font-size: 10px;
-            color: #475569;
+        .divider-line {
+            border: 0;
+            border-top: 1px solid #d1d5db;
+            margin: 10px 0 10px 0;
         }
 
-        /* Summary Box */
-        .summary-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 8px 0;
-            margin-bottom: 15px;
-        }
-
-        .summary-card {
-            border: 1px solid #cbd5e1;
-            background-color: #f8fafc;
-            border-radius: 6px;
-            padding: 8px 10px;
-            text-align: left;
-        }
-
-        .summary-label {
-            font-size: 8.5px;
-            font-weight: bold;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .summary-val {
-            font-size: 11.5px;
-            font-weight: bold;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .val-primary { color: #0369a1; }
-        .val-green { color: #15803d; }
-        .val-red { color: #b91c1c; }
-
-        /* Tabel Transaksi */
-        .data-table {
+        /* ============================================================
+           SECTION METADATA (Laporan Kas, Periode, Saldo Akhir)
+        ============================================================ */
+        .meta-section {
             width: 100%;
             border-collapse: collapse;
+        }
+
+        .meta-section td {
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .meta-left {
+            width: 50%;
+        }
+
+        .meta-right {
+            width: 50%;
+            text-align: right;
+        }
+
+        .report-heading {
+            font-size: 11px;
+            font-weight: bold;
+            color: #111827;
+            margin: 0 0 5px 0;
+        }
+
+        .meta-table {
+            border-collapse: collapse;
+        }
+
+        .meta-table td {
+            font-size: 8.5px;
+            padding: 1px 0;
+            vertical-align: middle;
+        }
+
+        .meta-lbl {
+            color: #4b5563;
+            width: 52px;
+        }
+
+        .meta-val {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .meta-table-right {
+            border-collapse: collapse;
+            margin-left: auto;
+        }
+
+        .meta-table-right td {
+            font-size: 8.5px;
+            padding: 1px 0;
+            vertical-align: middle;
+        }
+
+        .meta-lbl-r {
+            color: #4b5563;
+            text-align: right;
+            padding-right: 14px;
+        }
+
+        .meta-val-r {
+            text-align: right;
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .meta-val-r.val-bold {
+            font-weight: bold;
+        }
+
+        /* ============================================================
+           SUB-BAR (Total Transaksi & Waktu Dibuat)
+        ============================================================ */
+        .sub-bar {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+
+        .sub-bar td {
+            font-size: 8px;
+            color: #374151;
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .sub-bar-right {
+            text-align: right;
+        }
+
+        /* ============================================================
+           TABEL TRANSAKSI MUTASI (Persis myBisnis)
+        ============================================================ */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #e5e7eb;
             margin-bottom: 20px;
         }
 
-        .data-table th, 
-        .data-table td {
-            border: 1px solid #cbd5e1;
-            padding: 5px 7px;
-            font-size: 9.5px;
-        }
-
-        .data-table th {
-            background-color: #f1f5f9;
-            color: #334155;
-            font-weight: bold;
-            text-align: center;
-            text-transform: uppercase;
+        .report-table thead th {
+            background-color: #f9fafb;
+            color: #111827;
             font-size: 8.5px;
-            letter-spacing: 0.3px;
-        }
-
-        .data-table tr:nth-child(even) td {
-            background-color: #fcfdfe;
-        }
-
-        .data-table .row-saldo-awal td {
-            background-color: #f8fafc;
-            font-style: italic;
-            font-weight: 600;
-        }
-
-        .text-center { text-align: center; }
-        .text-left { text-align: left; }
-        .text-right { text-align: right; }
-        .font-mono { font-family: 'Courier New', Courier, monospace; }
-        .font-bold { font-weight: bold; }
-
-        .data-table tfoot td {
-            background-color: #f1f5f9;
             font-weight: bold;
-            border-top: 2px solid #94a3b8;
+            text-align: left;
+            padding: 7px 6px;
+            border: 0;
+            border-bottom: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
         }
 
-        /* Tanda Tangan */
+        .report-table tbody td {
+            padding: 6px 6px;
+            font-size: 8px;
+            color: #111827;
+            border: 0;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        /* Lebar Kolom */
+        .col-date {
+            width: 15%;
+        }
+
+        .col-desc {
+            width: 37%;
+        }
+
+        .col-in {
+            width: 16%;
+        }
+
+        .col-out {
+            width: 16%;
+        }
+
+        .col-bal {
+            width: 16%;
+        }
+
+        /* ============================================================
+           PENGESAHAN TANDA TANGAN (Opsional Formal)
+        ============================================================ */
         .signature-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 25px;
             page-break-inside: avoid;
+            margin-top: 15px;
         }
 
         .signature-table td {
             width: 50%;
             vertical-align: top;
-            padding: 0 20px;
             text-align: center;
+            padding: 0 15px;
         }
 
         .sig-date {
-            font-size: 10px;
+            font-size: 8px;
+            color: #4b5563;
             margin-bottom: 4px;
         }
 
         .sig-title {
-            font-size: 10px;
-            font-weight: bold;
-            color: #334155;
-            margin-bottom: 60px;
+            font-size: 8.5px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 46px;
+            line-height: 1.35;
         }
 
         .sig-name {
-            font-size: 10.5px;
+            font-size: 9px;
             font-weight: bold;
             text-decoration: underline;
-            color: #0f172a;
+            color: #111827;
         }
 
         .sig-role {
-            font-size: 9px;
-            color: #64748b;
+            font-size: 7.5px;
+            color: #6b7280;
             margin-top: 2px;
-        }
-
-        /* Footer Cetak */
-        .footer-note {
-            position: fixed;
-            bottom: -1.2cm;
-            left: 0;
-            right: 0;
-            font-size: 8px;
-            color: #94a3b8;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 4px;
-            text-align: right;
         }
     </style>
 </head>
+
 <body>
 
-    <!-- KOP SURAT -->
-    <table class="kop-table">
+    <!-- 1. TOP BAR: Judul Kas & Brand -->
+    <table class="top-bar">
         <tr>
-            <td class="kop-logo">
-                @if(!empty($logoBase64))
-                    <img src="{{ $logoBase64 }}" alt="Logo">
-                @endif
+            <td>
+                <div class="top-title">{{ $kategoriNama }}</div>
             </td>
-            <td class="kop-text">
-                <div class="kop-title-sub">Laporan Pembukuan Kas</div>
-                <div class="kop-title-main">Pondok Pesantren Al-Amanah</div>
-                <div class="kop-subtitle">Sistem Informasi Manajemen Keuangan &bull; Cetak Mandiri</div>
-            </td>
-        </tr>
-    </table>
-    <div class="kop-line-double"></div>
+            <td class="top-brand">
 
-    <!-- JUDUL LAPORAN -->
-    <div class="report-header">
-        <div class="report-title">BUKU KAS &amp; MUTASI KEUANGAN</div>
-        <div class="report-meta">
-            <strong>Kategori:</strong> {{ $kategoriNama }} &nbsp;|&nbsp; 
-            <strong>Periode:</strong> {{ $namaBulan }} &nbsp;|&nbsp; 
-            <strong>Dicetak:</strong> {{ $tanggalCetak }}
-        </div>
-    </div>
-
-    <!-- RINGKASAN SALDO -->
-    <table class="summary-table">
-        <tr>
-            <td class="summary-card" style="width: 25%;">
-                <div class="summary-label">Saldo Bulan Lalu</div>
-                <div class="summary-val val-primary">Rp {{ number_format($saldoAwal, 0, ',', '.') }}</div>
-            </td>
-            <td class="summary-card" style="width: 25%;">
-                <div class="summary-label">Total Pemasukan</div>
-                <div class="summary-val val-green">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</div>
-            </td>
-            <td class="summary-card" style="width: 25%;">
-                <div class="summary-label">Total Pengeluaran</div>
-                <div class="summary-val val-red">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</div>
-            </td>
-            <td class="summary-card" style="width: 25%;">
-                <div class="summary-label">Saldo Akhir</div>
-                <div class="summary-val {{ $saldoAkhir >= 0 ? 'val-primary' : 'val-red' }}">
-                    Rp {{ number_format($saldoAkhir, 0, ',', '.') }}
-                </div>
+                <span class="brand-name">Al-Amanah</span>
             </td>
         </tr>
     </table>
 
-    <!-- TABEL TRANSAKSI -->
+    <hr class="divider-line">
+
+    <!-- 2. METADATA SECTION: Laporan Kas, Periode & Saldo Akhir -->
+    <table class="meta-section">
+        <tr>
+            <td class="meta-left">
+                <div class="report-heading">Laporan Kas</div>
+                <table class="meta-table">
+                    <tr>
+                        <td class="meta-lbl">Dari</td>
+                        <td class="meta-val">{{ $startDate }}</td>
+                    </tr>
+                    <tr>
+                        <td class="meta-lbl">Sampai</td>
+                        <td class="meta-val">{{ $endDate }}</td>
+                    </tr>
+                </table>
+            </td>
+            <td class="meta-right">
+                <table class="meta-table-right">
+                    <tr>
+                        <td class="meta-val-r">Semua Transaksi</td>
+                    </tr>
+                    <tr>
+                        <td class="meta-lbl-r">Saldo Akhir</td>
+                        <td class="meta-val-r val-bold">
+                            {{ ($saldoAkhir < 0 ? '- ' : '') . 'Rp ' . number_format(abs($saldoAkhir), 0, ',', '.') }}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <hr class="divider-line">
+
+    <!-- 3. SUB-BAR: Total Transaksi & Waktu Dibuat -->
+    <table class="sub-bar">
+        <tr>
+            <td>
+                Total Transaksi : {{ count($transactions) }}
+            </td>
+            <td class="sub-bar-right">
+                Laporan Dibuat {{ $createdDate }} &bull; {{ $createdTime }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- 4. TABEL TRANSAKSI MUTASI -->
     @php
         $runningBalance = $saldoAwal;
-        $no = 1;
     @endphp
 
-    <table class="data-table">
+    <table class="report-table">
         <thead>
             <tr>
-                <th style="width: 5%;">No</th>
-                <th style="width: 12%;">Tanggal</th>
-                <th style="width: 38%;">Uraian / Keterangan</th>
-                <th style="width: 15%;">Pemasukan (Rp)</th>
-                <th style="width: 15%;">Pengeluaran (Rp)</th>
-                <th style="width: 15%;">Saldo (Rp)</th>
+                <th class="col-date">Tanggal</th>
+                <th class="col-desc">Keterangan</th>
+                <th class="col-in">Uang Masuk</th>
+                <th class="col-out">Uang Keluar</th>
+                <th class="col-bal">Saldo</th>
             </tr>
         </thead>
         <tbody>
             <!-- Baris Saldo Awal -->
-            <tr class="row-saldo-awal">
-                <td class="text-center">-</td>
-                <td class="text-center">01/{{ sprintf('%02d', $bulan) }}/{{ $tahun }}</td>
-                <td>Saldo Awal (Akumulasi Bulan Lalu)</td>
-                <td class="text-right font-mono">{{ $saldoAwal > 0 ? number_format($saldoAwal, 0, ',', '.') : '-' }}</td>
-                <td class="text-right font-mono">{{ $saldoAwal < 0 ? number_format(abs($saldoAwal), 0, ',', '.') : '-' }}</td>
-                <td class="text-right font-mono font-bold">{{ number_format($runningBalance, 0, ',', '.') }}</td>
+            <tr>
+                <td class="col-date">{{ $startDate }}</td>
+                <td class="col-desc">Saldo Awal</td>
+                <td class="col-in">
+                    {{ $saldoAwal > 0 ? 'Rp ' . number_format($saldoAwal, 0, ',', '.') : '--' }}
+                </td>
+                <td class="col-out">
+                    {{ $saldoAwal < 0 ? 'Rp ' . number_format(abs($saldoAwal), 0, ',', '.') : '--' }}
+                </td>
+                <td class="col-bal">
+                    {{ ($saldoAwal < 0 ? '- ' : '') . 'Rp ' . number_format(abs($saldoAwal), 0, ',', '.') }}
+                </td>
             </tr>
 
+            <!-- Baris Transaksi -->
             @forelse($transactions as $t)
                 @php
                     if ($t->tipe === 'pemasukan') {
@@ -318,65 +396,50 @@
                     } else {
                         $runningBalance -= $t->nominal;
                     }
+                    $keterangan = !empty(trim($t->keterangan)) ? $t->keterangan : '--';
                 @endphp
                 <tr>
-                    <td class="text-center">{{ $no++ }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($t->tanggal)->format('d/m/Y') }}</td>
-                    <td>{{ $t->keterangan }}</td>
-                    <td class="text-right font-mono">
-                        {{ $t->tipe === 'pemasukan' ? number_format($t->nominal, 0, ',', '.') : '-' }}
+                    <td class="col-date">
+                        {{ \Carbon\Carbon::parse($t->tanggal)->locale('id')->translatedFormat('d M Y') }}</td>
+                    <td class="col-desc">{{ $keterangan }}</td>
+                    <td class="col-in">
+                        {{ $t->tipe === 'pemasukan' ? 'Rp ' . number_format($t->nominal, 0, ',', '.') : '--' }}
                     </td>
-                    <td class="text-right font-mono">
-                        {{ $t->tipe === 'pengeluaran' ? number_format($t->nominal, 0, ',', '.') : '-' }}
+                    <td class="col-out">
+                        {{ $t->tipe === 'pengeluaran' ? 'Rp ' . number_format($t->nominal, 0, ',', '.') : '--' }}
                     </td>
-                    <td class="text-right font-mono font-bold">
-                        {{ number_format($runningBalance, 0, ',', '.') }}
+                    <td class="col-bal">
+                        {{ ($runningBalance < 0 ? '- ' : '') . 'Rp ' . number_format(abs($runningBalance), 0, ',', '.') }}
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center" style="padding: 18px; color: #94a3b8;">
-                        Tidak ada riwayat transaksi pada bulan ini.
+                    <td colspan="5" style="text-align: center; padding: 18px; color: #9ca3af; font-style: italic;">
+                        Tidak ada transaksi pada periode ini.
                     </td>
                 </tr>
             @endforelse
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3" class="text-right font-bold">TOTAL TRANSAKSI BULAN INI</td>
-                <td class="text-right font-mono font-bold">{{ number_format($totalPemasukan, 0, ',', '.') }}</td>
-                <td class="text-right font-mono font-bold">{{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
-                <td class="text-center font-mono" style="color: #94a3b8;">-</td>
-            </tr>
-            <tr>
-                <td colspan="5" class="text-right font-bold" style="background-color: #e2e8f0; letter-spacing: 0.5px;">SALDO AKHIR KAS PER {{ strtoupper($namaBulan) }}</td>
-                <td class="text-right font-mono font-bold" style="background-color: #e2e8f0; color: #0369a1; font-size: 10px;">{{ number_format($saldoAkhir, 0, ',', '.') }}</td>
-            </tr>
-        </tfoot>
     </table>
 
-    <!-- TANDA TANGAN -->
+    <!-- 5. PENGESAHAN TANDA TANGAN (Formal Lembaga) -->
     <table class="signature-table">
         <tr>
             <td>
                 <div class="sig-date">&nbsp;</div>
-                <div class="sig-title">Mengetahui,<br>Pengasuh / Pimpinan Pondok</div>
-                <div class="sig-name">( ............................................ )</div>
-                <div class="sig-role">Pondok Pesantren Al-Amanah</div>
+                <div class="sig-title">Mengetahui,<br>Pengasuh Pesantren</div>
+                <div class="sig-name">Moh. Syakur, M.S.I</div>
+
             </td>
             <td>
-                <div class="sig-date">Cetak: {{ $tanggalCetak }}</div>
-                <div class="sig-title">Bendahara Keuangan<br>{{ $kategoriNama }}</div>
-                <div class="sig-name">( ............................................ )</div>
-                <div class="sig-role">Pondok Pesantren Al-Amanah</div>
+                <div class="sig-date">Semarang, {{ $tanggalCetak }}</div>
+                <div class="sig-title">Bendahara,<br>{{ $kategoriNama }}</div>
+                <div class="sig-name">Muhamad Taqwa</div>
+
             </td>
         </tr>
     </table>
 
-    <!-- FOOTER NOTE -->
-    <div class="footer-note">
-        Dokumen resmi dicetak otomatis via SIM Pesantren Al-Amanah &bull; Halaman dicetak pada {{ now()->format('d/m/Y H:i') }} WIB
-    </div>
-
 </body>
+
 </html>

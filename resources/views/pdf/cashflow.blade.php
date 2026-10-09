@@ -330,7 +330,7 @@
             <td class="meta-right">
                 <table class="meta-table-right">
                     <tr>
-                        <td class="meta-val-r">Semua Transaksi</td>
+                        <td class="meta-val-r" colspan="2">Semua Transaksi</td>
                     </tr>
                     <tr>
                         <td class="meta-lbl-r">Saldo Akhir</td>

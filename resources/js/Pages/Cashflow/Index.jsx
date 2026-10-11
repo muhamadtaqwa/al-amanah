@@ -5,7 +5,7 @@ import AppLayout from "@/Layouts/AppLayout";
 import { Pencil, Trash2, ChevronLeft, ChevronRight, FileDown } from "lucide-react";
 
 export default function Index() {
-    const { cashflow, kategori, bulan, tahun, pemasukan, pengeluaran, total } =
+    const { cashflow, kategori, bulan, tahun, pemasukan, pengeluaran, total, canInput } =
         usePage().props;
 
     const [showPopup, setShowPopup] = useState(false);
@@ -21,10 +21,12 @@ export default function Index() {
     const kategoriList = [
         { key: "kas_putra", label: "Kas Putra" },
         { key: "kas_putri", label: "Kas Putri" },
-        { key: "spp", label: "SPP" },
+        { key: "anjem", label: "Anjem" },
+        { key: "spp", label: "SPP Cash" },
         { key: "operasional", label: "Operasional" },
         { key: "tahlil", label: "Tahlil" },
-        { key: "anjem", label: "Anjem" },
+        { key: "khotmil", label: "Khotmil" },
+        { key: "mesin_cuci", label: "Mesin Cuci" },
     ];
 
     const handleKategori = (key) => {
@@ -154,17 +156,36 @@ export default function Index() {
                     </a>
                 </div>
 
-                {/* Tab Kategori */}
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
-                    {kategoriList.map((k) => (
-                        <button
-                            key={k.key}
-                            onClick={() => handleKategori(k.key)}
-                            className={`py-2 px-1 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-semibold text-center transition ${kategori === k.key ? "bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white shadow-lg" : "bg-white border border-slate-200 text-slate-500 hover:border-slate-300"}`}
+                {/* Dropdown Kategori (Tanpa Icon) */}
+                <div className="mb-4">
+                    <div className="relative">
+                        <select
+                            value={kategori}
+                            onChange={(e) => handleKategori(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3D7ABA] focus:border-transparent cursor-pointer appearance-none transition pr-10"
                         >
-                            {k.label}
-                        </button>
-                    ))}
+                            {kategoriList.map((k) => (
+                                <option key={k.key} value={k.key}>
+                                    {k.label}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                            <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Ringkasan */}
@@ -191,21 +212,23 @@ export default function Index() {
                     </span>
                 </div>
 
-                {/* Tombol Tambah */}
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                    <button
-                        onClick={() => bukaTambah("pemasukan")}
-                        className="bg-emerald-500 text-white py-2.5 rounded-2xl text-sm font-semibold shadow-lg"
-                    >
-                        Pemasukan
-                    </button>
-                    <button
-                        onClick={() => bukaTambah("pengeluaran")}
-                        className="bg-red-500 text-white py-2.5 rounded-2xl text-sm font-semibold shadow-lg"
-                    >
-                        Pengeluaran
-                    </button>
-                </div>
+                {/* Tombol Tambah (Khusus Admin & Bendahara Santri PA01, PA07, PI02) */}
+                {canInput && (
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                        <button
+                            onClick={() => bukaTambah("pemasukan")}
+                            className="bg-emerald-500 text-white py-2.5 rounded-2xl text-sm font-semibold shadow-lg active:scale-95 transition"
+                        >
+                            Pemasukan
+                        </button>
+                        <button
+                            onClick={() => bukaTambah("pengeluaran")}
+                            className="bg-red-500 text-white py-2.5 rounded-2xl text-sm font-semibold shadow-lg active:scale-95 transition"
+                        >
+                            Pengeluaran
+                        </button>
+                    </div>
+                )}
 
                 {/* Navigasi Bulan */}
                 <div className="flex items-center justify-between mb-4">
@@ -246,7 +269,7 @@ export default function Index() {
                                 <p className="text-xs text-slate-400 shrink-0">
                                     {formatTanggal(item.tanggal)}
                                 </p>
-                                {item.id !== 0 && (
+                                {canInput && item.id !== 0 && (
                                     <div className="flex gap-1 shrink-0">
                                         <button
                                             onClick={() => bukaEdit(item)}

@@ -10,6 +10,22 @@ use Inertia\Inertia;
 
 class CashflowController extends Controller
 {
+    public const NIS_BENDAHARA = ['PA01', 'PA07', 'PI02'];
+
+    private function authorizeInput()
+    {
+        $user = auth()->user();
+        if ($user && $user->role === 'admin') {
+            return;
+        }
+
+        if ($user && $user->role === 'santri' && in_array($user->santri?->nis, self::NIS_BENDAHARA)) {
+            return;
+        }
+
+        abort(403, 'Akses input kas terbatas hanya untuk admin dan bendahara santri (PA01, PA07, PI02).');
+    }
+
     public function index(Request $request)
     {
         $kategori = $request->kategori ?? 'kas_putra';
@@ -63,6 +79,12 @@ class CashflowController extends Controller
         // Total = pemasukan - pengeluaran
         $total = $pemasukan - $pengeluaran;
 
+        $user = auth()->user();
+        $canInput = $user && (
+            $user->role === 'admin' ||
+            ($user->role === 'santri' && in_array($user->santri?->nis, self::NIS_BENDAHARA))
+        );
+
         return Inertia::render('Cashflow/Index', [
             'cashflow' => $cashflow,
             'kategori' => $kategori,
@@ -71,13 +93,16 @@ class CashflowController extends Controller
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
             'total' => $total,
+            'canInput' => (bool) $canInput,
         ]);
     }
 
     public function store(Request $request)
     {
+        $this->authorizeInput();
+
         $request->validate([
-            'kategori' => 'required|in:kas_putra,kas_putri,spp,operasional,tahlil,anjem',
+            'kategori' => 'required|in:kas_putra,kas_putri,anjem,spp,operasional,tahlil,khotmil,mesin_cuci',
             'tipe' => 'required|in:pemasukan,pengeluaran',
             'tanggal' => 'required|date',
             'nominal' => 'required|integer|min:1',
@@ -91,6 +116,8 @@ class CashflowController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->authorizeInput();
+
         $request->validate([
             'tanggal' => 'required|date',
             'nominal' => 'required|integer|min:1',
@@ -105,6 +132,8 @@ class CashflowController extends Controller
 
     public function destroy($id)
     {
+        $this->authorizeInput();
+
         Cashflow::findOrFail($id)->delete();
 
         return back()->with('success', 'Data cashflow dihapus.');
@@ -119,10 +148,12 @@ class CashflowController extends Controller
         $kategoriLabels = [
             'kas_putra' => 'Kas Santri Putra',
             'kas_putri' => 'Kas Santri Putri',
-            'spp' => 'Kas SPP',
+            'anjem' => 'Kas Antar Jemput (Anjem)',
+            'spp' => 'Kas SPP Cash',
             'operasional' => 'Kas Operasional',
             'tahlil' => 'Kas Tahlil',
-            'anjem' => 'Kas Antar Jemput (Anjem)',
+            'khotmil' => 'Kas Khotmil',
+            'mesin_cuci' => 'Kas Mesin Cuci',
         ];
         $kategoriNama = $kategoriLabels[$kategori] ?? ucwords(str_replace('_', ' ', $kategori));
 

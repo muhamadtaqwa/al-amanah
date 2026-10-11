@@ -196,7 +196,7 @@ export default function AppLayout({ children }) {
             label: "Cashflow",
             path: "/cashflow",
             icon: TrendingUp,
-            roles: ["admin"],
+            roles: ["admin", "ustadz", "santri"],
         },
         { label: "Rekap", path: "/rekap", icon: ChartBar, roles: ["admin"] },
         {

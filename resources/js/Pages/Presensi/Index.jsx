@@ -100,7 +100,7 @@ export default function Index() {
         year: "numeric",
     });
 
-    const totalHonor = rekap.reduce(
+    const totalBisyaroh = rekap.reduce(
         (s, r) => s + parseInt(r.total_honor || 0),
         0,
     );
@@ -319,7 +319,7 @@ export default function Index() {
                                         <>
                                             <div className="flex justify-between mt-1">
                                                 <span className="text-slate-500">
-                                                    Honor
+                                                    Bisyaroh
                                                 </span>
                                                 <span className="font-bold text-[#3D7ABA] font-mono">
                                                     Rp{" "}
@@ -335,10 +335,10 @@ export default function Index() {
                             {isAdmin && (
                                 <div className="rounded-2xl bg-gradient-to-r from-[#3D7ABA]/10 to-[#20B5E8]/10 p-4 flex items-center justify-between text-sm font-bold">
                                     <span className="text-[#3D7ABA]">
-                                        Total Honor ({namaBulanRekap})
+                                        Total Bisyaroh ({namaBulanRekap})
                                     </span>
                                     <span className="text-[#3D7ABA] font-mono">
-                                        Rp {totalHonor.toLocaleString()}
+                                        Rp {totalBisyaroh.toLocaleString()}
                                     </span>
                                 </div>
                             )}

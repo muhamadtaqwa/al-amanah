@@ -1,11 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { usePage, router } from "@inertiajs/react";
 import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index() {
-    const { jadwal, hari, tanggal: tgl, rekap, auth, errors } = usePage().props;
+    const {
+        jadwal,
+        hari,
+        tanggal: tgl,
+        rekap,
+        bulanRekap = new Date().getMonth() + 1,
+        tahunRekap = new Date().getFullYear(),
+        auth,
+        errors,
+    } = usePage().props;
     const isAdmin = auth.user.role === "admin";
     const [tanggal, setTanggal] = useState(
         tgl || new Date().toISOString().split("T")[0],
@@ -15,14 +24,11 @@ export default function Index() {
 
     useEffect(() => {
         if (dateRef.current) {
-            dateRef.current.value = "";
-            setTimeout(() => {
-                const today = new Date().toISOString().split("T")[0];
-                dateRef.current.value = today;
-                setTanggal(today);
-            }, 50);
+            const initialDate = tgl || new Date().toISOString().split("T")[0];
+            dateRef.current.value = initialDate;
+            setTanggal(initialDate);
         }
-    }, []);
+    }, [tgl]);
 
     const handleSimpan = (niu, status, honorDefault) => {
         if (loadingNiu === niu) return;
@@ -58,6 +64,42 @@ export default function Index() {
         }
     };
 
+    const bulanSebelumnya = () => {
+        let b = bulanRekap - 1;
+        let t = tahunRekap;
+        if (b < 1) {
+            b = 12;
+            t--;
+        }
+        router.get(
+            "/presensi",
+            { tanggal, bulan_rekap: b, tahun_rekap: t },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
+
+    const bulanBerikutnya = () => {
+        let b = bulanRekap + 1;
+        let t = tahunRekap;
+        if (b > 12) {
+            b = 1;
+            t++;
+        }
+        router.get(
+            "/presensi",
+            { tanggal, bulan_rekap: b, tahun_rekap: t },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
+
+    const namaBulanRekap = new Date(
+        tahunRekap,
+        bulanRekap - 1,
+    ).toLocaleDateString("id-ID", {
+        month: "long",
+        year: "numeric",
+    });
+
     const totalHonor = rekap.reduce(
         (s, r) => s + parseInt(r.total_honor || 0),
         0,
@@ -78,8 +120,12 @@ export default function Index() {
                             setTanggal(e.target.value);
                             router.get(
                                 "/presensi",
-                                { tanggal: e.target.value },
-                                { preserveState: true },
+                                {
+                                    tanggal: e.target.value,
+                                    bulan_rekap: bulanRekap,
+                                    tahun_rekap: tahunRekap,
+                                },
+                                { preserveState: true, preserveScroll: true },
                             );
                         }}
                         className="border border-slate-200 rounded-2xl px-4 py-2.5 text-sm focus:border-[#20B5E8] focus:ring-4 focus:ring-sky-100 outline-none"
@@ -206,12 +252,43 @@ export default function Index() {
                     ))}
                 </div>
 
-                <div className="pt-4">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-                        Rekap Kehadiran Bulan Ini
-                    </h3>
+                <div className="pt-6 border-t border-slate-100">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-700">
+                                Rekap Kehadiran
+                            </h3>
+                            <p className="text-xs text-slate-400 capitalize">
+                                Periode {namaBulanRekap}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 rounded-2xl p-1">
+                            <button
+                                type="button"
+                                onClick={bulanSebelumnya}
+                                title="Bulan Sebelumnya"
+                                className="w-8 h-8 rounded-xl bg-white border border-slate-200/60 shadow-sm flex items-center justify-center text-slate-600 hover:text-[#3D7ABA] hover:border-[#3D7ABA]/30 transition"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-xs font-semibold text-slate-700 px-2 min-w-[90px] text-center">
+                                {namaBulanRekap}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={bulanBerikutnya}
+                                title="Bulan Berikutnya"
+                                className="w-8 h-8 rounded-xl bg-white border border-slate-200/60 shadow-sm flex items-center justify-center text-slate-600 hover:text-[#3D7ABA] hover:border-[#3D7ABA]/30 transition"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
                     {rekap.length === 0 ? (
-                        <p className="text-xs text-slate-400">Belum ada data</p>
+                        <p className="text-center text-xs text-slate-400 py-6">
+                            Belum ada data presensi pada bulan {namaBulanRekap}
+                        </p>
                     ) : (
                         <div className="space-y-2">
                             {rekap.map((r) => (
@@ -258,7 +335,7 @@ export default function Index() {
                             {isAdmin && (
                                 <div className="rounded-2xl bg-gradient-to-r from-[#3D7ABA]/10 to-[#20B5E8]/10 p-4 flex items-center justify-between text-sm font-bold">
                                     <span className="text-[#3D7ABA]">
-                                        Total Honor
+                                        Total Honor ({namaBulanRekap})
                                     </span>
                                     <span className="text-[#3D7ABA] font-mono">
                                         Rp {totalHonor.toLocaleString()}

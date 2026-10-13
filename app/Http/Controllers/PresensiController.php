@@ -44,14 +44,17 @@ class PresensiController extends Controller
             ];
         });
 
-        // Rekap bulan ini
+        $bulanRekap = (int) ($request->bulan_rekap ?? now()->month);
+        $tahunRekap = (int) ($request->tahun_rekap ?? now()->year);
+
+        // Rekap bulan yang dipilih
         $rekap = PresensiUstadz::with('ustad')
             ->selectRaw("niu, COUNT(*) as total_pertemuan,
                 SUM(CASE WHEN status='hadir' THEN 1 ELSE 0 END) as total_hadir,
                 SUM(CASE WHEN status='tidak_hadir' THEN 1 ELSE 0 END) as total_tidak_hadir,
                 SUM(COALESCE(honor,0)) as total_honor")
-            ->whereMonth('tanggal', now()->month)
-            ->whereYear('tanggal', now()->year)
+            ->whereMonth('tanggal', $bulanRekap)
+            ->whereYear('tanggal', $tahunRekap)
             ->groupBy('niu')
             ->get();
 
@@ -60,6 +63,8 @@ class PresensiController extends Controller
             'hari' => $hari,
             'tanggal' => $tanggal,
             'rekap' => $rekap,
+            'bulanRekap' => $bulanRekap,
+            'tahunRekap' => $tahunRekap,
         ]);
     }
 

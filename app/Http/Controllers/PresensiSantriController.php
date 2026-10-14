@@ -44,10 +44,7 @@ class PresensiSantriController extends Controller
             // Data izin (harian)
             $izinHariIni = IzinSantri::with('santri')
                 ->where('tanggal', '<=', $tanggal)
-                ->where(function ($q) use ($tanggal) {
-                    $q->where('tanggal_selesai', '>=', $tanggal)
-                      ->orWhereNull('tanggal_selesai');
-                })
+                ->whereRaw('COALESCE(tanggal_selesai, tanggal) >= ?', [$tanggal])
                 ->get();
 
             $izin = $izinHariIni->map(function ($i) {
@@ -85,10 +82,7 @@ class PresensiSantriController extends Controller
 
             $izinMingguan = IzinSantri::with('santri')
                 ->where('tanggal', '<=', $endOfWeek)
-                ->where(function ($q) use ($startOfWeek) {
-                    $q->where('tanggal_selesai', '>=', $startOfWeek)
-                      ->orWhereNull('tanggal_selesai');
-                })
+                ->whereRaw('COALESCE(tanggal_selesai, tanggal) >= ?', [$startOfWeek])
                 ->get();
 
             $totalHariEfektif = 7;
@@ -140,10 +134,7 @@ class PresensiSantriController extends Controller
 
             $izinBulanan = IzinSantri::with('santri')
                 ->where('tanggal', '<=', $endOfMonth->toDateString())
-                ->where(function ($q) use ($startOfMonth) {
-                    $q->where('tanggal_selesai', '>=', $startOfMonth->toDateString())
-                      ->orWhereNull('tanggal_selesai');
-                })
+                ->whereRaw('COALESCE(tanggal_selesai, tanggal) >= ?', [$startOfMonth->toDateString()])
                 ->get();
 
             $rekap = $semuaSantri->map(function ($s) use ($presensiBulanan, $izinBulanan, $totalHari, $startOfMonth, $endOfMonth) {
@@ -203,10 +194,7 @@ class PresensiSantriController extends Controller
         // Cek apakah santri sedang izin hari ini
         $sudahIzin = IzinSantri::where('nis', $request->nis)
             ->where('tanggal', '<=', $tanggal)
-            ->where(function ($q) use ($tanggal) {
-                $q->where('tanggal_selesai', '>=', $tanggal)
-                  ->orWhereNull('tanggal_selesai');
-            })
+            ->whereRaw('COALESCE(tanggal_selesai, tanggal) >= ?', [$tanggal])
             ->exists();
 
         if ($sudahIzin) {

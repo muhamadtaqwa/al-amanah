@@ -23,13 +23,7 @@ class IzinSantriController extends Controller
         // Kalau admin → lihat semua izin
         $query = IzinSantri::with('santri')
             ->where('tanggal', '<=', $endOfMonth)
-            ->where(function ($q) use ($startOfMonth) {
-                $q->where('tanggal_selesai', '>=', $startOfMonth)
-                  ->orWhere(function ($sub) use ($startOfMonth) {
-                      $sub->whereNull('tanggal_selesai')
-                          ->where('tanggal', '>=', $startOfMonth);
-                  });
-            })
+            ->whereRaw('COALESCE(tanggal_selesai, tanggal) >= ?', [$startOfMonth])
             ->orderBy('tanggal', 'desc');
 
         if ($user->role === 'santri') {
@@ -83,13 +77,7 @@ class IzinSantriController extends Controller
         // Cek apakah ada izin yang overlap pada rentang tanggal tersebut
         $sudah = IzinSantri::where('nis', $nis)
             ->where('tanggal', '<=', $tglSelesai)
-            ->where(function ($q) use ($tglMulai) {
-                $q->where('tanggal_selesai', '>=', $tglMulai)
-                  ->orWhere(function ($sub) use ($tglMulai) {
-                      $sub->whereNull('tanggal_selesai')
-                          ->where('tanggal', '>=', $tglMulai);
-                  });
-            })
+            ->whereRaw('COALESCE(tanggal_selesai, tanggal) >= ?', [$tglMulai])
             ->exists();
 
         if ($sudah) {

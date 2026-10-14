@@ -41,9 +41,13 @@ class PresensiSantriController extends Controller
 
             $hadirNis = $hadir->pluck('nis');
 
-            // Data izin
+            // Data izin (harian)
             $izinHariIni = IzinSantri::with('santri')
-                ->whereDate('tanggal', $tanggal)
+                ->where('tanggal', '<=', $tanggal)
+                ->where(function ($q) use ($tanggal) {
+                    $q->where('tanggal_selesai', '>=', $tanggal)
+                      ->orWhereNull('tanggal_selesai');
+                })
                 ->get();
 
             $izin = $izinHariIni->map(function ($i) {
@@ -80,18 +84,37 @@ class PresensiSantriController extends Controller
                 ->groupBy('nis');
 
             $izinMingguan = IzinSantri::with('santri')
-                ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
-                ->get()
-                ->groupBy('nis');
+                ->where('tanggal', '<=', $endOfWeek)
+                ->where(function ($q) use ($startOfWeek) {
+                    $q->where('tanggal_selesai', '>=', $startOfWeek)
+                      ->orWhereNull('tanggal_selesai');
+                })
+                ->get();
 
             $totalHariEfektif = 7;
 
-            $rekap = $semuaSantri->map(function ($s) use ($presensiMingguan, $izinMingguan, $totalHariEfektif) {
+            $rekap = $semuaSantri->map(function ($s) use ($presensiMingguan, $izinMingguan, $totalHariEfektif, $startOfWeek, $endOfWeek) {
                 $itemsHadir = $presensiMingguan->get($s->nis, collect());
-                $itemsIzin = $izinMingguan->get($s->nis, collect());
+                $santriIzins = $izinMingguan->where('nis', $s->nis);
+
+                $izinCount = 0;
+                $startW = \Carbon\Carbon::parse($startOfWeek);
+                $endW = \Carbon\Carbon::parse($endOfWeek);
+
+                foreach ($santriIzins as $iz) {
+                    $izStart = \Carbon\Carbon::parse($iz->tanggal);
+                    $izEnd = $iz->tanggal_selesai ? \Carbon\Carbon::parse($iz->tanggal_selesai) : $izStart;
+
+                    $overlapStart = $izStart->greaterThan($startW) ? $izStart : $startW;
+                    $overlapEnd = $izEnd->lessThan($endW) ? $izEnd : $endW;
+
+                    if ($overlapStart->lessThanOrEqualTo($overlapEnd)) {
+                        $izinCount += $overlapStart->diffInDays($overlapEnd) + 1;
+                    }
+                }
 
                 $hadir = $itemsHadir->count();
-                $izin = $itemsIzin->count();
+                $izin = $izinCount;
                 $tidak = $totalHariEfektif - $hadir - $izin;
 
                 return [
@@ -105,7 +128,9 @@ class PresensiSantriController extends Controller
         }
 
         if ($mode === 'bulanan') {
-            $totalHari = now()->daysInMonth;
+            $startOfMonth = \Carbon\Carbon::create($tahun, $bulan, 1)->startOfMonth();
+            $endOfMonth = \Carbon\Carbon::create($tahun, $bulan, 1)->endOfMonth();
+            $totalHari = $startOfMonth->daysInMonth;
 
             $presensiBulanan = PresensiSantri::with('santri')
                 ->whereMonth('tanggal', $bulan)
@@ -114,17 +139,32 @@ class PresensiSantriController extends Controller
                 ->groupBy('nis');
 
             $izinBulanan = IzinSantri::with('santri')
-                ->whereMonth('tanggal', $bulan)
-                ->whereYear('tanggal', $tahun)
-                ->get()
-                ->groupBy('nis');
+                ->where('tanggal', '<=', $endOfMonth->toDateString())
+                ->where(function ($q) use ($startOfMonth) {
+                    $q->where('tanggal_selesai', '>=', $startOfMonth->toDateString())
+                      ->orWhereNull('tanggal_selesai');
+                })
+                ->get();
 
-            $rekap = $semuaSantri->map(function ($s) use ($presensiBulanan, $izinBulanan, $totalHari) {
+            $rekap = $semuaSantri->map(function ($s) use ($presensiBulanan, $izinBulanan, $totalHari, $startOfMonth, $endOfMonth) {
                 $itemsHadir = $presensiBulanan->get($s->nis, collect());
-                $itemsIzin = $izinBulanan->get($s->nis, collect());
+                $santriIzins = $izinBulanan->where('nis', $s->nis);
+
+                $izinCount = 0;
+                foreach ($santriIzins as $iz) {
+                    $izStart = \Carbon\Carbon::parse($iz->tanggal);
+                    $izEnd = $iz->tanggal_selesai ? \Carbon\Carbon::parse($iz->tanggal_selesai) : $izStart;
+
+                    $overlapStart = $izStart->greaterThan($startOfMonth) ? $izStart : $startOfMonth;
+                    $overlapEnd = $izEnd->lessThan($endOfMonth) ? $izEnd : $endOfMonth;
+
+                    if ($overlapStart->lessThanOrEqualTo($overlapEnd)) {
+                        $izinCount += $overlapStart->diffInDays($overlapEnd) + 1;
+                    }
+                }
 
                 $hadir = $itemsHadir->count();
-                $izin = $itemsIzin->count();
+                $izin = $izinCount;
                 $tidak = $totalHari - $hadir - $izin;
 
                 return [
@@ -162,7 +202,11 @@ class PresensiSantriController extends Controller
 
         // Cek apakah santri sedang izin hari ini
         $sudahIzin = IzinSantri::where('nis', $request->nis)
-            ->whereDate('tanggal', $tanggal)
+            ->where('tanggal', '<=', $tanggal)
+            ->where(function ($q) use ($tanggal) {
+                $q->where('tanggal_selesai', '>=', $tanggal)
+                  ->orWhereNull('tanggal_selesai');
+            })
             ->exists();
 
         if ($sudahIzin) {

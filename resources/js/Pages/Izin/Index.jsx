@@ -8,10 +8,22 @@ export default function Index() {
     const [showPopup, setShowPopup] = useState(false);
     const [form, setForm] = useState({
         tanggal: new Date().toISOString().slice(0, 10),
+        tanggal_selesai: new Date().toISOString().slice(0, 10),
         keterangan: "",
     });
 
     const isSantri = role === "santri";
+
+    const hitungHari = (mulai, selesai) => {
+        if (!mulai) return "Izin selama 1 hari";
+        const end = selesai || mulai;
+        const d1 = new Date(mulai + "T00:00:00");
+        const d2 = new Date(end + "T00:00:00");
+        const diffTime = d2 - d1;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        const hari = Math.max(1, isNaN(diffDays) ? 1 : diffDays);
+        return `Izin selama ${hari} hari`;
+    };
 
     const namaBulan = new Date(tahun, bulan - 1).toLocaleDateString("id-ID", {
         month: "long",
@@ -29,8 +41,10 @@ export default function Index() {
     };
 
     const openInput = () => {
+        const today = new Date().toISOString().slice(0, 10);
         setForm({
-            tanggal: new Date().toISOString().slice(0, 10),
+            tanggal: today,
+            tanggal_selesai: today,
             keterangan: "",
         });
         setShowPopup(true);
@@ -41,7 +55,12 @@ export default function Index() {
         router.post("/izin-santri", form, {
             onSuccess: () => {
                 setShowPopup(false);
-                setForm({ tanggal: "", keterangan: "" });
+                const today = new Date().toISOString().slice(0, 10);
+                setForm({
+                    tanggal: today,
+                    tanggal_selesai: today,
+                    keterangan: "",
+                });
             },
             onError: (err) => {
                 alert(err?.error || "Gagal mengajukan izin.");
@@ -155,20 +174,34 @@ export default function Index() {
                                     </button>
                                 )}
                             </div>
-                            <div className="mt-2 pt-2 border-t border-slate-100 space-y-1">
-                                <div className="flex justify-between">
-                                    <span className="text-[11px] text-slate-400">
-                                        Tanggal
+                            <div className="mt-2 pt-2 border-t border-slate-100 space-y-1.5">
+                                <div className="flex justify-between items-center text-[11px]">
+                                    <span className="text-slate-400">
+                                        Waktu Izin
                                     </span>
-                                    <span className="text-[11px] font-medium text-slate-600">
-                                        {formatTanggal(i.tanggal)}
+                                    <span className="font-medium text-slate-700 text-right">
+                                        {i.tanggal_selesai && i.tanggal_selesai !== i.tanggal ? (
+                                            <>
+                                                {formatTanggal(i.tanggal)} – {formatTanggal(i.tanggal_selesai)}
+                                            </>
+                                        ) : (
+                                            formatTanggal(i.tanggal)
+                                        )}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-[11px] text-slate-400">
+                                <div className="flex justify-between items-center text-[11px]">
+                                    <span className="text-slate-400">
+                                        Lama Izin
+                                    </span>
+                                    <span className="font-semibold text-[#3D7ABA] bg-sky-50 border border-sky-100/60 px-2 py-0.5 rounded-full">
+                                        Izin selama {i.total_hari || 1} hari
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-start text-[11px]">
+                                    <span className="text-slate-400 shrink-0">
                                         Keterangan
                                     </span>
-                                    <span className="text-[11px] font-medium text-slate-600 text-right ml-4">
+                                    <span className="font-medium text-slate-600 text-right ml-4">
                                         {i.keterangan}
                                     </span>
                                 </div>
@@ -196,27 +229,61 @@ export default function Index() {
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            <form onSubmit={handleSubmit} className="space-y-3">
-                                <div>
-                                    <label className="text-xs text-slate-500 mb-1 block">
-                                        Tanggal Izin
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={form.tanggal}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                tanggal: e.target.value,
-                                            })
-                                        }
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none"
-                                        required
-                                    />
+                            <form onSubmit={handleSubmit} className="space-y-3.5">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-600 mb-1 block">
+                                            Dari Tanggal
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={form.tanggal}
+                                            onChange={(e) => {
+                                                const newTgl = e.target.value;
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    tanggal: newTgl,
+                                                    tanggal_selesai:
+                                                        !prev.tanggal_selesai ||
+                                                        prev.tanggal_selesai < newTgl
+                                                            ? newTgl
+                                                            : prev.tanggal_selesai,
+                                                }));
+                                            }}
+                                            className="w-full border border-slate-200 rounded-2xl px-3.5 py-2.5 text-sm outline-none focus:border-[#20B5E8] focus:ring-2 focus:ring-sky-100"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-600 mb-1 block">
+                                            Sampai Tanggal
+                                        </label>
+                                        <input
+                                            type="date"
+                                            min={form.tanggal}
+                                            value={form.tanggal_selesai || form.tanggal}
+                                            onChange={(e) =>
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    tanggal_selesai: e.target.value,
+                                                }))
+                                            }
+                                            className="w-full border border-slate-200 rounded-2xl px-3.5 py-2.5 text-sm outline-none focus:border-[#20B5E8] focus:ring-2 focus:ring-sky-100"
+                                            required
+                                        />
+                                    </div>
                                 </div>
+
+                                <div className="bg-sky-50/80 border border-sky-100 rounded-2xl px-3.5 py-2 text-xs flex items-center justify-between">
+                                    <span className="text-slate-500">Keterangan:</span>
+                                    <span className="font-bold text-[#3D7ABA]">
+                                        {hitungHari(form.tanggal, form.tanggal_selesai)}
+                                    </span>
+                                </div>
+
                                 <div>
-                                    <label className="text-xs text-slate-500 mb-1 block">
-                                        Keterangan
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">
+                                        Keterangan / Alasan
                                     </label>
                                     <textarea
                                         value={form.keterangan}
@@ -226,9 +293,9 @@ export default function Index() {
                                                 keterangan: e.target.value,
                                             })
                                         }
-                                        placeholder="Contoh: Sakit, pulang, acara keluarga..."
+                                        placeholder="Contoh: Sakit, pulang ada keperluan keluarga..."
                                         rows={3}
-                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none resize-none"
+                                        className="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none focus:border-[#20B5E8] focus:ring-2 focus:ring-sky-100 resize-none"
                                         required
                                     ></textarea>
                                 </div>
@@ -237,15 +304,15 @@ export default function Index() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPopup(false)}
-                                        className="flex-1 border border-slate-200 py-2.5 rounded-2xl text-sm"
+                                        className="flex-1 border border-slate-200 py-2.5 rounded-2xl text-sm font-medium hover:bg-slate-50 transition"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold"
+                                        className="flex-1 bg-gradient-to-r from-[#3D7ABA] to-[#20B5E8] text-white py-2.5 rounded-2xl text-sm font-semibold shadow-md hover:opacity-95 transition"
                                     >
-                                        Ajukan
+                                        Ajukan Izin
                                     </button>
                                 </div>
                             </form>

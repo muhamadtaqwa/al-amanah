@@ -6,20 +6,30 @@ use App\Models\IzinSantri;
 use App\Models\Santri;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class IzinSantriController extends Controller
 {
     public function index(Request $request)
     {
         $user = auth()->user();
-        $bulan = $request->bulan ?? now()->month;
-        $tahun = $request->tahun ?? now()->year;
+        $bulan = (int) ($request->bulan ?? now()->month);
+        $tahun = (int) ($request->tahun ?? now()->year);
+
+        $startOfMonth = Carbon::create($tahun, $bulan, 1)->startOfMonth()->toDateString();
+        $endOfMonth = Carbon::create($tahun, $bulan, 1)->endOfMonth()->toDateString();
 
         // Kalau santri → hanya lihat izin sendiri
         // Kalau admin → lihat semua izin
         $query = IzinSantri::with('santri')
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
+            ->where('tanggal', '<=', $endOfMonth)
+            ->where(function ($q) use ($startOfMonth) {
+                $q->where('tanggal_selesai', '>=', $startOfMonth)
+                  ->orWhere(function ($sub) use ($startOfMonth) {
+                      $sub->whereNull('tanggal_selesai')
+                          ->where('tanggal', '>=', $startOfMonth);
+                  });
+            })
             ->orderBy('tanggal', 'desc');
 
         if ($user->role === 'santri') {
@@ -28,19 +38,25 @@ class IzinSantriController extends Controller
         }
 
         $izins = $query->get()->map(function ($i) {
+            $tglMulai = Carbon::parse($i->tanggal);
+            $tglSelesai = $i->tanggal_selesai ? Carbon::parse($i->tanggal_selesai) : $tglMulai;
+            $totalHari = $tglMulai->diffInDays($tglSelesai) + 1;
+
             return [
                 'id' => $i->id,
                 'nis' => $i->nis,
                 'nama' => $i->santri->nama_lengkap ?? '-',
                 'tanggal' => $i->tanggal,
+                'tanggal_selesai' => $i->tanggal_selesai ?? $i->tanggal,
+                'total_hari' => $totalHari,
                 'keterangan' => $i->keterangan,
             ];
         });
 
         return Inertia::render('Izin/Index', [
             'izins' => $izins,
-            'bulan' => (int) $bulan,
-            'tahun' => (int) $tahun,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
             'role' => $user->role,
         ]);
     }
@@ -49,6 +65,7 @@ class IzinSantriController extends Controller
     {
         $request->validate([
             'tanggal' => 'required|date',
+            'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal',
             'keterangan' => 'required|string|max:500',
         ]);
 
@@ -60,19 +77,29 @@ class IzinSantriController extends Controller
         }
 
         $nis = $user->santri->nis;
+        $tglMulai = $request->tanggal;
+        $tglSelesai = $request->tanggal_selesai ?: $request->tanggal;
 
-        // Cek apakah sudah izin di tanggal yang sama
+        // Cek apakah ada izin yang overlap pada rentang tanggal tersebut
         $sudah = IzinSantri::where('nis', $nis)
-            ->where('tanggal', $request->tanggal)
+            ->where('tanggal', '<=', $tglSelesai)
+            ->where(function ($q) use ($tglMulai) {
+                $q->where('tanggal_selesai', '>=', $tglMulai)
+                  ->orWhere(function ($sub) use ($tglMulai) {
+                      $sub->whereNull('tanggal_selesai')
+                          ->where('tanggal', '>=', $tglMulai);
+                  });
+            })
             ->exists();
 
         if ($sudah) {
-            return back()->withErrors(['error' => 'Sudah izin di tanggal tersebut.']);
+            return back()->withErrors(['error' => 'Sudah ada izin yang diajukan pada rentang tanggal tersebut.']);
         }
 
         IzinSantri::create([
             'nis' => $nis,
-            'tanggal' => $request->tanggal,
+            'tanggal' => $tglMulai,
+            'tanggal_selesai' => $tglSelesai,
             'keterangan' => $request->keterangan,
         ]);
 

@@ -8,7 +8,7 @@ class IzinSantri extends Model
 {
     protected $table = 'izin_santri';
 
-    protected $fillable = ['nis', 'tanggal', 'keterangan'];
+    protected $fillable = ['nis', 'tanggal', 'tanggal_selesai', 'keterangan'];
 
     public function santri()
     {

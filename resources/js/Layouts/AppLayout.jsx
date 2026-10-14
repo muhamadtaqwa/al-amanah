@@ -225,7 +225,7 @@ export default function AppLayout({ children }) {
             roles: ["admin"],
         },
         {
-            label: "Kotak Suara",
+            label: "Kotak Aspirasi",
             path: "/aspirasi",
             icon: MessageSquareQuote,
             roles: ["admin", "santri"],

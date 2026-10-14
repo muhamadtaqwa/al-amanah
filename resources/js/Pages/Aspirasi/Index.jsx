@@ -154,7 +154,7 @@ export default function Index() {
                                     <Send className="w-4 h-4 text-white" />
                                 </div>
                                 <h3 className="font-bold text-sm text-slate-800">
-                                    Kirim Suara / Masukan Anda
+                                    Kirim Aspirasi / Masukan Anda
                                 </h3>
                             </div>
 
@@ -247,7 +247,7 @@ export default function Index() {
                         <div className="rounded-[30px] border border-sky-100 bg-white p-5 shadow-sm space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold text-sm text-slate-800">
-                                    Riwayat Suara Saya
+                                    Riwayat Aspirasi Saya
                                 </h3>
                                 <span className="text-xs text-slate-400">
                                     {riwayat?.length || 0} Terkirim

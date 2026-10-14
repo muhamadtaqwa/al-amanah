@@ -171,7 +171,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/haid', [HaidController::class, 'store'])->name('haid.store');
     Route::delete('/haid/{id}', [HaidController::class, 'destroy'])->name('haid.destroy');
 
-    // Kotak Suara Santri
+    // Kotak Aspirasi Santri
     Route::get('/aspirasi', [AspirasiController::class, 'index'])->name('aspirasi.index');
     Route::post('/aspirasi', [AspirasiController::class, 'store'])->name('aspirasi.store');
     Route::put('/aspirasi/{id}/tanggapi', [AspirasiController::class, 'tanggapi'])->name('aspirasi.tanggapi');

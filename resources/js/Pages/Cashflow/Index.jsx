@@ -146,8 +146,7 @@ export default function Index() {
                     </h2>
                     <a
                         href={`/cashflow/pdf?kategori=${kategori}&bulan=${bulan}&tahun=${tahun}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        download
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-[#3D7ABA] text-xs font-semibold shadow-sm hover:bg-sky-50 active:scale-95 transition"
                         title="Download Laporan PDF"
                     >

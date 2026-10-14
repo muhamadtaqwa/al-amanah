@@ -140,6 +140,18 @@ export default function AppLayout({ children }) {
 
     const menuKegiatan = [
         {
+            label: "Presensi Ustadz",
+            path: "/presensi",
+            icon: ClipboardList,
+            roles: ["admin", "ustadz"],
+        },
+        {
+            label: "Presensi Santri",
+            path: "/presensi-santri",
+            icon: ClipboardCheck,
+            roles: ["admin", "ustadz"],
+        },
+        {
             label: "Program Tahfidz",
             path: "/tahfidz",
             icon: BookMarked,
@@ -151,18 +163,6 @@ export default function AppLayout({ children }) {
             icon: CalendarHeart,
             roles: ["admin", "santri"],
             khususPutri: true,
-        },
-        {
-            label: "Presensi Ustadz",
-            path: "/presensi",
-            icon: ClipboardList,
-            roles: ["admin", "ustadz"],
-        },
-        {
-            label: "Presensi Santri",
-            path: "/presensi-santri",
-            icon: ClipboardCheck,
-            roles: ["admin", "ustadz"],
         },
         {
             label: "Izin",

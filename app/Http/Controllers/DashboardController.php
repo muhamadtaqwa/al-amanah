@@ -12,6 +12,7 @@ use App\Models\PresensiSantri;
 use App\Models\IzinSantri;
 use App\Models\Tahfidz;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -101,6 +102,24 @@ class DashboardController extends Controller
             }
         }
 
+        $cutoff = now()->subMinutes(5)->timestamp;
+        $onlineUsers = array_filter(Cache::get('users_online', []), fn($time) => $time >= $cutoff);
+        if (auth()->check() && !isset($onlineUsers[auth()->id()])) {
+            $onlineUsers[auth()->id()] = now()->timestamp;
+        }
+        $userAktif = count($onlineUsers);
+
+        if ($userAktif === 0 && config('session.driver') === 'database') {
+            try {
+                $userAktif = DB::table('sessions')
+                    ->whereNotNull('user_id')
+                    ->where('last_activity', '>=', $cutoff)
+                    ->count();
+            } catch (\Throwable $e) {
+                // Abaikan jika tabel sessions tidak ada
+            }
+        }
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'totalSantri'       => Santri::where('status', 'aktif')->count(),
@@ -109,10 +128,7 @@ class DashboardController extends Controller
                 'totalUstadz'       => Ustadz::count(),
                 'totalBelumBayar'   => $totalBelumBayar,
                 'totalSudahBayar'   => $totalSudahBayar,
-                'userAktif'         => DB::table('sessions')
-                    ->whereNotNull('user_id')
-                    ->where('last_activity', '>=', now()->subMinutes(5)->timestamp)
-                    ->count(),
+                'userAktif'         => $userAktif,
                 'totalUser'         => User::count(),
                 'kunjunganHariIni'  => Login::whereDate('created_at', today())->count(),
                 'totalKunjungan'    => Login::count(),

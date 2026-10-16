@@ -7,7 +7,7 @@
     <style>
         @page {
             size: a4 portrait;
-            margin: 1.2cm 1.2cm 1.4cm 1.2cm;
+            margin: 0.8cm 0.8cm 1.0cm 0.8cm;
         }
 
         @font-face {
@@ -45,9 +45,9 @@
 
         body {
             font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
-            font-size: 8.5px;
+            font-size: 12px;
             color: #111827;
-            line-height: 1.35;
+            line-height: 1.4;
             margin: 0;
             padding: 0;
         }
@@ -66,7 +66,7 @@
         }
 
         .top-title {
-            font-size: 17px;
+            font-size: 22px;
             font-weight: bold;
             color: #111827;
             margin: 0;
@@ -79,14 +79,14 @@
         }
 
         .brand-icon {
-            height: 22px;
+            height: 26px;
             width: auto;
             vertical-align: middle;
             margin-right: 4px;
         }
 
         .brand-name {
-            font-size: 15px;
+            font-size: 19px;
             font-weight: bold;
             color: #111827;
             vertical-align: middle;
@@ -96,7 +96,7 @@
         .divider-line {
             border: 0;
             border-top: 1px solid #d1d5db;
-            margin: 10px 0 10px 0;
+            margin: 12px 0 12px 0;
         }
 
         /* ============================================================
@@ -122,10 +122,10 @@
         }
 
         .report-heading {
-            font-size: 11px;
+            font-size: 14.5px;
             font-weight: bold;
             color: #111827;
-            margin: 0 0 5px 0;
+            margin: 0 0 6px 0;
         }
 
         .meta-table {
@@ -133,14 +133,14 @@
         }
 
         .meta-table td {
-            font-size: 8.5px;
-            padding: 1px 0;
+            font-size: 12px;
+            padding: 2px 0;
             vertical-align: middle;
         }
 
         .meta-lbl {
             color: #4b5563;
-            width: 52px;
+            width: 65px;
         }
 
         .meta-val {
@@ -154,15 +154,15 @@
         }
 
         .meta-table-right td {
-            font-size: 8.5px;
-            padding: 1px 0;
+            font-size: 12px;
+            padding: 2px 0;
             vertical-align: middle;
         }
 
         .meta-lbl-r {
             color: #4b5563;
             text-align: right;
-            padding-right: 14px;
+            padding-right: 20px;
         }
 
         .meta-val-r {
@@ -173,6 +173,9 @@
 
         .meta-val-r.val-bold {
             font-weight: bold;
+            font-size: 15.5px;
+            color: #0f172a;
+            white-space: nowrap;
         }
 
         /* ============================================================
@@ -181,12 +184,12 @@
         .sub-bar {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .sub-bar td {
-            font-size: 8px;
-            color: #374151;
+            font-size: 11px;
+            color: #4b5563;
             padding: 0;
             vertical-align: middle;
         }
@@ -202,24 +205,24 @@
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #e5e7eb;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .report-table thead th {
-            background-color: #f9fafb;
-            color: #111827;
-            font-size: 8.5px;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-size: 12px;
             font-weight: bold;
             text-align: left;
-            padding: 7px 6px;
+            padding: 9px 8px;
             border: 0;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1.5px solid #cbd5e1;
             border-top: 1px solid #e5e7eb;
         }
 
         .report-table tbody td {
-            padding: 6px 6px;
-            font-size: 8px;
+            padding: 9px 8px;
+            font-size: 12px;
             color: #111827;
             border: 0;
             border-bottom: 1px solid #e5e7eb;
@@ -229,23 +232,27 @@
 
         /* Lebar Kolom */
         .col-date {
-            width: 15%;
+            width: 16%;
+            white-space: nowrap;
         }
 
         .col-desc {
-            width: 37%;
+            width: 36%;
         }
 
         .col-in {
             width: 16%;
+            white-space: nowrap;
         }
 
         .col-out {
             width: 16%;
+            white-space: nowrap;
         }
 
         .col-bal {
             width: 16%;
+            white-space: nowrap;
         }
 
         /* ============================================================
@@ -255,7 +262,7 @@
             width: 100%;
             border-collapse: collapse;
             page-break-inside: avoid;
-            margin-top: 15px;
+            margin-top: 24px;
         }
 
         .signature-table td {
@@ -266,30 +273,30 @@
         }
 
         .sig-date {
-            font-size: 8px;
+            font-size: 11px;
             color: #4b5563;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
 
         .sig-title {
-            font-size: 8.5px;
+            font-size: 12px;
             font-weight: 600;
             color: #111827;
-            margin-bottom: 46px;
-            line-height: 1.35;
+            margin-bottom: 50px;
+            line-height: 1.4;
         }
 
         .sig-name {
-            font-size: 9px;
+            font-size: 13.5px;
             font-weight: bold;
             text-decoration: underline;
             color: #111827;
         }
 
         .sig-role {
-            font-size: 7.5px;
+            font-size: 10.5px;
             color: #6b7280;
-            margin-top: 2px;
+            margin-top: 3px;
         }
     </style>
 </head>
@@ -328,17 +335,13 @@
                 </table>
             </td>
             <td class="meta-right">
-                <table class="meta-table-right">
-                    <tr>
-                        <td class="meta-val-r" colspan="2">Semua Transaksi</td>
-                    </tr>
-                    <tr>
-                        <td class="meta-lbl-r">Saldo Akhir</td>
-                        <td class="meta-val-r val-bold">
-                            {{ ($saldoAkhir < 0 ? '- ' : '') . 'Rp ' . number_format(abs($saldoAkhir), 0, ',', '.') }}
-                        </td>
-                    </tr>
-                </table>
+                <div style="font-size: 12px; color: #111827; margin-bottom: 5px;">Semua Transaksi</div>
+                <div style="font-size: 12px; color: #4b5563;">
+                    Saldo Akhir &nbsp;&nbsp;
+                    <span class="meta-val-r val-bold">
+                        {{ ($saldoAkhir < 0 ? '- ' : '') . 'Rp ' . number_format(abs($saldoAkhir), 0, ',', '.') }}
+                    </span>
+                </div>
             </td>
         </tr>
     </table>

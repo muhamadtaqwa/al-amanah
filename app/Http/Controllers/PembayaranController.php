@@ -299,6 +299,8 @@ class PembayaranController extends Controller
 
     /**
      * Catat pemasukan cashflow saat pembayaran lunas.
+     * Hanya otomatis untuk: Kas Santri (Putra/Putri) dan Anjem.
+     * Kategori SPP Cash, Operasional, Tahlil, Khotmil, dan Mesin Cuci dicatat secara manual di menu Cashflow.
      */
     private function catatCashflow($pembayaran)
     {
@@ -308,12 +310,6 @@ class PembayaranController extends Controller
             $kategoriCashflow = str_starts_with($pembayaran->nis, 'PA') ? 'kas_putra' : 'kas_putri';
         } elseif ($pembayaran->jenis === 'Anjem') {
             $kategoriCashflow = 'anjem';
-        } elseif ($pembayaran->jenis === 'SPP') {
-            $kategoriCashflow = 'spp';
-        } elseif (strtolower($pembayaran->jenis) === 'tahlil') {
-            $kategoriCashflow = 'tahlil';
-        } elseif (strtolower($pembayaran->jenis) === 'operasional') {
-            $kategoriCashflow = 'operasional';
         }
 
         if (!$kategoriCashflow) return;

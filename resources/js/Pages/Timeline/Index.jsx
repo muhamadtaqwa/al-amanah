@@ -150,7 +150,7 @@ export default function Index() {
                 <div className="relative pl-6 ml-[7px] space-y-3 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-[#3D7ABA]/20">
                     {timeline.length === 0 && (
                         <p className="text-slate-400 text-sm">
-                            Belum ada acara
+                            Belum ada acara mendatang
                         </p>
                     )}
                     {timeline.map((item) => (

@@ -137,7 +137,7 @@ export default function Santri() {
                                 {hadir.map((p) => (
                                     <div
                                         key={p.nis}
-                                        className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+                                        className="rounded-2xl border border-sky-100 bg-white px-4 py-2.5 shadow-sm"
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ export default function Santri() {
                                 {izin?.map((p) => (
                                     <div
                                         key={p.nis}
-                                        className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+                                        className="rounded-2xl border border-sky-100 bg-white px-4 py-2.5 shadow-sm"
                                     >
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
@@ -207,7 +207,7 @@ export default function Santri() {
                                 {tidakHadir.map((p) => (
                                     <div
                                         key={p.nis}
-                                        className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+                                        className="rounded-2xl border border-sky-100 bg-white px-4 py-2.5 shadow-sm"
                                     >
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
@@ -243,7 +243,7 @@ export default function Santri() {
                         {rekap.map((r) => (
                             <div
                                 key={r.nis}
-                                className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+                                className="rounded-2xl border border-sky-100 bg-white px-4 py-2.5 shadow-sm"
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
@@ -339,7 +339,7 @@ export default function Santri() {
                             {rekap.map((r) => (
                                 <div
                                     key={r.nis}
-                                    className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+                                    className="rounded-2xl border border-sky-100 bg-white px-4 py-2.5 shadow-sm"
                                 >
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">

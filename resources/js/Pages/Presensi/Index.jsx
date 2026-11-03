@@ -294,7 +294,7 @@ export default function Index() {
                             {rekap.map((r) => (
                                 <div
                                     key={r.niu}
-                                    className="rounded-2xl border border-sky-100 bg-white p-4 text-sm"
+                                    className="rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm"
                                 >
                                     <h4 className="font-semibold text-slate-700 mb-2">
                                         {r.ustad?.nama_lengkap || r.niu}

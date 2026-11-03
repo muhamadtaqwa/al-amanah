@@ -92,38 +92,38 @@ class PresensiSantriController extends Controller
                 $santriIzins = $izinMingguan->where('nis', $s->nis);
 
                 $izinCount = 0;
-                $startW = \Carbon\Carbon::parse($startOfWeek);
-                $endW = \Carbon\Carbon::parse($endOfWeek);
+                $startW = \Carbon\Carbon::parse($startOfWeek)->startOfDay();
+                $endW = \Carbon\Carbon::parse($endOfWeek)->startOfDay();
 
                 foreach ($santriIzins as $iz) {
-                    $izStart = \Carbon\Carbon::parse($iz->tanggal);
-                    $izEnd = $iz->tanggal_selesai ? \Carbon\Carbon::parse($iz->tanggal_selesai) : $izStart;
+                    $izStart = \Carbon\Carbon::parse($iz->tanggal)->startOfDay();
+                    $izEnd = $iz->tanggal_selesai ? \Carbon\Carbon::parse($iz->tanggal_selesai)->startOfDay() : $izStart;
 
                     $overlapStart = $izStart->greaterThan($startW) ? $izStart : $startW;
                     $overlapEnd = $izEnd->lessThan($endW) ? $izEnd : $endW;
 
                     if ($overlapStart->lessThanOrEqualTo($overlapEnd)) {
-                        $izinCount += $overlapStart->diffInDays($overlapEnd) + 1;
+                        $izinCount += (int) $overlapStart->diffInDays($overlapEnd) + 1;
                     }
                 }
 
                 $hadir = $itemsHadir->count();
-                $izin = $izinCount;
-                $tidak = $totalHariEfektif - $hadir - $izin;
+                $izin = (int) $izinCount;
+                $tidak = max(0, $totalHariEfektif - $hadir - $izin);
 
                 return [
                     'nis' => $s->nis,
                     'nama' => $s->nama_lengkap,
                     'total_hadir' => $hadir,
                     'total_izin' => $izin,
-                    'total_tidak' => max(0, $tidak),
+                    'total_tidak' => $tidak,
                 ];
             })->sortBy('nama')->values();
         }
 
         if ($mode === 'bulanan') {
-            $startOfMonth = \Carbon\Carbon::create($tahun, $bulan, 1)->startOfMonth();
-            $endOfMonth = \Carbon\Carbon::create($tahun, $bulan, 1)->endOfMonth();
+            $startOfMonth = \Carbon\Carbon::create($tahun, $bulan, 1)->startOfDay();
+            $endOfMonth = \Carbon\Carbon::create($tahun, $bulan, 1)->endOfMonth()->startOfDay();
             $totalHari = $startOfMonth->daysInMonth;
 
             $presensiBulanan = PresensiSantri::with('santri')
@@ -143,27 +143,27 @@ class PresensiSantriController extends Controller
 
                 $izinCount = 0;
                 foreach ($santriIzins as $iz) {
-                    $izStart = \Carbon\Carbon::parse($iz->tanggal);
-                    $izEnd = $iz->tanggal_selesai ? \Carbon\Carbon::parse($iz->tanggal_selesai) : $izStart;
+                    $izStart = \Carbon\Carbon::parse($iz->tanggal)->startOfDay();
+                    $izEnd = $iz->tanggal_selesai ? \Carbon\Carbon::parse($iz->tanggal_selesai)->startOfDay() : $izStart;
 
                     $overlapStart = $izStart->greaterThan($startOfMonth) ? $izStart : $startOfMonth;
                     $overlapEnd = $izEnd->lessThan($endOfMonth) ? $izEnd : $endOfMonth;
 
                     if ($overlapStart->lessThanOrEqualTo($overlapEnd)) {
-                        $izinCount += $overlapStart->diffInDays($overlapEnd) + 1;
+                        $izinCount += (int) $overlapStart->diffInDays($overlapEnd) + 1;
                     }
                 }
 
                 $hadir = $itemsHadir->count();
-                $izin = $izinCount;
-                $tidak = $totalHari - $hadir - $izin;
+                $izin = (int) $izinCount;
+                $tidak = max(0, $totalHari - $hadir - $izin);
 
                 return [
                     'nis' => $s->nis,
                     'nama' => $s->nama_lengkap,
                     'total_hadir' => $hadir,
                     'total_izin' => $izin,
-                    'total_tidak' => max(0, $tidak),
+                    'total_tidak' => $tidak,
                     'terakhir_hadir' => $itemsHadir->max('tanggal'),
                 ];
             })->sortBy('nama')->values();

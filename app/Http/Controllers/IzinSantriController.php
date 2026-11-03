@@ -32,9 +32,9 @@ class IzinSantriController extends Controller
         }
 
         $izins = $query->get()->map(function ($i) {
-            $tglMulai = Carbon::parse($i->tanggal);
-            $tglSelesai = $i->tanggal_selesai ? Carbon::parse($i->tanggal_selesai) : $tglMulai;
-            $totalHari = $tglMulai->diffInDays($tglSelesai) + 1;
+            $tglMulai = Carbon::parse($i->tanggal)->startOfDay();
+            $tglSelesai = $i->tanggal_selesai ? Carbon::parse($i->tanggal_selesai)->startOfDay() : $tglMulai;
+            $totalHari = (int) $tglMulai->diffInDays($tglSelesai) + 1;
 
             return [
                 'id' => $i->id,

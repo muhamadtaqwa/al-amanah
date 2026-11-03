@@ -270,7 +270,7 @@ export default function Santri() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-amber-500">
-                                                {r.total_izin || 0}
+                                                {Math.round(r.total_izin || 0)}
                                             </p>
                                             <p className="text-[10px] text-slate-400">
                                                 Izin
@@ -278,7 +278,7 @@ export default function Santri() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-red-500">
-                                                {r.total_tidak}
+                                                {Math.round(r.total_tidak || 0)}
                                             </p>
                                             <p className="text-[10px] text-slate-400">
                                                 Tidak
@@ -366,7 +366,7 @@ export default function Santri() {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-bold text-amber-500">
-                                                    {r.total_izin || 0}
+                                                    {Math.round(r.total_izin || 0)}
                                                 </p>
                                                 <p className="text-[10px] text-slate-400">
                                                     Izin
@@ -374,7 +374,7 @@ export default function Santri() {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-bold text-red-500">
-                                                    {r.total_tidak}
+                                                    {Math.round(r.total_tidak || 0)}
                                                 </p>
                                                 <p className="text-[10px] text-slate-400">
                                                     Tidak

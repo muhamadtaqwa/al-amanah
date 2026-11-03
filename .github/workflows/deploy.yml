@@ -1,0 +1,47 @@
+name: Deploy to Hosting via FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  web-deploy:
+    name: 🎉 Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Ambil Kode Terbaru dari GitHub
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install NPM & Build Frontend (Vite)
+        run: |
+          npm ci || npm install
+          npm run build
+
+      - name: 🚀 Upload File ke Hosting via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR || 'public_html/' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env*
+            **/storage/**
+            **/tests/**
+            phpunit.xml
+            README.md
+            .editorconfig
+            .phpunit.result.cache

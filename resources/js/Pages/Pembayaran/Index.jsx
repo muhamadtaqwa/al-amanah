@@ -916,32 +916,49 @@ export default function Index() {
                                     </div>
                                 )}
                                 {showCicilan === p.id && isAdmin && (
-                                    <div className="mt-3 pt-3 border-t flex gap-2">
-                                        <input
-                                            type="number"
-                                            placeholder="Nominal"
-                                            value={nominalCicilan}
-                                            onChange={(e) => {
-                                                setNominalCicilan(
-                                                    e.target.value,
-                                                );
-                                                setCicilanError("");
-                                            }}
-                                            className="flex-1 border border-slate-200 rounded-2xl px-4 py-2 text-sm"
-                                        />
-                                        <button
-                                            onClick={() => handleCicilan(p)}
-                                            disabled={cicilanSubmitting}
-                                            className="bg-amber-500 text-white px-4 py-2 rounded-2xl text-sm"
-                                        >
-                                            Bayar
-                                        </button>
-                                        <button
-                                            onClick={() => setShowCicilan(null)}
-                                            className="text-slate-400"
-                                        >
-                                            ✕
-                                        </button>
+                                    <div className="mt-3 pt-3 border-t border-slate-100">
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative flex-1 min-w-0">
+                                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs text-slate-400 font-medium pointer-events-none">
+                                                    Rp
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Nominal cicilan..."
+                                                    value={nominalCicilan}
+                                                    onChange={(e) => {
+                                                        setNominalCicilan(
+                                                            e.target.value,
+                                                        );
+                                                        setCicilanError("");
+                                                    }}
+                                                    className="w-full min-w-0 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => handleCicilan(p)}
+                                                disabled={cicilanSubmitting}
+                                                className="shrink-0 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition disabled:opacity-50"
+                                            >
+                                                {cicilanSubmitting ? "..." : "Bayar"}
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowCicilan(null);
+                                                    setCicilanError("");
+                                                }}
+                                                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                                                title="Batal"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                        {cicilanError && (
+                                            <p className="text-xs text-red-500 mt-1.5 ml-1">
+                                                {cicilanError}
+                                            </p>
+                                        )}
                                     </div>
                                 )}
                             </div>

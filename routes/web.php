@@ -22,6 +22,7 @@ use App\Http\Controllers\TahfidzController;
 use App\Http\Controllers\HaidController;
 use App\Http\Controllers\AspirasiController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Auth
 Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -34,6 +35,22 @@ Route::post('/psb', [PsbController::class, 'store']);
 Route::get('/psb/cetak/{id}', [PsbController::class, 'cetak']);
 Route::get('/psb/cek', [PsbController::class, 'cek']);
 Route::post('/psb/cek', [PsbController::class, 'cekStatus']);
+
+// File Storage Route (Fallback jika symlink public/storage tidak tersedia di hosting)
+Route::get('/storage/{path}', function (string $path) {
+    if (str_contains($path, '..')) {
+        abort(404);
+    }
+
+    $disk = Storage::disk('public');
+    if (!$disk->exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($disk->path($path), [
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->where('path', '.*');
 
 // Authenticated
 Route::middleware('auth')->group(function () {

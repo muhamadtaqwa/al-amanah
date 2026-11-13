@@ -23,13 +23,8 @@ class DashboardController extends Controller
         $bulanIni = now()->month;
         $tahunIni = now()->year;
 
-        $pembayaran = Pembayaran::all();
-        $totalBelumBayar = $pembayaran->filter(
-            fn($p) => $p->status === 'menunggu' || $p->status === 'dicicil'
-        )->count();
-        $totalSudahBayar = $pembayaran->filter(
-            fn($p) => $p->status === 'lunas'
-        )->count();
+        $totalSudahBayar = Pembayaran::where('status_verifikasi', 'lunas')->count();
+        $totalBelumBayar = Pembayaran::where('status_verifikasi', '!=', 'lunas')->count();
 
         $aktivitas = $this->getAktivitas();
 

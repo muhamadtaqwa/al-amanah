@@ -11,7 +11,7 @@ class RekapController extends Controller
 {
     public function index()
     {
-        $rekap = Pembayaran::all()->groupBy('jenis')->map(function ($items) {
+        $rekap = Pembayaran::with('details')->get()->groupBy('jenis')->map(function ($items) {
             $total = $items->sum('nominal');
             $dibayar = $items->sum('total_dibayar');
             $lunas = $items->filter(fn($i) => $i->status === 'lunas');
@@ -58,7 +58,7 @@ class RekapController extends Controller
     public function santriDetailJson($nis)
     {
         $santri = Santri::where('nis', $nis)->first();
-        $rekap = Pembayaran::where('nis', $nis)->get()->groupBy('jenis')->map(function ($items) {
+        $rekap = Pembayaran::with('details')->where('nis', $nis)->get()->groupBy('jenis')->map(function ($items) {
             $total = $items->sum('nominal');
             $dibayar = $items->sum('total_dibayar');
             $lunas = $items->filter(fn($i) => $i->status === 'lunas');
@@ -76,18 +76,19 @@ class RekapController extends Controller
 
     public function spp()
     {
-        $data = Pembayaran::where('jenis', 'SPP')->get()
+        $data = Pembayaran::with(['santri', 'details'])->where('jenis', 'SPP')->get()
             ->groupBy('nis')
             ->map(function ($items) {
-                $santri = Santri::where('nis', $items->first()->nis)->first();
+                $santri = $items->first()->santri;
                 $total = $items->sum('nominal');
                 $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
 
-                $perSpp = $items->map(function ($item) use ($santri) {
+                $namaSantri = $santri->nama_lengkap ?? '';
+                $perSpp = $items->map(function ($item) use ($namaSantri) {
                     return [
                         'id' => $item->id,
-                        'nama_pembayaran' => str_replace(" - {$santri->nama_lengkap}", '', $item->nama_pembayaran),
+                        'nama_pembayaran' => str_replace(" - {$namaSantri}", '', $item->nama_pembayaran),
                         'nominal' => $item->nominal,
                         'status' => $item->status,
                     ];
@@ -95,7 +96,7 @@ class RekapController extends Controller
 
                 return [
                     'nis' => $items->first()->nis,
-                    'nama' => $santri->nama_lengkap ?? '-',
+                    'nama' => $namaSantri ?: '-',
                     'total_tagihan' => $items->count(),
                     'total_lunas' => $lunas->count(),
                     'total_belum' => $items->count() - $lunas->count(),
@@ -116,18 +117,19 @@ class RekapController extends Controller
 
     public function kitab()
     {
-        $data = Pembayaran::where('jenis', 'Kitab')->get()
+        $data = Pembayaran::with(['santri', 'details'])->where('jenis', 'Kitab')->get()
             ->groupBy('nis')
             ->map(function ($items) {
-                $santri = Santri::where('nis', $items->first()->nis)->first();
+                $santri = $items->first()->santri;
                 $total = $items->sum('nominal');
                 $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
 
-                $perKitab = $items->map(function ($item) use ($santri) {
+                $namaSantri = $santri->nama_lengkap ?? '';
+                $perKitab = $items->map(function ($item) use ($namaSantri) {
                     return [
                         'id' => $item->id,
-                        'nama_pembayaran' => str_replace(" - {$santri->nama_lengkap}", '', $item->nama_pembayaran),
+                        'nama_pembayaran' => str_replace(" - {$namaSantri}", '', $item->nama_pembayaran),
                         'nominal' => $item->nominal,
                         'status' => $item->status,
                     ];
@@ -135,7 +137,7 @@ class RekapController extends Controller
 
                 return [
                     'nis' => $items->first()->nis,
-                    'nama' => $santri->nama_lengkap ?? '-',
+                    'nama' => $namaSantri ?: '-',
                     'total_tagihan' => $items->count(),
                     'total_lunas' => $lunas->count(),
                     'total_belum' => $items->count() - $lunas->count(),
@@ -171,10 +173,10 @@ class RekapController extends Controller
             'Desember',
         ];
 
-        $data = Pembayaran::where('jenis', 'Kas')->get()
+        $data = Pembayaran::with(['santri', 'details'])->where('jenis', 'Kas')->get()
             ->groupBy('nis')
             ->map(function ($items) use ($urutanBulan) {
-                $santri = Santri::where('nis', $items->first()->nis)->first();
+                $santri = $items->first()->santri;
                 $total = $items->sum('nominal');
                 $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');
@@ -223,10 +225,10 @@ class RekapController extends Controller
 
     public function anjem()
     {
-        $data = Pembayaran::where('jenis', 'Anjem')->get()
+        $data = Pembayaran::with(['santri', 'details'])->where('jenis', 'Anjem')->get()
             ->groupBy('nis')
             ->map(function ($items) {
-                $santri = Santri::where('nis', $items->first()->nis)->first();
+                $santri = $items->first()->santri;
                 $total = $items->sum('nominal');
                 $dibayar = $items->sum('total_dibayar');
                 $lunas = $items->filter(fn($i) => $i->status === 'lunas');

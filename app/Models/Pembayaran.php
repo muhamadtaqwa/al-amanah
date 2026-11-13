@@ -34,7 +34,9 @@ class Pembayaran extends Model
 
     public function getTotalDibayarAttribute()
     {
-        return $this->details()->sum('nominal');
+        return $this->relationLoaded('details')
+            ? (int) $this->details->sum('nominal')
+            : (int) $this->details()->sum('nominal');
     }
 
     public function getSisaAttribute()

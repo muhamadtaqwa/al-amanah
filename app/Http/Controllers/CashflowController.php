@@ -33,7 +33,7 @@ class CashflowController extends Controller
         $tahun = $request->tahun ?? now()->year;
 
         // Saldo awal (akumulasi sebelum bulan ini)
-        $saldoAwal = Cashflow::where('kategori', $kategori)
+        $saldoAwal = (int) (Cashflow::where('kategori', $kategori)
             ->where(function ($q) use ($bulan, $tahun) {
                 $q->whereYear('tanggal', '<', $tahun)
                     ->orWhere(function ($q2) use ($bulan, $tahun) {
@@ -41,10 +41,8 @@ class CashflowController extends Controller
                             ->whereMonth('tanggal', '<', $bulan);
                     });
             })
-            ->get()
-            ->sum(function ($item) {
-                return $item->tipe === 'pemasukan' ? $item->nominal : -$item->nominal;
-            });
+            ->selectRaw("SUM(CASE WHEN tipe = 'pemasukan' THEN nominal ELSE -nominal END) as saldo")
+            ->value('saldo') ?? 0);
 
         // Data bulan berjalan
         $cashflow = Cashflow::where('kategori', $kategori)
@@ -158,7 +156,7 @@ class CashflowController extends Controller
         $kategoriNama = $kategoriLabels[$kategori] ?? ucwords(str_replace('_', ' ', $kategori));
 
         // Saldo awal (akumulasi sebelum bulan ini)
-        $saldoAwal = Cashflow::where('kategori', $kategori)
+        $saldoAwal = (int) (Cashflow::where('kategori', $kategori)
             ->where(function ($q) use ($bulan, $tahun) {
                 $q->whereYear('tanggal', '<', $tahun)
                     ->orWhere(function ($q2) use ($bulan, $tahun) {
@@ -166,10 +164,8 @@ class CashflowController extends Controller
                             ->whereMonth('tanggal', '<', $bulan);
                     });
             })
-            ->get()
-            ->sum(function ($item) {
-                return $item->tipe === 'pemasukan' ? $item->nominal : -$item->nominal;
-            });
+            ->selectRaw("SUM(CASE WHEN tipe = 'pemasukan' THEN nominal ELSE -nominal END) as saldo")
+            ->value('saldo') ?? 0);
 
         // Transaksi bulan berjalan diurutkan secara kronologis (ASC)
         $transactions = Cashflow::where('kategori', $kategori)

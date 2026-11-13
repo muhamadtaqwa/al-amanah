@@ -7,12 +7,9 @@ use App\Models\PembayaranDetail;
 use App\Models\RekeningYayasan;
 use App\Models\Santri;
 use App\Models\JenisPembayaran;
-use App\Models\PushSubscription;
 use App\Models\Cashflow;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Minishlink\WebPush\WebPush;
-use Minishlink\WebPush\Subscription;
 
 class PembayaranController extends Controller
 {
@@ -80,13 +77,6 @@ class PembayaranController extends Controller
         ]);
 
         $pembayaran = Pembayaran::create($request->all() + ['status_verifikasi' => 'menunggu']);
-
-        $this->kirimNotifKeSantri(
-            $pembayaran->nis,
-            'Tagihan',
-            $pembayaran->nama_pembayaran . ' - Rp ' . number_format($pembayaran->nominal, 0, ',', '.'),
-            '/tagihan'
-        );
 
         return back()->with('success', 'Tagihan berhasil dibuat.');
     }
@@ -179,20 +169,13 @@ class PembayaranController extends Controller
 
         $count = 0;
         foreach ($santris as $s) {
-            $pembayaran = Pembayaran::create([
+            Pembayaran::create([
                 'nis' => $s->nis,
                 'jenis' => $request->jenis,
                 'nama_pembayaran' => $namaPembayaran,
                 'nominal' => $request->nominal,
                 'tgl_jatuh_tempo' => $request->tgl_jatuh_tempo,
             ]);
-
-            $this->kirimNotifKeSantri(
-                $pembayaran->nis,
-                'Tagihan',
-                $pembayaran->nama_pembayaran . ' - Rp ' . number_format($pembayaran->nominal, 0, ',', '.'),
-                '/tagihan'
-            );
 
             $count++;
         }
@@ -235,26 +218,12 @@ class PembayaranController extends Controller
 
                 // Otomatis masuk cashflow
                 $this->catatCashflow($p);
-
-                $this->kirimNotifKeSantri(
-                    $p->nis,
-                    'Lunas',
-                    $p->nama_pembayaran . ' - LUNAS',
-                    '/tagihan'
-                );
             } else {
                 $p->update(['status_verifikasi' => 'menunggu']);
             }
         } else {
             $request->validate(['status_verifikasi' => 'required|in:ditolak']);
             $p->update(['status_verifikasi' => 'ditolak']);
-
-            $this->kirimNotifKeSantri(
-                $p->nis,
-                'Ditolak',
-                $p->nama_pembayaran . ' - pembayaran ditolak',
-                '/tagihan'
-            );
         }
 
         return back()->with('success', $request->status_verifikasi === 'lunas' ? 'Pembayaran disetujui.' : 'Pembayaran ditolak.');
@@ -324,46 +293,5 @@ class PembayaranController extends Controller
             'keterangan' => $santriNama . ' - ' . $pembayaran->nama_pembayaran,
             'pembayaran_id' => $pembayaran->id,
         ]);
-    }
-
-    private function kirimNotifKeSantri($nis, $title, $body, $url)
-    {
-        $santri = Santri::where('nis', $nis)->first();
-        if (!$santri || !$santri->user_id) return;
-
-        $subscriptions = PushSubscription::where('user_id', $santri->user_id)->get();
-        if ($subscriptions->isEmpty()) return;
-
-        $auth = [
-            'VAPID' => [
-                'subject' => config('webpush.vapid.subject'),
-                'publicKey' => config('webpush.vapid.public_key'),
-                'privateKey' => config('webpush.vapid.private_key'),
-            ],
-        ];
-
-        $webPush = new WebPush($auth);
-
-        foreach ($subscriptions as $sub) {
-            $subscription = Subscription::create([
-                'endpoint' => $sub->endpoint,
-                'publicKey' => $sub->p256dh,
-                'authToken' => $sub->auth,
-            ]);
-
-            $webPush->queueNotification(
-                $subscription,
-                json_encode([
-                    'title' => $title,
-                    'body' => $body,
-                    'icon' => '/icon-amanah.png',
-                    'url' => $url,
-                ])
-            );
-        }
-
-        foreach ($webPush->flush() as $report) {
-            // Handle report
-        }
     }
 }

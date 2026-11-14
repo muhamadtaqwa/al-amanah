@@ -118,13 +118,6 @@ class PembayaranController extends Controller
 
             // Otomatis masuk cashflow
             $this->catatCashflow($p);
-
-            $this->kirimNotifKeSantri(
-                $p->nis,
-                'Lunas',
-                $p->nama_pembayaran . ' - LUNAS',
-                '/tagihan'
-            );
         }
 
         return back()->with('success', 'Cicilan berhasil.');
